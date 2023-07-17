@@ -2,7 +2,7 @@
 
 #  Makefile for mootools
 
-VERSION = 1.0svn$(SVN_REV)
+VERSION = 1.0.$(REVISION)
 
 #-----------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ BINDIR:=.
 SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c
 HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h
 OBJS  = $(SRCS:.c=.o)
-DIST_OTHER_FILES = Makefile README LICENSE svn_version *.mk
+DIST_OTHER_FILES = Makefile README LICENSE git_version *.mk
 
 -include Makevars
 # We do not need $(GSL_LIBS) yet because we don't compile whv_hype.c into any executable.
@@ -53,7 +53,7 @@ EXE_LDFLAGS=-lm
 
 ECHO = @echo "$(1)"
 
-include svnversion.mk
+include gitversion.mk
 include gcc.mk
 
 EXE_CFLAGS += $(OPT_CFLAGS) $(GSL_CFLAGS) $(WARN_CFLAGS) \

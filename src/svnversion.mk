@@ -6,4 +6,4 @@ ifeq ($(shell sh -c 'which svnversion 1> /dev/null 2>&1 && echo y'),y)
   endif
 endif
 ## Set version information:
-SVN_REV = $(shell sh -c 'cat svn_version 2> /dev/null')
+REVISION = $(shell sh -c 'cat svn_version 2> /dev/null')
