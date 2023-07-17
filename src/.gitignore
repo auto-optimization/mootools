@@ -1,0 +1,10 @@
+*.o
+autom4te.cache/
+config.log
+config.status
+dominatedsets
+epsilon
+igd
+ndsort
+nondominated
+Makevars
