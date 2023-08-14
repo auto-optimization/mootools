@@ -1,5 +1,5 @@
 # -*- Makefile-gmake -*-
-WARN_CFLAGS = -pedantic -Wall -Wextra
+WARN_CFLAGS = -pedantic -Wall -Wextra -Wvla
 SANITIZERS= -fsanitize=undefined -fsanitize=address
 ifeq ($(DEBUG), 0)
   OPT_CFLAGS ?= -O3 -flto -DNDEBUG
