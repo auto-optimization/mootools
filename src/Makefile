@@ -6,7 +6,7 @@ VERSION = 1.0.$(REVISION)
 
 #-----------------------------------------------------------------------
 
-#                        Copyright (c) 2007, 2008, 2009, 2010
+#                        Copyright (c) 2007-2023
 #           Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>
 
 #  This program is free software (software libre); you can redistribute
@@ -38,36 +38,40 @@ VERSION = 1.0.$(REVISION)
 # citations of papers referencing this work so I can mention them to
 # my funding agent and tenure committee.
 #-----------------------------------------------------------------------
-DEBUG?=1
+DEBUG?=0
 BINDIR:=.
 
 ## Define source files
-SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c
-HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h
+SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
+	eaf.c eaf_main.c eaf3d.c avl.c
+HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
+	eaf.h cvector.h avl.h bit_array.h
+# Relative to root folder.
+DIST_OTHER_FILES =  git_version *.mk configure.ac configure
+DIST_ROOT_FILES = Makefile README.md LICENSE
 OBJS  = $(SRCS:.c=.o)
-DIST_OTHER_FILES = Makefile README LICENSE git_version *.mk
 
 -include Makevars
 # We do not need $(GSL_LIBS) yet because we don't compile whv_hype.c into any executable.
 EXE_LDFLAGS=-lm 
-
 ECHO = @echo "$(1)"
 
-include gitversion.mk
-include gcc.mk
+-include gitversion.mk
+-include gcc.mk
 
 EXE_CFLAGS += $(OPT_CFLAGS) $(GSL_CFLAGS) $(WARN_CFLAGS) \
-	-D_GNU_SOURCE -DDEBUG=$(DEBUG) -DVERSION=\"$(VERSION)\" -DMARCH='"$(gcc-guess-march)"'
+	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
 igd = $(BINDIR)/igd$(EXE)
 epsilon = $(BINDIR)/epsilon$(EXE)
 dominatedsets = $(BINDIR)/dominatedsets$(EXE)
 nondominated = $(BINDIR)/nondominated$(EXE)
 ndsort = $(BINDIR)/ndsort$(EXE)
+eafexe=$(BINDIR)/eaf$(EXE)
 
 .PHONY : all clean distclean dist default 
 
-default: Makevars $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort)
+default: Makevars $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe)
 
 configure: configure.ac
 	autoreconf configure.ac
@@ -75,32 +79,36 @@ configure: configure.ac
 Makevars: configure Makevars.in
 	./configure
 
-$(igd) : OBJS=igd.o io.o
-$(igd) : igd.o io.o $(HEADERS)
+$(igd): OBJS=igd.o io.o
+$(igd): HEADERS=io.h common.h gcc_attribs.h igd.h nondominated.h cmdline.h
 
-$(epsilon) : OBJS=epsilon.o io.o
-$(epsilon) : epsilon.o io.o $(HEADERS)
+$(epsilon): OBJS=epsilon.o io.o
+$(epsilon): HEADERS=io.h common.h gcc_attribs.h epsilon.h nondominated.h cmdline.h
 
-$(dominatedsets) : OBJS=dominatedsets.o io.o
-$(dominatedsets) : dominatedsets.o io.o $(HEADERS)
+$(dominatedsets): OBJS=dominatedsets.o io.o
+$(dominatedsets): HEADERS=io.h common.h gcc_attribs.h nondominated.h cmdline.h
 
+$(nondominated): OBJS=nondominated.o io.o
+$(nondominated): HEADERS=io.h common.h gcc_attribs.h epsilon.h nondominated.h cmdline.h
 
-$(nondominated) : OBJS=nondominated.o io.o
-$(nondominated) : nondominated.o io.o $(HEADERS)
+$(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o
+$(eafexe): HEADERS=eaf.h io.h
+
+io.o: io_priv.h
 
 include libhv.mk
 
-$(ndsort) : OBJS=ndsort.o pareto.o io.o hv_contrib.c $(HV_OBJS)
-$(ndsort) : $(OBJS) $(HEADERS)
+$(ndsort): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(HV_OBJS)
+$(ndsort): HEADERS=io.h common.h gcc_attribs.h nondominated.h cmdline.h
 
-$(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort):
+$(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe): $(OBJS) $(HEADERS)
 	@mkdir -p $(BINDIR)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
-$(OBJS) : $(HEADERS)
+$(OBJS): $(HEADERS)
 
-clean :
+clean:
 	@$(RM) config.status config.log Makevars
 	$(call ECHO,---> Removing $(igd) <---)
 	@$(RM) $(igd)
@@ -120,17 +128,17 @@ clean :
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
 	@$(RM) $(OBJS) $(HV_OBJS)
 
-all : clean
+all: clean
 	$(MAKE) default
 
 %.o : %.c
 	$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 DIST_SRC_FILES =  $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS) 
-DIST_SRC := mootools-$(VERSION)-src
-dist : DEBUG=0
-dist : CDEBUG=
-dist : all
+DIST_SRC:= mootools-$(VERSION)-src
+dist: DEBUG=0
+dist: CDEBUG=
+dist: all
 	@(mkdir -p ../$(DIST_SRC) \
 	&& rsync -rlpC --exclude=.svn $(DIST_SRC_FILES) ../$(DIST_SRC)/ \
 	&& cd .. \
