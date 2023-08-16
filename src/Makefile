@@ -39,8 +39,7 @@ VERSION = 1.0.$(REVISION)
 # my funding agent and tenure committee.
 #-----------------------------------------------------------------------
 DEBUG?=0
-BINDIR:=.
-
+BINDIR=../bin/
 ## Define source files
 SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
 	eaf.c eaf_main.c eaf3d.c avl.c
@@ -62,6 +61,7 @@ ECHO = @echo "$(1)"
 EXE_CFLAGS += $(OPT_CFLAGS) $(GSL_CFLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
+BINDIR:=$(realpath $(BINDIR))
 igd = $(BINDIR)/igd$(EXE)
 epsilon = $(BINDIR)/epsilon$(EXE)
 dominatedsets = $(BINDIR)/dominatedsets$(EXE)
@@ -125,8 +125,30 @@ clean:
 	$(call ECHO,---> Removing $(ndsort) <---)
 	@$(RM) $(ndsort)
 
+	$(call ECHO,---> Removing $(eafexe) <---)
+	@$(RM) $(eafexe)
+
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
 	@$(RM) $(OBJS) $(HV_OBJS)
+
+TESTSUITE:="../testsuite"
+check: clean
+	$(MAKE) all DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Checking $(eafexe) for errors (DEBUG=1) <--- )
+	@if test -d $(TESTSUITE); then  		    	         \
+	    cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD); \
+	else                                                    	 \
+	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
+	fi
+
+test: clean
+	$(MAKE) all DEBUG=0 SANITIZERS=""
+	$(call ECHO,---> Testing $(eafexe) for speed (DEBUG=0) <--- )
+	@if test -d $(TESTSUITE); then  		    	         \
+	    cd $(TESTSUITE)/eaf && ./regtest.py $(eafexe) && cd $(PWD); \
+	else                                                    	 \
+	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
+	fi
 
 all: clean
 	$(MAKE) default
@@ -134,7 +156,7 @@ all: clean
 %.o : %.c
 	$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
 
-DIST_SRC_FILES =  $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS) 
+DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS) 
 DIST_SRC:= mootools-$(VERSION)-src
 dist: DEBUG=0
 dist: CDEBUG=
