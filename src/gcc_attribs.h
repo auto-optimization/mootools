@@ -2,8 +2,6 @@
 #define GCC_ATTRIBUTES
 
 /* FIXME: does this handle C++? */
-/* FIXME: add the explanation from the GCC documentation to each attribute. */
-
 #ifndef __pure_func
 # define __pure_func	__attribute__((pure))
 #endif
@@ -30,13 +28,17 @@
    data pointed to must not be declared const. Likewise, a function
    that calls a non-const function usually must not be const. It does
    not make sense for a const function to return void.  */
+#ifndef __noreturn
 # define __noreturn	__attribute__((noreturn))
+#endif
 /* The noreturn keyword tells the compiler to assume that function
    cannot return. It can then optimize without regard to what would
    happen if fatal ever did return. This makes slightly better
    code. More importantly, it helps avoid spurious warnings of
    uninitialized variables. */
+#ifndef __malloc
 # define __malloc	__attribute__((malloc))
+#endif
 /* The malloc attribute is used to tell the compiler that a function
    may be treated as if any non-NULL pointer it returns cannot alias
    any other pointer valid when the function returns. This will often
@@ -45,7 +47,9 @@
    long as the old pointer is never referred to (including comparing
    it to the new pointer) after the function returns a non-NULL
    value.  */
+#ifndef __must_check
 # define __must_check	__attribute__((warn_unused_result))
+#endif
 /* The warn_unused_result attribute causes a warning to be emitted if
    a caller of the function with this attribute does not use its
    return value.  */
@@ -57,16 +61,21 @@
 #ifndef __used
 # define __used		__attribute__((used))
 #endif
+/* FIXME: add the explanation from the GCC documentation to each attribute. */
 #ifndef __unused
 # define __unused	__attribute__((unused))
 #endif
+/* FIXME: add the explanation from the GCC documentation to each attribute. */
 #ifndef __packed
 # define __packed	__attribute__((packed))
 #endif
+/* FIXME: add the explanation from the GCC documentation to each attribute. */
 
 #if __GNUC__ >= 3
 # define likely(x)	__builtin_expect (!!(x), 1)
+/* FIXME: add the explanation from the GCC documentation to each attribute. */
 # define unlikely(x)	__builtin_expect (!!(x), 0)
+/* FIXME: add the explanation from the GCC documentation to each attribute. */
 #else
 # define  __attribute__(x) /* If we're not using GNU C, elide __attribute__ */
 # define likely(x)	(x)
