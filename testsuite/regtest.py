@@ -5,6 +5,7 @@ import sys
 import glob
 import time
 import shutil
+from joblib import Parallel, delayed
 
 def runcmd(command):
     result = subprocess.run(command, shell=True)
@@ -14,6 +15,33 @@ def is_exe(fpath):
     fpath = os.path.expanduser(fpath)
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK) \
         and os.path.getsize(fpath) > 0
+
+def run_test(test, program, dir_out):
+    outfile = os.path.join(dir_out, test.replace(".test", ".out"))
+    expfile = test.replace(".test", ".exp")
+    compress_out = "| cat " # So that redirection works
+    diff = "diff"
+    if not os.access(expfile, os.R_OK) and os.access(expfile + ".xz", os.R_OK):
+        expfile = expfile + ".xz"
+        outfile = outfile + ".xz"
+        compress_out = " | xz "
+        diff = "xzdiff"
+
+    print("{:<60}".format("Running " + test + " :"), end = " ")
+    command = f"PROGRAM={program} . ./{test} 2>&1 {compress_out}1> {outfile}"
+    start_time = time.time()
+    runcmd(command)
+    elapsed_time = time.time() - start_time
+
+    if runcmd(f"{diff} -iEBwq -- {outfile} {expfile} 1> /dev/null  2>&1") == 0:
+        print(f"passed {elapsed_time:.2f}")
+        os.remove(outfile)
+        return True
+    else:
+        print(f"FAILED! {elapsed_time:.2f}")
+        print(subprocess.getoutput(f"{diff} -uiEBw -- {outfile} {expfile}"))
+        return False
+        
 
 def main():
     if len(sys.argv) < 2:
@@ -26,50 +54,23 @@ def main():
         print(f"error: '{program}' not found or not executable!")
         sys.exit(1)        
 
-    tests = glob.glob("*.test") if len(sys.argv) == 2  else sys.argv[2:]        
+    tests = sorted(glob.glob("*.test")) if len(sys.argv) == 2  else sys.argv[2:]        
     for test in tests:
         if not test.endswith(".test"):
             print(test, "is not a test file")
             sys.exit(1)
             
-    npassed = 0
-    nfailed = 0
-    ntotal = 0
     dir_out = "./out/"
     os.makedirs(dir_out, exist_ok=True)
-
-    for test in tests:
-        outfile = os.path.join(dir_out, test.replace(".test", ".out"))
-        expfile = test.replace(".test", ".exp")
-        compress_out = "| cat " # So that redirection works
-        diff = "diff"
-        if not os.access(expfile, os.R_OK) and os.access(expfile + ".xz", os.R_OK):
-            expfile = expfile + ".xz"
-            outfile = outfile + ".xz"
-            compress_out = " | xz "
-            diff = "xzdiff"
-
-        print("{:<60}".format("Running " + test + " :"), end = " ")
-
-        command = f"PROGRAM={program} . ./{test} 2>&1 {compress_out}1> {outfile}"
-        start_time = time.time()
-        runcmd(command)
-        elapsed_time = time.time() - start_time
-
-        if runcmd(f"{diff} -iEBwq -- {outfile} {expfile} 1> /dev/null  2>&1") == 0:
-            print(f"passed {elapsed_time:.2f}")
-            os.remove(outfile)
-            npassed += 1
-        else:
-            print("FAILED!")
-            print(subprocess.getoutput(f"{diff} -uiEBw -- {outfile} {expfile}"))
-            nfailed += 1
-        ntotal += 1
-
-    print("\n         === regression test summary ===\n")
-    print(f"# of total tests    {ntotal:5d}")
-    print(f"# of passed tests   {npassed:5d}")
-    print(f"# of failed tests   {nfailed:5d}\n")
+    ntotal = len(tests)
+    ok = Parallel(n_jobs=-2)(
+        delayed(run_test)(test, dir_out = dir_out, program = program) for test in tests)
+    npassed = sum(ok)
+    nfailed = ntotal - npassed
+    print("\n === regression test summary ===\n")
+    print(f"# of total tests : {ntotal:5d}")
+    print(f"# of passed tests: {npassed:5d}")
+    print(f"# of failed tests: {nfailed:5d}\n")
 
 if __name__ == "__main__":
     main()
