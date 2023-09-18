@@ -65,7 +65,6 @@ read_objective_t_data (const char *filename, objective_t **data_p,
     } while (retval == 1);
 
     if (retval == EOF) { /* faster than !feof() */
-        warnprintf ("%s: file is empty.", filename);
         errorcode = READ_INPUT_FILE_EMPTY;
         goto read_data_finish;
     }

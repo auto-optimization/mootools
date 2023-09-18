@@ -2,7 +2,7 @@
 
 #  Makefile for mootools
 
-VERSION = 1.0.$(REVISION)
+VERSION = 0.1.9999-$(REVISION)
 
 #-----------------------------------------------------------------------
 
@@ -38,11 +38,38 @@ VERSION = 1.0.$(REVISION)
 # citations of papers referencing this work so I can mention them to
 # my funding agent and tenure committee.
 #-----------------------------------------------------------------------
+
+S=
+## Quiet / verbose output:
+ifneq ($(findstring $(MAKEFLAGS),s),s)
+  ifdef S 
+    QUIET_CC   = @echo '   ' CC $@;
+    QUIET_AR   = @echo '   ' AR $@;
+    QUIET_LINK = @echo '   ' LINK $@;
+    QUIET_RM   = @echo '   ' RM $@;
+    ECHO       = 
+  else
+    ECHO       = @echo "$(1)"
+  endif
+endif
+
+uname_S := $(shell gcc -dumpmachine 2>&1)
+uname_S := $(subst MINGW,mingw,$(uname_S))
+ifneq (,$(findstring mingw,$(uname_S)))
+RM=-del /Q
+CC=gcc
+uname_S :=mingw
+else
+## Detect system and machine type:
+uname_S :=$(shell uname -s || echo unknown)
+uname_M :=$(shell uname -m || echo unknown)
+endif
+
 DEBUG?=0
 BINDIR=../bin/
 ## Define source files
 SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
-	eaf.c eaf_main.c eaf3d.c avl.c
+	eaf.c eaf_main.c eaf3d.c avl.c cmdline.c libmootools.c main-hv.c timer.c
 HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
 	eaf.h cvector.h avl.h bit_array.h
 # Relative to root folder.
@@ -58,6 +85,12 @@ ECHO = @echo "$(1)"
 -include gitversion.mk
 -include gcc.mk
 
+ifneq ($(uname_S),Cygwin)
+CPPFLAGS += -D_GNU_SOURCE
+else
+CPPFLAGS += -U_GNU_SOURCE
+endif 
+
 EXE_CFLAGS += $(OPT_CFLAGS) $(GSL_CFLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
@@ -68,10 +101,11 @@ dominatedsets = $(BINDIR)/dominatedsets$(EXE)
 nondominated = $(BINDIR)/nondominated$(EXE)
 ndsort = $(BINDIR)/ndsort$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
+hvexe=$(BINDIR)/hv$(EXE)
 
-.PHONY : all clean distclean dist default 
+.PHONY : all clean dist default check test eaf
 
-default: Makevars $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe)
+default: Makevars $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
 
 configure: configure.ac
 	autoreconf configure.ac
@@ -79,37 +113,45 @@ configure: configure.ac
 Makevars: configure Makevars.in
 	./configure
 
-$(igd): OBJS=igd.o io.o
-$(igd): HEADERS=io.h common.h gcc_attribs.h igd.h nondominated.h cmdline.h
+eaf: $(eafexe)
 
-$(epsilon): OBJS=epsilon.o io.o
-$(epsilon): HEADERS=io.h common.h gcc_attribs.h epsilon.h nondominated.h cmdline.h
+$(igd): OBJS=igd.o io.o cmdline.o
+$(igd): HEADERS=igd.h nondominated.h cmdline.h
 
-$(dominatedsets): OBJS=dominatedsets.o io.o
-$(dominatedsets): HEADERS=io.h common.h gcc_attribs.h nondominated.h cmdline.h
+$(epsilon): OBJS=epsilon.o io.o cmdline.o
+$(epsilon): HEADERS=epsilon.h nondominated.h cmdline.h
 
-$(nondominated): OBJS=nondominated.o io.o
-$(nondominated): HEADERS=io.h common.h gcc_attribs.h epsilon.h nondominated.h cmdline.h
+$(dominatedsets): OBJS=dominatedsets.o io.o cmdline.o
+$(dominatedsets): HEADERS=nondominated.h cmdline.h
 
-$(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o
-$(eafexe): HEADERS=eaf.h io.h
+$(nondominated): OBJS=nondominated.o io.o cmdline.o
+$(nondominated): HEADERS= epsilon.h nondominated.h cmdline.h
 
-io.o: io_priv.h
+$(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o cmdline.o
+$(eafexe): HEADERS=eaf.h 
 
 include libhv.mk
 
-$(ndsort): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(HV_OBJS)
-$(ndsort): HEADERS=io.h common.h gcc_attribs.h nondominated.h cmdline.h
+$(ndsort): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
+$(ndsort): HEADERS=nondominated.h cmdline.h
 
-$(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe): $(OBJS) $(HEADERS)
+
+$(hvexe): OBJS=main-hv.o io.o timer.o cmdline.o $(LIBHV_OBJS)
+$(hvexe): HEADERS=hv.h timer.h
+
+io.o: io_priv.h io.h
+
+$(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
 	@mkdir -p $(BINDIR)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
-	$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
+	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
-$(OBJS): $(HEADERS)
+$(OBJS): $(HEADERS) common.h gcc_attribs.h
 
 clean:
-	@$(RM) config.status config.log Makevars
+	@$(RM) config.status config.log Makevars 
+	@test -d autom4te.cache/ || $(RM) -r autom4te.cache
+
 	$(call ECHO,---> Removing $(igd) <---)
 	@$(RM) $(igd)
 
@@ -128,33 +170,59 @@ clean:
 	$(call ECHO,---> Removing $(eafexe) <---)
 	@$(RM) $(eafexe)
 
+	$(call ECHO,---> Removing $(hvexe) <---)
+	@$(RM) $(hvexe)
+
 	$(call ECHO,---> Removing object files: $(OBJS) <---)
 	@$(RM) $(OBJS) $(HV_OBJS)
 
 TESTSUITE:="../testsuite"
 check: clean
-	$(MAKE) all DEBUG=1 SANITIZERS=""
-	$(call ECHO,---> Checking $(eafexe) for errors (DEBUG=1) <--- )
-	@if test -d $(TESTSUITE); then  		    	         \
-	    cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD); \
-	else                                                    	 \
+	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
+	$(MAKE) all DEBUG=1 SANITIZERS=""
+	$(MAKE) check-eaf
+	$(MAKE) check-hv
+
+check-eaf:
+	$(MAKE) eaf DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Checking $(eafexe) for errors (DEBUG=1) <--- )
+	cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
+
+check-hv:
+	$(MAKE) $(hvexe) DEBUG=1 SANITIZERS=""
+	$(call ECHO,---> Checking $(hvexe) for errors (DEBUG=1) <--- )
+	cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
 
 test: clean
-	$(MAKE) all DEBUG=0 SANITIZERS=""
-	$(call ECHO,---> Testing $(eafexe) for speed (DEBUG=0) <--- )
-	@if test -d $(TESTSUITE); then  		    	         \
-	    cd $(TESTSUITE)/eaf && ./regtest.py $(eafexe) && cd $(PWD); \
-	else                                                    	 \
+	@if ! test -d $(TESTSUITE); then  		    	         \
 	    echo "Error: Testsuite not found in $(TESTSUITE)" && exit 1; \
 	fi
+	$(MAKE) all DEBUG=0 SANITIZERS=""
+	$(MAKE) test-eaf
+	$(MAKE) test-hv
+
+test-eaf:
+	$(MAKE) eaf DEBUG=0 SANITIZERS=""
+	$(call ECHO,---> Testing $(eafexe) for speed (DEBUG=0) <--- )
+	cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
+
+test-hv:
+	$(MAKE) $(hvexe) DEBUG=0 SANITIZERS=""
+	$(call ECHO,---> Testing $(hvexe) for speed (DEBUG=0) <--- )
+	cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
 
 all: clean
 	$(MAKE) default
 
 %.o : %.c
-	$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
+	$(QUIET_CC)$(CC) $(CPPFLAGS) $(EXE_CFLAGS) $(CFLAGS) -c -o $@ $<
+
+mex: MEX?=mex
+mex: Hypervolume_MEX.c $(HV_SRCS)
+	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O CFLAGS=-std=c99"' to pass flags to mex. Code compiled by MEX is less optimized (slower) than the default 'hv' command-line program <---)
+	$(MEX) -v $(MEXFLAGS) CFLAGS='$$CFLAGS -std=c99' $^
 
 DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS) 
 DIST_SRC:= mootools-$(VERSION)-src

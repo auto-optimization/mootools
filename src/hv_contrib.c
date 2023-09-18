@@ -1,10 +1,9 @@
-#include "hv.h"
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
 #include "common.h"
+#include "hv.h"
 
 /* Given a list of points, compute the hypervolume of each set that can be
    obtained by removing just one point.

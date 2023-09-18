@@ -2,7 +2,6 @@
    https://github.com/noporpoise/BitArray
 */
 #include <inttypes.h>
-#include <stdbool.h>
 #include <stdlib.h> // malloc, calloc
 #include <string.h> // memcpy
 #include "common.h" // fatal_error

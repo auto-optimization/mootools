@@ -65,7 +65,6 @@
 #include <getopt.h> // for getopt_long()
 #include "cmdline.h"
 
-char *program_invocation_short_name = "epsilon";
 static bool verbose_flag = false;
 static bool additive_flag = true;
 static const char *suffix = NULL;

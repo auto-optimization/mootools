@@ -57,7 +57,6 @@
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "either -o, --obj, -u, --upper or -l, --lower" 
 #include "cmdline.h"
 
-char *program_invocation_short_name = "nondominated";
 static int verbose_flag = false;
 static bool union_flag = false;
 static bool check_flag = true;

@@ -54,7 +54,6 @@
 #ifndef INFINITY
 #define INFINITY (HUGE_VAL)
 #endif
-#include "common.h"
 #include "io.h"
 
 static inline double 

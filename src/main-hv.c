@@ -42,10 +42,6 @@
       13(5):1075-1082, 2009.
 
 *************************************************************************/
-#include "io.h"
-#include "hv.h"
-#include "timer.h"
-
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,15 +52,18 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 
-#ifdef __USE_GNU
-extern char *program_invocation_short_name;
-#else
-char *program_invocation_short_name;
-#endif
+#include "io.h"
+#include "hv.h"
+#include "timer.h"
+#define CMDLINE_COPYRIGHT_YEARS "2010-2023"
+#define CMDLINE_AUTHORS "Carlos M. Fonseca <cmfonsec@dei.uc.pt>\n" \
+    "Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>\n" \
+    "Luis Paquete <paquete@dei.uc.pt>\n"
+#include "cmdline.h"
 
-static const char * const stdin_name = "<stdin>";
 static int verbose_flag = 1;
 static bool union_flag = false;
+static bool shift_flag = false;
 static char *suffix = NULL;
 
 static void usage(void)
@@ -93,35 +92,9 @@ static void usage(void)
 " -s, --suffix=STRING Create an output file for each input file by appending\n"
 "                     this suffix. This is ignored when reading from stdin. \n"
 "                     If missing, output is sent to stdout.                 \n"
+" -S, --shift         Shift the data before calculating the hypervolume.    \n"
+"                     This consumes more memory but it is faster.           \n"
 "\n");
-}
-
-static void version(void)
-{
-    printf("%s version " VERSION
-#ifdef ARCH
-           " (optimised for " ARCH ")"
-#endif
-           "\n\n", program_invocation_short_name);
-
-    printf(
-"Copyright (C) 2010"
-"\nCarlos M. Fonseca <cmfonsec@dei.uc.pt>"
-"\nManuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>"
-"\nLuis Paquete <paquete@dei.uc.pt>"
-"\n"
-"This is free software, and you are welcome to redistribute it under certain\n"
-"conditions.  See the GNU General Public License for details. There is NO   \n"
-"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
-"\n"        );
-}
-
-static inline void
-vector_printf (const double *vector, int size)
-{
-    int k;
-    for (k = 0; k < size; k++)
-        printf (" %f", vector[k]);
 }
 
 static double *
@@ -155,26 +128,6 @@ read_reference(char * str, int *nobj)
 
     *nobj = k - 1;
     return reference;
-}
-
-static inline void
-handle_read_data_error (int err, const char *filename)
-{
-    switch (err) {
-    case 0: /* No error */
-        break;
-
-    case READ_INPUT_FILE_EMPTY:
-        errprintf ("%s: no input data.", filename);
-        exit (EXIT_FAILURE);
-
-    case READ_INPUT_WRONG_INITIAL_DIM:
-        errprintf ("check the argument of -r, --reference.\n");
-        exit (EXIT_FAILURE);
-    default:
-        errprintf ("unknown error.\n");
-        exit (EXIT_FAILURE);
-    }
 }
 
 static void
@@ -220,7 +173,7 @@ file_range (const char *filename, double **maximum_p, double **minimum_p,
     double *minimum = *minimum_p;
 
     handle_read_data_error (
-        read_data (filename, &data, &dim, &cumsizes, &nruns), filename);
+        read_double_data (filename, &data, &dim, &cumsizes, &nruns), filename);
 
     data_bounds (&minimum, &maximum, data, dim, cumsizes[nruns-1]);
 
@@ -258,7 +211,7 @@ hv_file (const char *filename, double *reference,
     char *outfilename = NULL;
     FILE *outfile = stdout;
 
-    int err = read_data (filename, &data, &nobj, &cumsizes, &nruns);
+    int err = read_double_data (filename, &data, &nobj, &cumsizes, &nruns);
     if (!filename) filename = stdin_name;
     handle_read_data_error (err, filename);
 
@@ -322,20 +275,20 @@ hv_file (const char *filename, double *reference,
     }
 
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
-        double time_elapsed;
-        double volume;
-
         Timer_start ();
-        volume = fpli_hv (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize,
-                          reference);
+        
+        double volume = (shift_flag)
+            ? fpli_hv_shift (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference)
+            : fpli_hv (&data[nobj * cumsize], nobj, cumsizes[n] - cumsize, reference);
+        
         if (volume == 0.0) {
             errprintf ("none of the points strictly dominates the reference point\n");
             exit (EXIT_FAILURE);
         }
 
-        time_elapsed = Timer_elapsed_virtual ();
+        double time_elapsed = Timer_elapsed_virtual ();
 
-        fprintf (outfile, "%-16.15g\n", volume);
+        fprintf (outfile, "%-17.15g\n", volume);
         if (verbose_flag >= 2)
             fprintf (outfile, "# Time: %f seconds\n", time_elapsed);
     }
@@ -373,6 +326,7 @@ int main(int argc, char *argv[])
         {"reference",  required_argument, NULL, 'r'},
         {"union",      no_argument,       NULL, 'u'},
         {"suffix",     required_argument, NULL, 's'},
+        {"shift",      no_argument,       NULL, 'S'},
 
         {NULL, 0, NULL, 0} /* marks end of list */
     };
@@ -381,7 +335,7 @@ int main(int argc, char *argv[])
     program_invocation_short_name = argv[0];
 #endif
 
-    while (0 < (opt = getopt_long (argc, argv, "hVvqur:s:",
+    while (0 < (opt = getopt_long (argc, argv, "hVvqur:s:S",
                                    long_options, &longopt_index))) {
         switch (opt) {
         case 'r': // --reference
@@ -399,6 +353,10 @@ int main(int argc, char *argv[])
 
         case 's': // --suffix
             suffix = optarg;
+            break;
+
+        case 'S': // --shift
+            shift_flag = true;
             break;
 
         case 'V': // --version

@@ -1,16 +1,14 @@
 #ifndef CMDLINE_H
 #define CMDLINE_H
 
+#include <stdbool.h>
+
 #ifndef CMDLINE_COPYRIGHT_YEARS
-#define CMDLINE_COPYRIGHT_YEARS "2007-2018"
+#define CMDLINE_COPYRIGHT_YEARS "2007-2023"
 #endif
 
 #ifndef CMDLINE_AUTHORS
 #define CMDLINE_AUTHORS "Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>\n"
-#endif
-
-#ifndef MARCH
-#define MARCH "unknown"
 #endif
 
 #define OPTION_HELP_STR \
@@ -24,13 +22,16 @@
     " -q, --quiet          print as little as possible                           \n"
 
 extern char *program_invocation_short_name;
+
 static void version(void)
 {
-    printf("%s version %s (optimised for %s)\n\n",
-           program_invocation_short_name, VERSION, MARCH);
+    printf("%s version " VERSION
+#ifdef MARCH
+           " (optimised for "MARCH")"
+#endif
+           "\n\n", program_invocation_short_name);
     printf(
-"Copyright (C) " CMDLINE_COPYRIGHT_YEARS "\n"
-CMDLINE_AUTHORS "\n"
+"Copyright (C) " CMDLINE_COPYRIGHT_YEARS "\n" CMDLINE_AUTHORS "\n"
 "This is free software, and you are welcome to redistribute it under certain\n"
 "conditions.  See the GNU General Public License for details. There is NO   \n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -40,6 +41,7 @@ CMDLINE_AUTHORS "\n"
 #ifndef READ_INPUT_WRONG_INITIAL_DIM_ERRSTR
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-r, --reference"
 #endif
+
 static inline void
 handle_read_data_error (int err, const char *filename)
 {
@@ -52,7 +54,7 @@ handle_read_data_error (int err, const char *filename)
           exit (EXIT_FAILURE);
           
       case READ_INPUT_WRONG_INITIAL_DIM:
-          errprintf ("check the argument of " READ_INPUT_WRONG_INITIAL_DIM_ERRSTR  ".\n");
+          errprintf ("check the argument of " READ_INPUT_WRONG_INITIAL_DIM_ERRSTR  ".");
           /* fall-through */
       default:
           exit (EXIT_FAILURE);
@@ -99,5 +101,16 @@ static inline char * m_strcat(const char * a, const char * b)
     strcpy (dest, a);
     strcat (dest, b);
     return dest;
+}
+
+static inline const char *str_is_default(bool flag)
+{
+    return flag ? "(default)" : "";
+}
+
+static inline void set_program_invocation_short_name(char *s)
+{
+    if (program_invocation_short_name == NULL || program_invocation_short_name[0] == '\0')
+        program_invocation_short_name = s;
 }
 #endif

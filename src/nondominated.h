@@ -1,8 +1,8 @@
 #ifndef NONDOMINATED_H
 #define NONDOMINATED_H
 
-#include "common.h"
 #include <string.h> // memcpy
+#include "common.h"
 
 enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
 
@@ -12,9 +12,9 @@ create_minmax(int nobj, const int * maximise)
 {
     signed char * minmax = malloc(sizeof(signed char) * nobj);
     for (int k = 0; k < nobj; k++) {
-        minmax[k] = (maximise[k] == TRUE)
+        minmax[k] = (maximise[k])
             ? AGREE_MAXIMISE
-            : (maximise[k] == FALSE) ? AGREE_MINIMISE : AGREE_NONE;
+            : (!maximise[k]) ? AGREE_MINIMISE : AGREE_NONE;
     }
     return minmax;
 }

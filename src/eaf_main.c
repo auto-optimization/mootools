@@ -41,11 +41,13 @@
 #include <stdbool.h> // for bool, true and false
 
 #include <unistd.h>  // for getopt()
-#define _GNU_SOURCE
 #include <getopt.h> // for getopt_long()
 #include <errno.h>
+#define CMDLINE_COPYRIGHT_YEARS "2009-2023"
+#define CMDLINE_AUTHORS "Carlos Fonseca <cmfonsec@ualg.pt>\n" \
+    "Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>\n"
 
-char *program_invocation_short_name = "eaf";
+#include "cmdline.h"
 
 static void usage(void)
 {
@@ -77,27 +79,6 @@ static void usage(void)
 "                     If FILE is missing use the same file as for output.   \n"
 "        , --polygons Write EAF as R polygons.                             \n"
 "\n\n"        );
-}
-
-static void version(void)
-{
-    printf("%s version %s"
-#ifdef MARCH
-           " (optimised for "MARCH")"
-#endif
-#ifndef VERSION
-#define VERSION "unknown"
-#endif
-           "\n\n", program_invocation_short_name, VERSION);
-    printf(
-"Copyright (C) 2009\n"
-"Carlos Fonseca <cmfonsec@ualg.pt>\n"
-"Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>\n"
-"\n"
-"This is free software, and you are welcome to redistribute it under certain\n"
-"conditions.   See the GNU General Public License for details.   There is NO\n"
-"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
-"\n"        );
 }
 
 // FIXME: How to implement this with const char *str?
@@ -246,10 +227,11 @@ int main(int argc, char *argv[])
     double *percentile = malloc(MAX_LEVELS * sizeof(double));
     int npercentiles = 0;
 
+    set_program_invocation_short_name(argv[0]);
+    
     while (0 < (option = getopt_long(argc, argv, short_options,
                                      long_options, &longopt_index))) {
-        switch (option)
-        {
+        switch (option) {
         case 'l':
             assert(nlevels < MAX_LEVELS);
             nlevels += read_ints(level + nlevels, optarg);
@@ -446,7 +428,7 @@ int main(int argc, char *argv[])
         fprintf (stderr, "# objectives (%d): --\n", nobj);
         fprintf (stderr, "# sets: %d\n", nruns);
         fprintf (stderr, "# points: %d\n", cumsizes[nruns - 1]);
-        fprintf (stderr, "%s: calculating levels:", program_invocation_short_name);
+        fprintf (stderr, "# calculating levels:");
         for (k = 0; k < nlevels; k++) 
             fprintf (stderr, " %d", level[k]);
         fprintf (stderr, "\n");

@@ -40,8 +40,8 @@
 *****************************************************************************/
 
 #include <stdio.h>
-#include "io.h"
 #include "common.h"
+#include "io.h"
 
 /* FIXME: Do we need to handle the following weird files? */
                 /* 
@@ -90,48 +90,6 @@ static inline int skip_comment_line (FILE * instream)
 #undef read_objective_t_data
 
 #ifndef R_PACKAGE
-extern char *program_invocation_short_name;
-#include <stdarg.h>
-void fatal_error(const char *format,...)
-{
-    va_list ap;
-    fprintf(stderr, "%s: fatal error: ", program_invocation_short_name);
-    va_start(ap,format);
-    vfprintf(stderr, format, ap);
-    va_end(ap);
-    exit(EXIT_FAILURE);
-}
-/* From:
-
-   Edition 0.10, last updated 2001-07-06, of `The GNU C Library
-   Reference Manual', for Version 2.3.x.
-
-   Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2001, 2002,
-   2003 Free Software Foundation, Inc.
-*/
-void errprintf(const char *format,...)
-{
-    va_list ap;
-
-    fprintf(stderr, "%s: error: ", program_invocation_short_name);
-    va_start(ap,format);
-    vfprintf(stderr, format, ap);
-    va_end(ap);
-    fprintf(stderr, "\n");
-}
-/* End of copyright The GNU C Library Reference Manual */
-
-void warnprintf(const char *format,...)
-{
-    va_list ap;
-
-    fprintf(stderr, "%s: warning: ", program_invocation_short_name);
-    va_start(ap,format);
-    vfprintf(stderr, format, ap);
-    va_end(ap);
-    fprintf(stderr, "\n");
-}
-
 void
 vector_fprintf (FILE *stream, const double * vector, int size)
 {
@@ -141,13 +99,11 @@ vector_fprintf (FILE *stream, const double * vector, int size)
         fprintf (stream, point_printf_sep "" point_printf_format, vector[k]);
 }
 
-#ifndef R_PACKAGE
 void
 vector_printf (const double *vector, int size)
 {
     vector_fprintf (stdout, vector, size);
 }
-#endif
 
 int 
 write_sets (FILE *outfile, const double *data, int ncols,

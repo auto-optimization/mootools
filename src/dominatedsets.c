@@ -67,8 +67,6 @@
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-o, --obj"
 #include "cmdline.h"
 
-char *program_invocation_short_name = "dominatedsets";
-
 static void usage(void)
 {
     printf("\n"

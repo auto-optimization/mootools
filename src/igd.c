@@ -66,7 +66,6 @@
 #include "igd.h"
 #include "nondominated.h"
 
-char *program_invocation_short_name = "igd";
 #define CMDLINE_COPYRIGHT_YEARS "2016"
 #define CMDLINE_AUTHORS "Manuel Lopez-Ibanez  <manuel.lopez-ibanez@manchester.ac.uk>\n" \
     "Leonardo C. T. Bezerra <leo.tbezerra@gmail.com>\n"

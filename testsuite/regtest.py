@@ -71,6 +71,8 @@ def main():
     print(f"# of total tests : {ntotal:5d}")
     print(f"# of passed tests: {npassed:5d}")
     print(f"# of failed tests: {nfailed:5d}\n")
+    exitcode = 1 if nfailed > 0 else 0
+    sys.exit(exitcode)
 
 if __name__ == "__main__":
     main()

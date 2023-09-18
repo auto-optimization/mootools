@@ -53,8 +53,6 @@
 #include "cmdline.h"
 #include "hv.h"
 
-char *program_invocation_short_name = "ndsort";
-
 static void usage(void)
 {
     printf("\n"
