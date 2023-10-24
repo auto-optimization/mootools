@@ -103,7 +103,7 @@ ndsort = $(BINDIR)/ndsort$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
 
-.PHONY : all clean dist default check test eaf
+.PHONY : all clean dist default check test eaf hv
 
 default: Makevars $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
 
@@ -114,6 +114,8 @@ Makevars: configure Makevars.in
 	./configure
 
 eaf: $(eafexe)
+
+hv: $(hvexe)
 
 $(igd): OBJS=igd.o io.o cmdline.o
 $(igd): HEADERS=igd.h nondominated.h cmdline.h
@@ -188,12 +190,12 @@ check: clean
 check-eaf:
 	$(MAKE) eaf DEBUG=1 SANITIZERS=""
 	$(call ECHO,---> Checking $(eafexe) for errors (DEBUG=1) <--- )
-	cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
+	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
 
 check-hv:
 	$(MAKE) $(hvexe) DEBUG=1 SANITIZERS=""
 	$(call ECHO,---> Checking $(hvexe) for errors (DEBUG=1) <--- )
-	cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
 
 test: clean
 	@if ! test -d $(TESTSUITE); then  		    	         \
@@ -206,12 +208,12 @@ test: clean
 test-eaf:
 	$(MAKE) eaf DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(eafexe) for speed (DEBUG=0) <--- )
-	cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
+	@cd $(TESTSUITE)/eaf && ../regtest.py $(eafexe) && cd $(PWD)
 
 test-hv:
 	$(MAKE) $(hvexe) DEBUG=0 SANITIZERS=""
 	$(call ECHO,---> Testing $(hvexe) for speed (DEBUG=0) <--- )
-	cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
+	@cd $(TESTSUITE)/hv && ../regtest.py $(hvexe) && cd $(PWD)
 
 all: clean
 	$(MAKE) default
