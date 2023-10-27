@@ -6,8 +6,9 @@ Authors@R: c(person("Manuel", "López-Ibáñez", role = c("aut", "cre"),
                     email = "manuel.lopez-ibanez@manchester.ac.uk",
                     comment = c(ORCID = "0000-0001-9974-1295")))
 Description: Fast implementation of mathematical operations and performance metrics for multi-objective optimization.
-Depends: R (>= 3.2)
+Depends: R (>= 3.5)
 Imports:
+        matrixStats,
         Rdpack
 Suggests: testthat (>= 3.0.0)
 License: LGPL (>= 2)

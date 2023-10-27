@@ -101,7 +101,7 @@
 #'     igd_plus(A, ref), "< IGD+(B)=", igd_plus(B, ref), ", which is correct.\n")
 #'
 #' # A less trivial example.
-#' extdata_path <- system.file(package="eaf","extdata")
+#' extdata_path <- system.file(package="moocore","extdata")
 #' path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
 #' path.A2 <- file.path(extdata_path, "ALG_2_dat.xz")
 #' A1 <- read_datasets(path.A1)[,1:2]

@@ -1,21 +1,14 @@
-<img src="man/figures/ALG_1_dat-ALG_2_dat.png" width="455" height="242" alt= "EAF
-   differences between two bi-objective optimizers" title= "EAF differences
-   between two bi-objective optimizers" style= "border:0; align:right; float:right;"/>
-<img src="man/figures/eafdiff-color.png" width="480"
-   height="240" alt="EAF differences between two variants of W-RoTS (color)"
-   title="EAF differences between two variants of W-RoTS (color)"
-   style="border:0; align:right; float:right; clear:right"/>
    
-**eaf**: Empirical Attainment Function (EAF) Tools
+**moocore**: Core Algorithms for Multi-Objective Optimization
 ================================================================
 
 <!-- badges: start -->
-[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/eaf)](https://cran.r-project.org/package=eaf) [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/eaf)](https://CRAN.R-project.org/package=eaf) [![R build
-status](https://github.com/MLopez-Ibanez/eaf/workflows/R-CMD-check/badge.svg)](https://github.com/MLopez-Ibanez/eaf/actions)
-[![Codecov test coverage](https://codecov.io/gh/MLopez-Ibanez/eaf/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MLopez-Ibanez/eaf?branch=master)
+[![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)](https://cran.r-project.org/package=moocore) [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)](https://CRAN.R-project.org/package=moocore) [![R build
+status](https://github.com/MLopez-Ibanez/moocore/workflows/R-CMD-check/badge.svg)](https://github.com/MLopez-Ibanez/moocore/actions)
+[![Codecov test coverage](https://codecov.io/gh/MLopez-Ibanez/moocore/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MLopez-Ibanez/moocore?branch=master)
 <!-- badges: end -->
 
-[ [**Homepage**](https://mlopez-ibanez.github.io/eaf/) ]  [ [**GitHub**](https://github.com/MLopez-Ibanez/eaf) ]
+[ [**Homepage**](https://mlopez-ibanez.github.io/moocore/) ]  [ [**GitHub**](https://github.com/MLopez-Ibanez/moocore) ]
 
 **Maintainer:** [Manuel López-Ibáñez](https://lopez-ibanez.eu)
 

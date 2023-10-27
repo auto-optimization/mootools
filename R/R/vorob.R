@@ -20,17 +20,25 @@
 #' 
 #' ## Display Vorob'ev expectation and attainment function
 #' # First style
-#' eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 25, 50, 75, 100, res$threshold),
-#'         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "%"),
-#'                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
-#' 
-#' # Second style
-#' eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 20, 40, 60, 80, 100),
-#'         col = gray(seq(0.8, 0.1, length.out = 6)^0.5), type = "area", 
-#'         legend.pos = "bottomleft", extra.points = res$VE, extra.col = "cyan",
-#'         extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,
-#'         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "%"),
-#'                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
+#' # eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 25, 50, 75, 100, res$threshold),
+#' #         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "%"),
+#' #                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
+#' # 
+#' # # Second style
+#' # eafplot(CPFs[,1:2], sets = CPFs[,3], percentiles = c(0, 20, 40, 60, 80, 100),
+#' #         col = gray(seq(0.8, 0.1, length.out = 6)^0.5), type = "area", 
+#' #         legend.pos = "bottomleft", extra.points = res$VE, extra.col = "cyan",
+#' #         extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,
+#' #         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "%"),
+#' #                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
+#' @references
+#' \insertRef{BinGinRou2015gaupar}{moocore}
+#'
+#' C. Chevalier (2013), Fast uncertainty reduction strategies relying on
+#' Gaussian process models, University of Bern, PhD thesis.
+#'
+#' \insertRef{Molchanov2005theory}{moocore}
+#'
 #' @concept eaf
 #' @export
 vorobT <- function(x, reference)
@@ -59,12 +67,14 @@ vorobT <- function(x, reference)
 } 
 
 #' @concept eaf
-#' @rdname Vorob  
+#' @rdname Vorob
+#' @param VE Vorob'ev expectation, e.g., as returned
+#'   by [vorobT()].
 #' @return `vorobDev` returns the Vorob'ev deviation.
 #' @examples
 #' 
 #' # Now print Vorob'ev deviation
-#' VD <- vorobDev(CPFs, res$VE, reference = c(2, 200))
+#' VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
 #' print(VD)
 #' @export
 vorobDev <- function(x, VE, reference)

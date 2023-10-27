@@ -36,7 +36,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <limits.h>
 #include "eaf.h"
 
@@ -526,7 +525,7 @@ __unused static void
 eaf_check_polygons(eaf_polygon_t *p, int nobj)
 {
     // This only works for 2 objectives.
-    assert(nobj == 2);
+    eaf_assert(nobj == 2);
         
     // Check #1: Polygons don't intersect
     // Last point of last polygon

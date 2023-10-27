@@ -40,7 +40,7 @@ normalise <- function(data, to_range = c(1, 2), lower = NA, upper = NA, maximise
   # Handle NA
   no.lower <- is.na(lower)
   no.upper <- is.na(upper)
-  minmax <- matrixStats::colRanges(data)
+  minmax <- colRanges(data)
   lower[no.lower] <- minmax[no.lower, 1L]
   upper[no.upper] <- minmax[no.upper, 2L]
   maximise <- as.logical(rep_len(maximise, nobjs))

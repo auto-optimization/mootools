@@ -2,12 +2,14 @@
 #'
 #' LONG DESCRIPTION
 #' 
+#' @importFrom matrixStats colRanges
 #' @importFrom Rdpack reprompt
 #' @importFrom utils modifyList write.table tail
 #'
 #' @useDynLib moocore, .registration = TRUE
 #'
-#'@examples
+#' @examples
+#' # TODO
 #' @keywords internal
 #' @concept multivariate
 #' @concept optimize
@@ -26,7 +28,7 @@
 #'      network. The second column is filled with `NA`}
 #'  }
 #' 
-#'@source \insertRef{LopezIbanezPhD}{eaf}.
+#'@source \insertRef{LopezIbanezPhD}{moocore}.
 #'
 #' @examples
 #'data(HybridGA)
@@ -42,15 +44,15 @@
 #'  A data frame as produced by [read_datasets()]. The second
 #'  column measures time in seconds and corresponds to a maximisation problem.
 #'
-#' @source \insertRef{LopezIbanezPhD}{eaf}
+#' @source \insertRef{LopezIbanezPhD}{moocore}
 #'
 #'@examples 
 #' data(HybridGA)
 #' data(SPEA2minstoptimeRichmond)
 #' SPEA2minstoptimeRichmond[,2] <- SPEA2minstoptimeRichmond[,2] / 60
-#' eafplot (SPEA2minstoptimeRichmond, xlab = expression(C[E]),
-#'          ylab = "Minimum idle time (minutes)", maximise = c(FALSE, TRUE),
-#'          las = 1, log = "y", legend.pos = "bottomright")
+#' # eafplot (SPEA2minstoptimeRichmond, xlab = expression(C[E]),
+#' #          ylab = "Minimum idle time (minutes)", maximise = c(FALSE, TRUE),
+#' #          las = 1, log = "y", legend.pos = "bottomright")
 #' @keywords datasets
 "SPEA2minstoptimeRichmond"
 
@@ -60,7 +62,7 @@
 #'@format 
 #'  A data frame as produced by [read_datasets()].
 #'
-#' @source \insertRef{LopezIbanezPhD}{eaf}
+#' @source \insertRef{LopezIbanezPhD}{moocore}
 #'
 #'@examples 
 #'data(HybridGA)
@@ -74,7 +76,7 @@
 #' @format 
 #'  A data frame as produced by [read_datasets()].
 #'
-#'@source \insertRef{LopezIbanezPhD}{eaf}
+#'@source \insertRef{LopezIbanezPhD}{moocore}
 #'
 #'@examples 
 #'data(HybridGA)
@@ -114,7 +116,7 @@
 #'  time was then normalized on a scale from 0 to 1 to make it instance
 #'  independent.
 #'
-#'@source \insertRef{ChiarandiniPhD}{eaf} (page 138)
+#'@source \insertRef{ChiarandiniPhD}{moocore} (page 138)
 #'
 #'@references 
 #'  A. Hertz and D. de Werra. Using Tabu Search Techniques for Graph
@@ -145,12 +147,33 @@
 #'
 #'@source
 #'  
-#' \insertRef{BinGinRou2015gaupar}{eaf}
+#' \insertRef{BinGinRou2015gaupar}{moocore}
 #'
 #'@examples 
 #' data(CPFs)
 #' vorobT(CPFs, reference = c(2, 200))
 #'@keywords datasets
 "CPFs"
+
+#' Various strategies of Two-Phase Local Search applied to the Permutation Flowshop Problem with Makespan and Weighted Tardiness objectives.
+#'
+#' @format 
+#'  A data frame with 1511 observations of  4 variables:
+#'  \describe{
+#'    \item{`algorithm`}{TPLS search strategy}
+#'    \item{`Makespan`}{first objective values.}
+#'    \item{`WeightedTardiness`}{second objective values.}
+#'    \item{`set`}{indices of corresponding conditional Pareto fronts.}
+#'  }
+#'
+#'@source
+#'  
+#' \insertRef{DubLopStu2011amai}{moocore}
+#'
+#'@examples 
+#' data(tpls50x20_1_MWT)
+#' str(tpls50x20_1_MWT)
+#'@keywords datasets
+"tpls50x20_1_MWT"
 
 

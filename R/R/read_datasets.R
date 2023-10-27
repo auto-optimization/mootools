@@ -6,28 +6,28 @@
 #' adds an additional column `set` to indicate to which set each row
 #' belongs.
 #'
-#' @param file (`character()`) \cr Filename that contains the data.  Each row
+#' @param file (`character()`)\cr Filename that contains the data.  Each row
 #'   of the table appears as one line of the file.  If it does not contain an
 #'   \emph{absolute} path, the file name is \emph{relative} to the current
 #'   working directory, \code{\link[base]{getwd}()}.  Tilde-expansion is
 #'   performed where supported.  Files compressed with `xz` are supported.
 #'
-#' @param col_names,col.names Vector of optional names for the variables.  The
+#' @param col_names (`character()`)\cr Vector of optional names for the variables.  The
 #'   default is to use \samp{"V"} followed by the column number.
 #'
-#' @param text (`character()`) \cr If `file` is not supplied and this is,
+#' @param text (`character()`)\cr If `file` is not supplied and this is,
 #'   then data are read from the value of `text` via a text connection.
 #'   Notice that a literal string can be used to include (small) data sets
 #'   within R code.
 #'
-#' @return  (`matrix()`) containing a representation of the
+#' @return  (`matrix()`) A numerical matrix of the
 #'  data in the file. An extra column `set` is added to indicate to
 #'  which set each row belongs. 
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
 #' @note There are several examples of data sets in
-#'   `system.file(package="eaf","extdata")`.
+#'   `system.file(package="moocore","extdata")`.
 #'
 #' @section Warning:
 #'  A known limitation is that the input file must use newline characters
@@ -38,7 +38,7 @@
 #'@seealso \code{\link[utils]{read.table}}
 #'
 #'@examples
-#' extdata_path <- system.file(package="eaf","extdata")
+#' extdata_path <- system.file(package="moocore","extdata")
 #' A1 <- read_datasets(file.path(extdata_path,"ALG_1_dat.xz"))
 #' str(A1)
 #'

@@ -14,22 +14,15 @@ OBJECTS = $(SOURCES:.c=.o)
 
 export GSL_CFLAGS GSL_LIBS
 
-eaf = moocore/eaf$(EXEEXT)
-igd = moocore/igd$(EXEEXT)
-epsilon = moocore/epsilon$(EXEEXT)
-dominatedsets = moocore/dominatedsets$(EXEEXT)
-nondominated = moocore/nondominated$(EXEEXT)
-ndsort = moocore/ndsort$(EXEEXT)
-
 .PHONY: all clean
 
 all: $(SHLIB)
-	$(MAKE) -C moocore all march=none CC="$(CC)" CFLAGS="$(CFLAGS) $(LTO)" OPT_CFLAGS="" WARN_CFLAGS="" DEBUG=$(DEBUG) EXE=$(EXEEXT)
+	$(MAKE) -C moocore all march=none CC="$(CC)" CFLAGS="$(CFLAGS) $(LTO)" OPT_CFLAGS="" WARN_CFLAGS="" DEBUG=$(DEBUG) EXE=$(EXEEXT) BINDIR=./
 
 $(SHLIB): $(OBJECTS) 
 
 clean:
 	@-rm -f *.o *.so *.dll
-	$(MAKE) -C moocore clean
+	$(MAKE) -C moocore clean EXE=$(EXEEXT) BINDIR=./
 
 

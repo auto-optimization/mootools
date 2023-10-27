@@ -19,9 +19,9 @@
 #'
 #' @references
 #'
-#' \insertRef{FonPaqLop06:hypervolume}{eaf}
+#' \insertRef{FonPaqLop06:hypervolume}{moocore}
 #'
-#' \insertRef{BeuFonLopPaqVah09:tec}{eaf}
+#' \insertRef{BeuFonLopPaqVah09:tec}{moocore}
 #'
 #' @examples
 #'
@@ -80,9 +80,9 @@ hypervolume <- function(data, reference, maximise = FALSE)
 #'
 #' @references
 #'
-#' \insertRef{FonPaqLop06:hypervolume}{eaf}
+#' \insertRef{FonPaqLop06:hypervolume}{moocore}
 #'
-#' \insertRef{BeuFonLopPaqVah09:tec}{eaf}
+#' \insertRef{BeuFonLopPaqVah09:tec}{moocore}
 #'
 #' @examples
 #'

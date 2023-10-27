@@ -43,7 +43,7 @@
 #' |R|)}, where \eqn{n} is the number of objectives (dimension of vectors).
 #' @references
 #'
-#' \insertRef{ZitThiLauFon2003:tec}{eaf}
+#' \insertRef{ZitThiLauFon2003:tec}{moocore}
 #' 
 NULL
 #> NULL
@@ -68,7 +68,7 @@ NULL
 #' epsilon_mult(A2, A1) # A2 is epsilon-dominated by A1 => e = 2 > 1
 #' 
 #' # A more realistic example
-#' extdata_path <- system.file(package="eaf","extdata")
+#' extdata_path <- system.file(package="moocore","extdata")
 #' path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
 #' path.A2 <- file.path(extdata_path, "ALG_2_dat.xz")
 #' A1 <- read_datasets(path.A1)[,1:2]

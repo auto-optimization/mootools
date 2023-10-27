@@ -46,7 +46,6 @@
 #    http://google-styleguide.googlecode.com/svn/trunk/google-r-style.html
 #
 ################################################################################
-#dyn.load("../src/eaf.so")
 
 check.eaf.data <- function(x)
 {
@@ -154,7 +153,7 @@ compute.eafdiff.helper <- function(data, intervals)
 #'   sets in `y` that attain each point (i.e., negative values are differences
 #'   in favour `y`).
 #' 
-#' @seealso    [read_datasets()], [eafdiffplot()]
+#' @seealso    [read_datasets()], [eaf::eafdiffplot()]
 #' 
 #' @examples
 #'
@@ -377,18 +376,18 @@ points.steps <- function(x)
 #'
 #' @author  Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
-#'@note There are several examples of data sets in `system.file(package="eaf","extdata")`. The current implementation only supports two and three dimensional points.
+#'@note There are several examples of data sets in `system.file(package="moocore","extdata")`. The current implementation only supports two and three dimensional points.
 #'
 #' @references
 #' 
-#' \insertRef{Grunert01}{eaf}
+#' \insertRef{Grunert01}{moocore}
 #'
-#' \insertRef{FonGueLopPaq2011emo}{eaf}
+#' \insertRef{FonGueLopPaq2011emo}{moocore}
 #'  
 #'@seealso [read_datasets()]
 #'
 #'@examples
-#' extdata_path <- system.file(package="eaf", "extdata")
+#' extdata_path <- system.file(package="moocore", "extdata")
 #' 
 #' x <- read_datasets(file.path(extdata_path, "example1_dat"))
 #' # Compute full EAF
@@ -474,18 +473,18 @@ add.extremes <- function(x, extremes, maximise)
 #'
 #' @param x (`list()`) List of data.frames or matrices. The names of the list
 #'   give the percentiles of the attainment surfaces.  This is the format
-#'   returned by [eafplot()] (and the internal function `compute.eaf.as.list`).
+#'   returned by [eaf::eafplot()] (and the internal function `compute.eaf.as.list`).
 #'
 #' @return A data.frame with as many columns as objectives and an additional column `percentiles`.
 #'
 #' @examples
 #'
 #' data(SPEA2relativeRichmond)
-#' attsurfs <- eafplot (SPEA2relativeRichmond, percentiles = c(0,50,100),
-#'                      xlab = expression(C[E]), ylab = "Total switches",
-#'                      lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
-#' attsurfs <- attsurf2df(attsurfs)
-#' text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
+#' # attsurfs <- eafplot (SPEA2relativeRichmond, percentiles = c(0,50,100),
+#' #                      xlab = expression(C[E]), ylab = "Total switches",
+#' #                      lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
+#' # attsurfs <- attsurf2df(attsurfs)
+#' # text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
 #' 
 #' @concept eaf
 #' @export

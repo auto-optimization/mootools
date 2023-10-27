@@ -1,7 +1,7 @@
-## Do we have svnversion?
+## Do we have git?
 ifeq ($(shell sh -c 'which git 1> /dev/null 2>&1 && echo y'),y)
   ## Is this a working copy?
-  ifeq ($(shell sh -c "LC_ALL=C git describe --first-parent --always | grep -q -E '[0-9a-z]+$$' && echo y"),y)
+  ifeq ($(shell sh -c "LC_ALL=C git describe --first-parent --always | grep -q -E '[0-9a-z]+$$' 2>&1 && echo y"),y)
      $(shell sh -c "git describe --dirty --first-parent --always --exclude '*' > git_version")
   endif
 endif

@@ -15,7 +15,7 @@ endef
 ## Do we have git?
 ifeq ($(shell sh -c 'which git 1> /dev/null 2>&1 && echo y'),y)
   ## Is this a working copy?
-  ifeq ($(shell sh -c 'LC_ALL=C  git describe --first-parent --always | grep -q "[0-9a-z]\+$$"  && echo y'),y)
+  ifeq ($(shell sh -c 'LC_ALL=C  git describe --first-parent --always | grep -q "[0-9a-z]\+$$" 2>&1 && echo y'),y)
     $(shell sh -c 'LC_ALL=C  git describe --dirty --first-parent --always --exclude "*" > git_version')
   endif
 endif
@@ -53,7 +53,6 @@ pkgdown: gendoc
 	$(Reval) 'pkgdown::build_site(run_dont_run = TRUE)'
 
 build:
-	@$(MAKE) scripts
 	@$(MAKE) gendoc
 	cd $(BINDIR) && R CMD build $(PACKAGEDIR)
 
@@ -63,7 +62,6 @@ closeversion:
 	git push --tags
 
 releasebuild: clean
-	@$(MAKE) scripts
 	@$(MAKE) gendoc
 	cd $(BINDIR) &&	R CMD build $(PACKAGEDIR) && tar -atvf $(PACKAGE)_$(PACKAGEVERSION).tar.gz
 
@@ -84,7 +82,7 @@ endif
 
 clean:
 	cd $(PACKAGEDIR) && ./cleanup
-	make -C src clean
+	$(MAKE) -C src clean
 
 pdf:
 	$(RM) $(BINDIR)/$(PACKAGE).pdf
