@@ -39,10 +39,10 @@ hypervolume <- function(data, reference, maximise = FALSE)
   nobjs <- ncol(data) 
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
-  if (length(reference) == 1) reference <- rep_len(reference, nobjs)
+  if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
   if (any(maximise)) {
-    if (length(maximise) == 1) {
+    if (length(maximise) == 1L) {
       data <- -data
       reference <- -reference
     } else if (length(maximise) != nobjs) {
@@ -51,11 +51,11 @@ hypervolume <- function(data, reference, maximise = FALSE)
     data[,maximise] <- -data[,maximise]
     reference[maximise] <- -reference[maximise]
   }
-  return(.Call(hypervolume_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints),
-               as.double(reference)))
+  .Call(hypervolume_C,
+    t(data),
+    nobjs,
+    npoints,
+    as.double(reference))
 }
 
 #' Hypervolume contribution of a set of points
@@ -106,10 +106,10 @@ hv_contributions <- function(data, reference, maximise = FALSE)
   nobjs <- ncol(data) 
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
-  if (length(reference) == 1) reference <- rep_len(reference, nobjs)
+  if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
   
   if (any(maximise)) {
-    if (length(maximise) == 1) {
+    if (length(maximise) == 1L) {
       data <- -data
       reference <- -reference
     } else if (length(maximise) != nobjs) {
@@ -118,10 +118,10 @@ hv_contributions <- function(data, reference, maximise = FALSE)
     data[,maximise] <- -data[,maximise]
     reference[maximise] <- -reference[maximise]
   }
-  return(.Call(hv_contributions_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints),
-               as.double(reference)
-               ))
+  .Call(hv_contributions_C,
+    t(data),
+    nobjs,
+    npoints,
+    as.double(reference)
+  )
 }

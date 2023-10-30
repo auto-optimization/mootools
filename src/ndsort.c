@@ -36,8 +36,6 @@
 
 *************************************************************************/
 
-#include "io.h"
-#include "nondominated.h" // for normalise()
 
 #include <assert.h>
 #include <errno.h>
@@ -48,7 +46,7 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 #include <math.h>  // for INFINITY
-
+#include "nondominated.h" // for normalise()
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "-o, --obj" 
 #include "cmdline.h"
 #include "hv.h"

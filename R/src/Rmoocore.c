@@ -54,6 +54,13 @@ compute_eaf_helper (SEXP DATA, int nobj, SEXP CUMSIZES, int nruns,
     return eaf;
 }
 
+static void free_eaf(eaf_t ** eaf, int nruns)
+{
+    for (int k = 0; k < nruns; k++)
+        eaf_delete (eaf[k]);
+    free(eaf);
+}
+
 SEXP
 compute_eaf_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP PERCENTILE)
 {
@@ -87,9 +94,8 @@ compute_eaf_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP PERCENTILE)
             rmat[pos + nobj * totalpoints] = percentile[k];
             pos++;
         }
-        eaf_delete (eaf[k]);
     }
-    free(eaf);
+    free_eaf(eaf, nlevels);
     UNPROTECT (1);
     return mat;
 }
@@ -145,9 +151,8 @@ compute_eafdiff_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
                                               (count_right / (double) nsets2));
             pos++;
         }
-        eaf_delete (eaf[k]);
     }
-    free(eaf);
+    free_eaf(eaf, nruns);
     UNPROTECT (1);
     return mat;
 }
@@ -190,9 +195,7 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     
     eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
     eaf_polygon_t * rects = eaf_compute_rectangles(eaf, nruns);
-    for (k = 0; k < nruns; k++)
-        eaf_delete (eaf[k]);
-    free(eaf);
+    free_eaf(eaf, nruns);
 
     const int division = nruns / 2;
     int nrow = vector_int_size(&rects->col);
@@ -238,10 +241,7 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
 
     eaf_polygon_t *p = eaf_compute_area(eaf, nruns);
-
-    for (k = 0; k < nruns; k++)
-        eaf_delete (eaf[k]);
-    free(eaf);
+    free_eaf(eaf, nruns);
 
     const int division = nruns / 2;
 
@@ -326,7 +326,7 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
 }
 
 SEXP
-read_data_sets (SEXP FILENAME)
+R_read_datasets(SEXP FILENAME)
 {
     SEXP_2_STRING(FILENAME, filename);
     /* Rprintf ("filename: %s\n", filename); */
@@ -337,10 +337,11 @@ read_data_sets (SEXP FILENAME)
 
     const int ntotal = cumsizes[nruns - 1];
 
+    /* FIXME: Is this the fastest way to transfer a matrix from C to R ? */
     SEXP DATA;
     PROTECT(DATA = Rf_allocMatrix(REALSXP, cumsizes[nruns-1], nobj + 1));
     double *rdata = REAL(DATA);
-    double_transpose (rdata, data, ntotal, nobj);
+    matrix_transpose_double (rdata, data, ntotal, nobj);
 
     int k, j;
     size_t pos = ntotal * nobj;
@@ -350,13 +351,13 @@ read_data_sets (SEXP FILENAME)
     }
     free(data);
     free(cumsizes);
-    UNPROTECT (1);
+    UNPROTECT(1);
     return DATA;
 }
 
 #include "nondominated.h"
 
-SEXP
+void
 normalise_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
             SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 {
@@ -366,38 +367,17 @@ normalise_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
     SEXP_2_DOUBLE_VECTOR(RANGE, range, range_len);
     SEXP_2_DOUBLE_VECTOR(LBOUND, lbound, lbound_len);
     SEXP_2_DOUBLE_VECTOR(UBOUND, ubound, ubound_len);
-    SEXP_2_LOGICAL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
 
-    if (nobj != lbound_len)
-        Rf_error("length of lbound (%d) is different from number of objectives (%d)",
-                 lbound_len, nobj);
-    if (nobj != ubound_len)
-        Rf_error("length of ubound (%d) is different from number of objectives (%d)",
-                 ubound_len, nobj);
-    if (nobj != maximise_len)
-        Rf_error("length of maximise (%d) is different from number of objectives (%d)",
-              maximise_len, nobj);
-    if (range_len != 2)
-        Rf_error("length of range must be two (lower, upper)");
+    assert(nobj == lbound_len);
+    assert(nobj == ubound_len);
+    assert (nobj == maximise_len);
+    assert (range_len == 2);
 
-    signed char * minmax = create_minmax(nobj, maximise);
-    
-    // FIXME: Is this slower than pure R? Why is R so inefficient?
-    new_real_matrix (out, nobj, npoint);
-    double * data = REAL(DATA);
-    for (int i = 0; i < nobj * npoint; i++)
-        out[i] = data[i];
-
-    // We have to make the objectives agree before normalisation.
-    // FIXME: Do normalisation and agree in one step.
-    const signed char agree = AGREE_MINIMISE;
-    agree_objectives (out, nobj, npoint, minmax, agree);
-    normalise(out, nobj, npoint, minmax, agree, range[0], range[1],
-              lbound, ubound);
-
-    free (minmax);
+    agree_normalise(REAL(DATA), nobj, npoint, maximise, range[0], range[1],
+                    lbound, ubound);
+    free (maximise);
     UNPROTECT(nprotected);
-    return Rexp_out;
 }
 
 SEXP
@@ -407,29 +387,18 @@ is_nondominated_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP MAXIMISE,
     int nprotected = 0;
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NPOINT, npoint);
-    SEXP_2_LOGICAL_VECTOR(MAXIMISE, maximise, maximise_len);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_LOGICAL(KEEP_WEAKLY, keep_weakly);
+    assert (nobj == maximise_len);
     
-    if (nobj != maximise_len)
-        Rf_error("length of maximise (%d) is different from number of objectives (%d)",
-                 maximise_len, nobj);
+    bool * bool_is_nondom = is_nondominated(REAL(DATA), nobj, npoint, maximise, keep_weakly);
+    free (maximise);
 
-    signed char * minmax = create_minmax(nobj, maximise);
-    bool * bool_is_nondom = nondom_init(npoint);
-    double * data = REAL(DATA);
-
-    if (keep_weakly) {
-        find_weak_nondominated_set(data, nobj, npoint, minmax, bool_is_nondom);
-    } else {
-        find_nondominated_set(data, nobj, npoint, minmax, bool_is_nondom);
-    }
-    
     new_logical_vector (is_nondom, npoint);
     bool_2_logical_vector(is_nondom, bool_is_nondom, npoint);
-    free (minmax);
     free (bool_is_nondom);
     UNPROTECT(nprotected);
-    return Rexp_is_nondom;
+    return Rexp(is_nondom);
 }
 
 SEXP
@@ -448,7 +417,7 @@ pareto_ranking_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT)
     }
     free (rank2);
     UNPROTECT(nprotected);
-    return Rexp_rank;
+    return Rexp(rank);
 }
 
 
@@ -462,14 +431,9 @@ hypervolume_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE)
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NPOINT, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
-
-    if (nobj != reference_len)
-        Rf_error("length of reference point (%d) is different from number of objectives (%d)",
-                 reference_len, nobj);
-
+    assert (nobj == reference_len);
     new_real_vector(hv, 1);
     hv[0] = fpli_hv(data, nobj, npoint, reference);
-
     UNPROTECT (nprotected);
     return Rexp(hv);
 }
@@ -482,11 +446,7 @@ hv_contributions_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE)
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NPOINT, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
-
-    if (nobj != reference_len)
-        Rf_error("length of reference point (%d) is different from number of objectives (%d)",
-                 reference_len, nobj);
-
+    assert (nobj == reference_len);
     new_real_vector(hv, npoint);
     hv_contributions(hv, data, nobj, npoint, reference);
     UNPROTECT (nprotected);
@@ -550,8 +510,8 @@ whv_hype_C(SEXP DATA, SEXP NPOINTS, SEXP IDEAL, SEXP REFERENCE,
     SEXP_2_DOUBLE_VECTOR(IDEAL, ideal, ideal_len);
     eaf_assert(reference_len == ideal_len);
     eaf_assert(reference_len == 2);
-    hype_sample_dist * dist = Sexp_to_dist(DIST, SEED);
     new_real_vector(hv, 1);
+    hype_sample_dist * dist = Sexp_to_dist(DIST, SEED);
     if (!dist) {
         Rf_error("Sexp_to_dist failed to create dist");
     } else {
@@ -566,14 +526,6 @@ whv_hype_C(SEXP DATA, SEXP NPOINTS, SEXP IDEAL, SEXP REFERENCE,
 #include "igd.h"
 #include "nondominated.h"
 
-
-SEXP
-epsilon_mul_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-              SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE);
-SEXP
-epsilon_add_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-              SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE);
-
 enum unary_metric_t {
     EPSILON_ADD,
     EPSILON_MUL,
@@ -582,7 +534,7 @@ enum unary_metric_t {
     AVG_HAUSDORFF
 }; 
 
-static SEXP
+static inline SEXP
 unary_metric_ref(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
                  SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE,
                  enum unary_metric_t metric, SEXP EXTRA)
@@ -591,41 +543,37 @@ unary_metric_ref(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NPOINT, npoint);
     double *ref = REAL(REFERENCE);
+    /* FIXME: int ref_size = Rf_nrows(REFERENCE); */
     SEXP_2_INT(REFERENCE_SIZE, ref_size);
-    SEXP_2_LOGICAL_VECTOR(MAXIMISE, maximise, maximise_len);
-
-    if (nobj != maximise_len)
-        Rf_error("length of maximise (%d) is different from number of objectives (%d)",
-                 maximise_len, nobj);
-
-    signed char * minmax = create_minmax(nobj, maximise);
+    SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
+    assert (nobj == maximise_len);
 
     new_real_vector(value, 1);
-    double *data = REAL(DATA);
+    const double *data = REAL(DATA);
     
     switch (metric) {
       case EPSILON_ADD:
-          value[0] = epsilon_additive (nobj, minmax, data, npoint, ref, ref_size);
+          value[0] = epsilon_additive (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case EPSILON_MUL:
-          value[0] = epsilon_mult (nobj, minmax, data, npoint, ref, ref_size);
+          value[0] = epsilon_mult (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case INV_GD:
-          value[0] = IGD (nobj, minmax, data, npoint, ref, ref_size);
+          value[0] = IGD (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case INV_GDPLUS:
-          value[0] = IGD_plus (nobj, minmax, data, npoint, ref, ref_size);
+          value[0] = IGD_plus (data, nobj, npoint, ref, ref_size, maximise);
           break;
       case AVG_HAUSDORFF: {
           SEXP_2_INT(EXTRA, p);
-          value[0] = avg_Hausdorff_dist (nobj, minmax, data, npoint, ref, ref_size, p);
+          value[0] = avg_Hausdorff_dist (data, nobj, npoint, ref, ref_size, maximise, p);
           break;
       }
       default:
           Rf_error("unknown unary metric");
     }
     
-    free (minmax);
+    free (maximise);
     UNPROTECT (nprotected);
     return Rexp(value);
 }

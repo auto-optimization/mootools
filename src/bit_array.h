@@ -80,7 +80,7 @@ bit_array_set(bit_array * b, size_t i, bool x) {
 
 
 static inline void
-bitset_check(const bit_array *b __unused, const bool * ref __unused, size_t n)
+bitset_check(const bit_array *b _no_warn_unused, const bool * ref _no_warn_unused, size_t n)
 {
     for(size_t i = 0; i < n; i++) {
         if (bit_array_get(b, i) != ref[i]) {

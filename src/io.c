@@ -89,6 +89,41 @@ static inline int skip_comment_line (FILE * instream)
 #undef objective_t_scanf_format
 #undef read_objective_t_data
 
+/* Convenience wrapper to read_double_data used by Python's moocore.  */
+int
+read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasize_p)
+{
+    double * data = NULL;
+    int * cumsizes = NULL;
+    int nsets = 0, nobjs = 0;
+    int error = read_double_data(filename, &data, &nobjs, &cumsizes, &nsets);
+    if (error) {
+        return error;
+    }
+    int ncols = nobjs + 1; // For the column 'set' 
+    int nrows = cumsizes[nsets - 1];
+    int datasize = ncols * nrows * sizeof(double);
+    double * newdata = malloc(datasize);
+    int set = 1;
+    int i = 0;
+    while (i < nrows) {
+        for (int j = 0; j < nobjs; j++) {
+            newdata[i * ncols + j] = data[i * nobjs + j];
+        }
+        newdata[i * ncols + nobjs] = (double) set;
+        i++;
+        if (i == cumsizes[set - 1])
+            set++;
+    }
+    free(data);
+    free(cumsizes);
+
+    *data_p = newdata;
+    *ncols_p = ncols;
+    *datasize_p = datasize;
+    return 0;
+}
+
 #ifndef R_PACKAGE
 void
 vector_fprintf (FILE *stream, const double * vector, int size)

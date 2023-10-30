@@ -9,7 +9,7 @@ attsurf2df(x)
 \arguments{
 \item{x}{(\code{list()}) List of data.frames or matrices. The names of the list
 give the percentiles of the attainment surfaces.  This is the format
-returned by \code{\link[eaf:eafplot]{eaf::eafplot()}} (and the internal function \code{compute.eaf.as.list}).}
+returned by \code{\link[eaf:eafplot]{eaf::eafplot()}} (and the internal function \code{compute_eaf_as_list}).}
 }
 \value{
 A data.frame with as many columns as objectives and an additional column \code{percentiles}.

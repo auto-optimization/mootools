@@ -8,7 +8,6 @@
 #define INFINITY (HUGE_VAL)
 #endif
 #include "common.h"
-#include "io.h"
 
 
 /* 
@@ -32,9 +31,9 @@
    for negative values doesn't make sense.
  */
 static inline double 
-epsilon_mult (int dim, const signed char *minmax,
-              const double *points_a, int size_a,
-              const double *points_b, int size_b)
+epsilon_mult_minmax (int dim, const signed char *minmax,
+                     const double *points_a, int size_a,
+                     const double *points_b, int size_b)
 {
     int a, b, d;
     double epsilon = 0;
@@ -68,9 +67,9 @@ epsilon_mult (int dim, const signed char *minmax,
 }
 
 static inline double
-epsilon_additive (int dim, const signed char *minmax,
-                  const double *points_a, int size_a,
-                  const double *points_b, int size_b)
+epsilon_additive_minmax (int dim, const signed char *minmax,
+                         const double *points_a, int size_a,
+                         const double *points_b, int size_b)
 {
     int a, b, d;
     double epsilon = -INFINITY;
@@ -96,6 +95,25 @@ epsilon_additive (int dim, const signed char *minmax,
     return epsilon;
 }
 
+_no_warn_unused static double
+epsilon_additive (const double *data, int nobj, int npoints,
+                  const double *ref, int ref_size, const bool * maximise)  
+{
+    const signed char *minmax = minmax_from_bool(nobj, maximise);
+    double value = epsilon_additive_minmax (nobj, minmax, data, npoints, ref, ref_size);
+    free ((void *)minmax);
+    return(value);
+}
+_no_warn_unused static double
+epsilon_mult (const double *data, int nobj, int npoints,
+              const double *ref, int ref_size, const bool * maximise)  
+{
+    const signed char *minmax = minmax_from_bool(nobj, maximise);
+    double value = epsilon_mult_minmax (nobj, minmax, data, npoints, ref, ref_size);
+    free ((void *)minmax);
+    return(value);
+}
+
 /* FIXME: this can be done much faster. For example, the diff needs to
    be calculated just once and stored on a temporary array diff[].  */
 static inline int
@@ -105,8 +123,8 @@ epsilon_additive_ind (int dim, const signed char *minmax,
 {
     double eps_ab, eps_ba;
 
-    eps_ab = epsilon_additive (dim, minmax, points_a, size_a, points_b, size_b);
-    eps_ba = epsilon_additive (dim, minmax, points_b, size_b, points_a, size_a);
+    eps_ab = epsilon_additive_minmax (dim, minmax, points_a, size_a, points_b, size_b);
+    eps_ba = epsilon_additive_minmax (dim, minmax, points_b, size_b, points_a, size_a);
 
     DEBUG2 (printf ("eps_ab = %g, eps_ba = %g\n", eps_ab, eps_ba));
 

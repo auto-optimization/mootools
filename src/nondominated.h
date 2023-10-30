@@ -4,21 +4,6 @@
 #include <string.h> // memcpy
 #include "common.h"
 
-enum objs_agree_t { AGREE_MINIMISE = -1, AGREE_NONE = 0, AGREE_MAXIMISE = 1 };
-
-/* Convert from int vector to minmax vector.  */
-static inline signed char *
-create_minmax(int nobj, const int * maximise)
-{
-    signed char * minmax = malloc(sizeof(signed char) * nobj);
-    for (int k = 0; k < nobj; k++) {
-        minmax[k] = (maximise[k])
-            ? AGREE_MAXIMISE
-            : (!maximise[k]) ? AGREE_MINIMISE : AGREE_NONE;
-    }
-    return minmax;
-}
-
 static inline bool *
 nondom_init (size_t size)
 {
@@ -177,6 +162,18 @@ get_nondominated_set (double **pareto_set_p,
     return new_size;
 }
 
+_no_warn_unused static bool *
+is_nondominated (const double * data, int nobj, int npoint, const bool * maximise, bool keep_weakly)
+{
+    bool * nondom = nondom_init(npoint);
+    const signed char * minmax = minmax_from_bool(nobj, maximise);
+    find_nondominated_set_ (data, nobj, npoint, minmax, AGREE_NONE, nondom,
+                            /* find_dominated_p = */false,
+                            /* keep_weakly = */keep_weakly);
+    free((void *)minmax);
+    return nondom;
+}
+
 static inline void
 agree_objectives (double *points, int dim, int size,
                   const signed char *minmax, const signed char agree)
@@ -216,6 +213,21 @@ normalise (double *points, int dim, int size,
     }
 
     free (diff);
+}
+
+_no_warn_unused static void
+agree_normalise (double *data, int nobj, int npoint,
+                 const bool * maximise,
+                 const double lower_range, const double upper_range,
+                 const double *lbound, const double *ubound)
+{
+    const signed char * minmax = minmax_from_bool(nobj, maximise);
+    // We have to make the objectives agree before normalisation.
+    // FIXME: Do normalisation and agree in one step.
+    agree_objectives (data, nobj, npoint, minmax, AGREE_MINIMISE);
+    normalise(data, nobj, npoint, minmax, AGREE_MINIMISE,
+              lower_range, upper_range, lbound, ubound);
+    free ((void *)minmax);
 }
 
 int * pareto_rank (const double *points, int dim, int size);

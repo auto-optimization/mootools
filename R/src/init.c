@@ -8,10 +8,10 @@ extern SEXP compute_eaf_C(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP compute_eafdiff_area_C(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP compute_eafdiff_rectangles_C(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP compute_eafdiff_C(SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP read_data_sets(SEXP);
+extern SEXP R_read_datasets(SEXP);
 extern SEXP hypervolume_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE);
 extern SEXP hv_contributions_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE);
-extern SEXP normalise_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
+extern void normalise_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
                         SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE);
 
 extern SEXP is_nondominated_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP MAXIMISE, SEXP KEEP_WEAKLY);
@@ -44,7 +44,7 @@ static const R_CallMethodDef CallEntries[] = {
     DECLARE_CALL_ENTRY(compute_eafdiff_area_C, 5)
     DECLARE_CALL_ENTRY(compute_eafdiff_rectangles_C, 5)
     DECLARE_CALL_ENTRY(compute_eafdiff_C,      5)
-    DECLARE_CALL_ENTRY(read_data_sets,         1)
+    DECLARE_CALL_ENTRY(R_read_datasets,         1)
     DECLARE_CALL_ENTRY(hypervolume_C,          4)
     DECLARE_CALL_ENTRY(hv_contributions_C,     4)
     DECLARE_CALL_ENTRY(normalise_C,            7)

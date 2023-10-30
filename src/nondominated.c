@@ -41,8 +41,6 @@
 
 
 *************************************************************************/
-#include "io.h"
-#include "nondominated.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -54,6 +52,7 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 #include <math.h> // for log10()
+#include "nondominated.h"
 #define READ_INPUT_WRONG_INITIAL_DIM_ERRSTR "either -o, --obj, -u, --upper or -l, --lower" 
 #include "cmdline.h"
 

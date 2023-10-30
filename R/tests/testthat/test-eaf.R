@@ -4,7 +4,7 @@ test_that("eaf", {
 
   test.eaf.dataset <- function(name, percentiles = NULL) {
     dataset <- get(name)
-    x <- moocore:::compute.eaf(dataset, percentiles)
+    x <- moocore:::compute_eaf(dataset, percentiles)
     # FIXME: work-around for change in the computation
     x[,3] <- floor(x[,3])
     #saveRDS(x, paste0(name, "-eaf.rds"))
@@ -12,7 +12,7 @@ test_that("eaf", {
   }
   test.eaf.file <- function(file, percentiles = NULL) {
     dataset <- read_datasets(file)
-    x <- moocore:::compute.eaf(dataset, percentiles)
+    x <- moocore:::compute_eaf(dataset, percentiles)
     #saveRDS(x, paste0(basename(file), "-eaf.rds"))
     return(x)
   }
@@ -39,7 +39,7 @@ test_that("eaf3d", {
   data.combined[, nobjs + 1] <- data.combined[, nobjs + 1] + nruns.left
   data.combined <- rbind(lin, data.combined)
   # This may stop working once we filter uninteresting values in the C code directly.
-  DIFF <- moocore:::compute.eafdiff.helper(data.combined, intervals = nruns.left)
+  DIFF <- moocore:::compute_eafdiff_helper(data.combined, intervals = nruns.left)
   x <- as.matrix(read.table("lin.S-sph.S-diff.txt.xz", header = FALSE))
   dimnames(x) <- NULL
   x[, nobjs + 1] <- x[, nobjs + 1] - x[, nobjs + 2]

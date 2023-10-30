@@ -190,7 +190,7 @@ do_file (const char *filename, double *reference, int reference_size,
     int n;
     int cumsize;
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
-        double __unused time_elapsed = 0;
+        double _no_warn_unused time_elapsed = 0;
         int size_a = cumsizes[n] - cumsize;
         const double *points_a = &data[nobj * cumsize];
         //Timer_start ();
@@ -204,30 +204,30 @@ do_file (const char *filename, double *reference, int reference_size,
             }                                                                  \
         } while(0)
         
-        print_value_if (gd,
-                        GD (nobj, minmax,
-                            points_a, size_a,
-                            reference, reference_size));
+        print_value_if(gd,
+                       GD_minmax (nobj, minmax,
+                                  points_a, size_a,
+                                  reference, reference_size));
         print_value_if(igd,
-                       IGD (nobj, minmax,
-                            points_a, size_a,
-                            reference, reference_size));
+                       IGD_minmax (nobj, minmax,
+                                   points_a, size_a,
+                                   reference, reference_size));
         print_value_if(gdp,
                        GD_p (nobj, minmax,
                              points_a, size_a,
                              reference, reference_size, exponent_p));
-        print_value_if (igdp,
-                        IGD_p (nobj, minmax,
-                               points_a, size_a,
-                               reference, reference_size, exponent_p));
-        print_value_if (igdplus,
-                        IGD_plus (nobj, minmax,
-                                  points_a, size_a,
-                                  reference, reference_size));
-        print_value_if (hausdorff,
-                        avg_Hausdorff_dist (nobj, minmax,
-                                            points_a, size_a,
-                                            reference, reference_size, exponent_p));
+        print_value_if(igdp,
+                       IGD_p (nobj, minmax,
+                              points_a, size_a,
+                              reference, reference_size, exponent_p));
+        print_value_if(igdplus,
+                       IGD_plus_minmax (nobj, minmax,
+                                        points_a, size_a,
+                                        reference, reference_size));
+        print_value_if(hausdorff,
+                       avg_Hausdorff_dist_minmax (nobj, minmax,
+                                                  points_a, size_a,
+                                                  reference, reference_size, exponent_p));
         //time_elapsed = Timer_elapsed_virtual ();
         fprintf(outfile, "\n");
         /* if (verbose_flag)  */

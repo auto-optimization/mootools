@@ -44,6 +44,9 @@ setup:
 configure: configure.ac src/Makevars.in
 	autoreconf configure.ac
 
+src/Makevars: configure
+	./configure
+
 gendoc: $(PACKAGEDIR)/man/$(PACKAGE)-package.Rd configure
 
 NAMESPACE $(PACKAGEDIR)/man/$(PACKAGE)-package.Rd: $(PACKAGEDIR)/R/*.R
@@ -80,9 +83,8 @@ else
 	cd $(BINDIR) && (_R_CHECK_FORCE_SUGGESTS_=false NOT_CRAN=true R CMD check --run-donttest --run-dontrun --timings $(PACKAGE)_$(PACKAGEVERSION).tar.gz; cat $(PACKAGE).Rcheck/$(PACKAGE)-Ex.timings)
 endif
 
-clean:
+clean: 
 	cd $(PACKAGEDIR) && ./cleanup
-	$(MAKE) -C src clean
 
 pdf:
 	$(RM) $(BINDIR)/$(PACKAGE).pdf

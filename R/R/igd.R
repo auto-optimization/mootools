@@ -124,15 +124,13 @@ igd <- function(data, reference, maximise = FALSE)
     stop("data and reference must have the same number of columns")
   reference_size <- nrow(reference)
   
-  maximise <- as.logical(rep_len(maximise, nobjs))
-    
-  return(.Call(igd_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints),
-               as.double(t(reference)),
-               as.integer(reference_size),
-               maximise))
+  .Call(igd_C,
+    as.double(t(data)),
+    as.integer(nobjs),
+    as.integer(npoints),
+    as.double(t(reference)),
+    as.integer(reference_size),
+    as.logical(rep_len(maximise, nobjs)))
 }
 
 #' @rdname igd
@@ -155,16 +153,13 @@ igd_plus <- function(data, reference, maximise = FALSE)
   if (ncol(reference) != nobjs)
     stop("data and reference must have the same number of columns")
   reference_size <- nrow(reference)
-  
-  maximise <- as.logical(rep_len(maximise, nobjs))
-    
-  return(.Call(igd_plus_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints),
-               as.double(t(reference)),
-               as.integer(reference_size),
-               maximise))
+  .Call(igd_plus_C,
+    as.double(t(data)),
+    as.integer(nobjs),
+    as.integer(npoints),
+    as.double(t(reference)),
+    as.integer(reference_size),
+    as.logical(rep_len(maximise, nobjs)))
 }
 
 #' @rdname igd
@@ -187,15 +182,12 @@ avg_hausdorff_dist <- function(data, reference, maximise = FALSE, p = 1L)
   if (ncol(reference) != nobjs)
     stop("data and reference must have the same number of columns")
   reference_size <- nrow(reference)
-  
-  maximise <- as.logical(rep_len(maximise, nobjs))
-    
-  return(.Call(avg_hausdorff_dist_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints),
-               as.double(t(reference)),
-               as.integer(reference_size),
-               maximise,
-               as.integer(p)))
+  .Call(avg_hausdorff_dist_C,
+    as.double(t(data)),
+    as.integer(nobjs),
+    as.integer(npoints),
+    as.double(t(reference)),
+    as.integer(reference_size),
+    as.logical(rep_len(maximise, nobjs)),
+    as.integer(p))
 }

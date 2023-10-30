@@ -64,7 +64,7 @@ read_datasets <- function(file, col_names, text)
       on.exit(unlink(file))
     }
   }
-  out <- .Call(read_data_sets, as.character(file))
+  out <- .Call(R_read_datasets, as.character(file))
   if (missing(col_names))
     col_names <- paste0("V", 1L:(ncol(out)-1))
   colnames(out) <- c(col_names, "set")

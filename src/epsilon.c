@@ -52,8 +52,6 @@
 
 *************************************************************************/
 
-#include "epsilon.h"
-#include "nondominated.h"
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -63,6 +61,8 @@
 
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
+#include "epsilon.h"
+#include "nondominated.h"
 #include "cmdline.h"
 
 static bool verbose_flag = false;
@@ -138,17 +138,15 @@ do_file (const char *filename, double *reference, int reference_size,
     int cumsize;
     int n;
     for (n = 0, cumsize = 0; n < nruns; cumsize = cumsizes[n], n++) {
-        double time_elapsed = 0;
-        double epsilon;
-
+        // double time_elapsed = 0;
         //Timer_start ();
-        epsilon = (additive_flag) 
-            ? epsilon_additive (nobj,  minmax,
-                                &data[nobj * cumsize], cumsizes[n] - cumsize,
-                                reference, reference_size)
-            : epsilon_mult (nobj,  minmax,
-                            &data[nobj * cumsize], cumsizes[n] - cumsize,
-                            reference, reference_size);
+        double epsilon = (additive_flag) 
+            ? epsilon_additive_minmax (nobj,  minmax,
+                                       &data[nobj * cumsize], cumsizes[n] - cumsize,
+                                       reference, reference_size)
+            : epsilon_mult_minmax (nobj,  minmax,
+                                   &data[nobj * cumsize], cumsizes[n] - cumsize,
+                                   reference, reference_size);
         //        time_elapsed = Timer_elapsed_virtual ();
         fprintf (outfile, "%-16.15g\n", epsilon);
         if ((additive_flag && epsilon < 0)
@@ -156,9 +154,10 @@ do_file (const char *filename, double *reference, int reference_size,
             errprintf ("%s: some points are not  dominated by the reference set",
                        filename);
             exit (EXIT_FAILURE);
-        }
+        }/*
         if (verbose_flag)
             fprintf (outfile, "# Time: %f seconds\n", time_elapsed);
+         */
     }
     
     if (outfilename) {

@@ -13,3 +13,21 @@ get_ideal <- function(x, maximise)
   ifelse(maximise, upper, lower)
 }
 
+check_dataset <- function(x)
+{
+  name <- deparse(substitute(x))
+  if (length(dim(x)) != 2L)
+    stop("'", name, "' must be a data.frame or a matrix")
+  if (nrow(x) < 1L)
+    stop("not enough points (rows) in '", name, "'")
+  if (ncol(x) < 2L)
+    stop("'", name, "' must have at least 2 columns")
+  x <-  as.matrix(x)
+  if (!is.numeric(x))
+    stop("'", name, "' must be numeric")
+  if (storage.mode(x) != "double")
+    storage.mode(x) <- "double"
+  return(x)
+}
+
+

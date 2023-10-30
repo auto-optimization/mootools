@@ -230,7 +230,7 @@ eaf_print_attsurf (eaf_t * eaf, FILE *coord_file,  FILE *indic_file, FILE *diff_
     }
 }
 
-__unused static void
+_no_warn_unused static void
 fprint_set2d (FILE *stream, const objective_t * const *data, int ntotal)
 {
     for (int k = 0; k < ntotal; k++)
@@ -509,7 +509,7 @@ polygons_intersect(const objective_t *a, const objective_t *b, int nobj)
 }
 
 
-__unused static void
+_no_warn_unused static void
 polygon_print(const objective_t *p, int nobj)
 {
     while (p[0] != objective_MIN) {
@@ -521,7 +521,7 @@ polygon_print(const objective_t *p, int nobj)
     fprintf(stderr, "\n");
 }
 
-__unused static void 
+_no_warn_unused static void 
 eaf_check_polygons(eaf_polygon_t *p, int nobj)
 {
     // This only works for 2 objectives.

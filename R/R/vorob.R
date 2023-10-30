@@ -43,7 +43,7 @@
 #' @export
 vorobT <- function(x, reference)
 {
-  x <- check.eaf.data(x)
+  x <- check_eaf_data(x)
   setcol <- ncol(x)
   nobjs <- setcol - 1L
 

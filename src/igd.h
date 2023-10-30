@@ -47,14 +47,12 @@
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <float.h>
 #include <math.h>
 #ifndef INFINITY
 #define INFINITY (HUGE_VAL)
 #endif
-#include "io.h"
+#include "common.h"
 
 static inline double 
 gd_common (int dim, const signed char *minmax,
@@ -100,9 +98,9 @@ gd_common (int dim, const signed char *minmax,
 }
 
 static inline double
-GD (int dim, const signed char *minmax,
-    const double *points_a, int size_a,
-    const double *points_r, int size_r)
+GD_minmax (int dim, const signed char *minmax,
+           const double *points_a, int size_a,
+           const double *points_r, int size_r)
 {
     return gd_common (dim, minmax,
                       points_a, size_a,
@@ -112,15 +110,25 @@ GD (int dim, const signed char *minmax,
 }
 
 static inline double
-IGD (int dim, const signed char *minmax,
-     const double *points_a, int size_a,
-     const double *points_r, int size_r)
+IGD_minmax (int dim, const signed char *minmax,
+            const double *points_a, int size_a,
+            const double *points_r, int size_r)
 {
     return gd_common (dim, minmax,
                       points_r, size_r,
                       points_a, size_a,
                       /*plus=*/false, /*psize=*/false,
                       /*p=*/1);
+}
+
+_no_warn_unused static double
+IGD (const double *data, int nobj, int npoints, const double *ref, int ref_size,
+     const bool * maximise)
+{
+    const signed char *minmax = minmax_from_bool(nobj, maximise);
+    double value = IGD_minmax (nobj, minmax, data, npoints, ref, ref_size);
+    free ((void *)minmax);
+    return(value);
 }
 
 static inline double
@@ -148,9 +156,9 @@ IGD_p (int dim, const signed char *minmax,
 }
 
 static inline double
-IGD_plus (int dim, const signed char *minmax,
-          const double *points_a, int size_a,
-          const double *points_r, int size_r)
+IGD_plus_minmax (int dim, const signed char *minmax,
+                 const double *points_a, int size_a,
+                 const double *points_r, int size_r)
 {
     return gd_common (dim, minmax,
                       points_r, size_r,
@@ -160,10 +168,20 @@ IGD_plus (int dim, const signed char *minmax,
 
 }
 
+_no_warn_unused static double
+IGD_plus (const double *data, int nobj, int npoints, const double *ref, int ref_size,
+          const bool * maximise)
+{
+    const signed char *minmax = minmax_from_bool(nobj, maximise);
+    double value = IGD_plus_minmax (nobj, minmax, data, npoints, ref, ref_size);
+    free ((void *)minmax);
+    return(value);
+}
+
 static inline double
-avg_Hausdorff_dist (int dim, const signed char *minmax,
-                    const double *points_a, int size_a,
-                    const double *points_r, int size_r, unsigned int p)
+avg_Hausdorff_dist_minmax (int dim, const signed char *minmax,
+                           const double *points_a, int size_a,
+                           const double *points_r, int size_r, unsigned int p)
 {
     double gd_p = gd_common (dim, minmax,
                              points_a, size_a,
@@ -179,5 +197,15 @@ avg_Hausdorff_dist (int dim, const signed char *minmax,
     return MAX (gd_p, igd_p);
 }
 /* TODO: Implement p=INFINITY See [4] */
+
+_no_warn_unused static double
+avg_Hausdorff_dist (const double *data, int nobj, int npoints, const double *ref, int ref_size,
+                    const bool * maximise, unsigned int p)  
+{
+    const signed char * minmax = minmax_from_bool(nobj, maximise);
+    double value = avg_Hausdorff_dist_minmax (nobj, minmax, data, npoints, ref, ref_size, p);
+    free ((void *)minmax);
+    return(value);
+}
 
 #endif /* IGD_H */

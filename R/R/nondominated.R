@@ -1,19 +1,3 @@
-check_dataset <- function(x)
-{
-  name <- deparse(substitute(x))
-  if (length(dim(x)) != 2L)
-    stop("'", name, "' must be a data.frame or a matrix")
-  if (nrow(x) < 1L)
-    stop("not enough points (rows) in '", name, "'")
-  if (ncol(x) < 2)
-    stop("'", name, "' must have at least 2 columns")
-  x <-  as.matrix(x)
-  if (!is.numeric(x))
-    stop("'", name, "' must be numeric")
-  return(x)
-}
-
-
 #' Identify, remove and rank dominated points according to Pareto optimality
 #'
 #' Identify nondominated points with `is_nondominated` and remove dominated
@@ -52,14 +36,14 @@ is_nondominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
   data <- check_dataset(data)
   nobjs <- ncol(data)
   npoints <- nrow(data)
-  maximise <- as.logical(rep_len(maximise, nobjs))
+  maximise <- rep_len(as.logical(maximise), nobjs)
 
-  return(.Call(is_nondominated_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints),
-               maximise,
-               as.logical(keep_weakly)))
+  .Call(is_nondominated_C,
+    t(data),
+    nobjs,
+    npoints,
+    maximise,
+    as.logical(keep_weakly))
 }
 
 #' @rdname nondominated
@@ -100,10 +84,9 @@ pareto_rank <- function(data, maximise = FALSE)
   data <- check_dataset(data)
   nobjs <- ncol(data)
   npoints <- nrow(data)
-  maximise <- as.logical(rep_len(maximise, nobjs))
-  data <- matrix.maximise(data, maximise)
-  return(.Call(pareto_ranking_C,
-               as.double(t(data)),
-               as.integer(nobjs),
-               as.integer(npoints)))
+  maximise <- rep_len(as.logical(maximise), nobjs)
+  data <- matrix_maximise(data, maximise)
+  .Call(pareto_ranking_C,
+    as.double(t(data)),
+    nobjs, npoints)
 }

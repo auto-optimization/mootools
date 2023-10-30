@@ -52,7 +52,6 @@
 #include <unistd.h>  // for getopt()
 #include <getopt.h> // for getopt_long()
 
-#include "io.h"
 #include "hv.h"
 #include "timer.h"
 #define CMDLINE_COPYRIGHT_YEARS "2010-2023"

@@ -42,44 +42,44 @@ whv_rect <- function(data, rectangles, reference, maximise = FALSE)
   nobjs <- ncol(data)
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
-  if (length(reference) == 1) reference <- rep_len(reference, nobjs)
+  if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
   # FIXME: This is wrong for maximisation
   stopifnot(maximise == FALSE)
   # FIXME: Do this in C code!
-  rectangles_a <- rectangles[,c(1,3), drop=FALSE]
-  rectangles_a[rectangles_a > reference[1]] <- reference[1]
-  rectangles_b <- rectangles[,c(2,4), drop=FALSE]
-  rectangles_b[rectangles_b > reference[2]] <- reference[2]
-  rectangles[,c(1,3)] <- rectangles_a
-  rectangles[,c(2,4)] <- rectangles_b
+  rectangles_a <- rectangles[,c(1L,3L), drop=FALSE]
+  rectangles_a[rectangles_a > reference[1L]] <- reference[1L]
+  rectangles_b <- rectangles[,c(2L,4L), drop=FALSE]
+  rectangles_b[rectangles_b > reference[2L]] <- reference[2L]
+  rectangles[,c(1L,3L)] <- rectangles_a
+  rectangles[,c(2L,4L)] <- rectangles_b
   # Remove empty rectangles maybe created above.
-  rectangles <- rectangles[ (rectangles[,1] != rectangles[,3]) & (rectangles[,2] != rectangles[,4]),
+  rectangles <- rectangles[ (rectangles[,1L] != rectangles[,3L]) & (rectangles[,2L] != rectangles[,4L]),
                          , drop = FALSE]
   rectangles_nrows <- nrow(rectangles)
 
-  if (nobjs != 2) stop("sorry: only 2 objectives supported")
+  if (nobjs != 2L) stop("sorry: only 2 objectives supported")
     
-  if (ncol(rectangles) != 5) stop("rectangles: invalid number of columns")
+  if (ncol(rectangles) != 5L) stop("rectangles: invalid number of columns")
   
   if (any(maximise)) {
-    if (length(maximise) == 1) {
+    if (length(maximise) == 1L) {
       data <- -data
       reference <- -reference
-      rectangles[,1:4] <- -rectangles[,1:4, drop = FALSE]
+      rectangles[,1L:4L] <- -rectangles[,1L:4L, drop = FALSE]
       
     } else if (length(maximise) != nobjs) {
       stop("length of maximise must be either 1 or ncol(data)")
     }
     data[,maximise] <- -data[,maximise]
     reference[maximise] <- -reference[maximise]
-    pos <- as.vector(matrix(1:4, nrow=2)[,maximise])
+    pos <- as.vector(matrix(1L:4L, nrow=2L)[,maximise])
     rectangles[,pos] <- -rectangles[,pos]
   }
-  return(.Call(rect_weighted_hv2d_C,
-               as.double(t(data)),
-               as.integer(npoints),
-               as.double(t(rectangles)),
-               as.integer(rectangles_nrows)))
+  .Call(rect_weighted_hv2d_C,
+    as.double(t(data)),
+    as.integer(npoints),
+    as.double(t(rectangles)),
+    as.integer(rectangles_nrows))
 }
 
 
@@ -180,15 +180,15 @@ whv_hype <- function(data, reference, ideal, maximise = FALSE,
   nobjs <- ncol(data)
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
-  if (length(reference) == 1) reference <- rep_len(reference, nobjs)
+  if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
   if (is.null(ideal)) stop("ideal cannot be NULL")
-  if (length(ideal) == 1) ideal <- rep_len(ideal, nobjs)
-  if (nobjs != 2) {
+  if (length(ideal) == 1L) ideal <- rep_len(ideal, nobjs)
+  if (nobjs != 2L) {
     stop("sorry: only 2 objectives supported")
   }
 
   if (any(maximise)) {
-    if (length(maximise) == 1) {
+    if (length(maximise) == 1L) {
       data <- -data
       reference <- -reference
       ideal <- -ideal
@@ -200,14 +200,15 @@ whv_hype <- function(data, reference, ideal, maximise = FALSE,
     ideal[maximise] <- -ideal[maximise]
   }
   seed <- get_seed()
-  return(.Call(whv_hype_C,
-               as.double(t(data)),
-               as.integer(npoints),
-               as.double(ideal),
-               as.double(reference),
-               dist,
-               as.integer(seed),
-               as.integer(nsamples)))
+  
+  .Call(whv_hype_C,
+    t(data),
+    npoints,
+    as.double(ideal),
+    as.double(reference),
+    dist,
+    as.integer(seed),
+    as.integer(nsamples))
 }
 
 get_seed <- function() sample.int(.Machine$integer.max, 1)

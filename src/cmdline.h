@@ -2,6 +2,7 @@
 #define CMDLINE_H
 
 #include <stdbool.h>
+#include "io.h"
 
 #ifndef CMDLINE_COPYRIGHT_YEARS
 #define CMDLINE_COPYRIGHT_YEARS "2007-2023"

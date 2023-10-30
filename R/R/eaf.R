@@ -47,81 +47,83 @@
 #
 ################################################################################
 
-check.eaf.data <- function(x)
+check_eaf_data <- function(x)
 {
   name <- deparse(substitute(x))
   if (length(dim(x)) != 2L)
     stop("'", name, "' must be a data.frame or a matrix")
   if (nrow(x) < 1L)
     stop("not enough points (rows) in '", name, "'")
-  if (ncol(x) < 3)
+  if (ncol(x) < 3L)
     stop("'", name, "' must have at least 3 columns: 2D points and set index")
   # Re-encode the sets so that they are consecutive and numeric
   setcol <- ncol(x)
   x[, setcol] <- as.numeric(as.factor(x[, setcol]))
-  x <-  as.matrix(x)
+  x <- as.matrix(x)
   if (!is.numeric(x))
     stop("The two first columns of '", name, "' must be numeric")
+  if (storage.mode(x) != "double")
+    storage.mode(x) <- "double"
   return(x)
 }
 
-compute.eaf <- function(data, percentiles = NULL)
+compute_eaf <- function(data, percentiles = NULL)
 {
-  data <- check.eaf.data(data)
+  data <- check_eaf_data(data)
   setcol <- ncol(data)
   nobjs <- setcol - 1L
-  # The C code expects points within a set to be contiguous.
-  data <- data[order(data[, setcol]), , drop=FALSE]
   sets <- data[, setcol]
+  # The C code expects points within a set to be contiguous.
+  data <- data[order(sets), 1L:nobjs, drop=FALSE]
   nsets <- length(unique(sets))
   npoints <- tabulate(sets)
   if (is.null(percentiles)) {
     # FIXME: We should compute this in the C code.
-    percentiles <- 1L:nsets * 100.0 / nsets
+    percentiles <- 1L:nsets * (100 / nsets)
   }
   # FIXME: We should handle only integral levels inside the C code. 
   percentiles <- unique.default(sort.int(percentiles))
-  return(.Call(compute_eaf_C,
-               as.double(t(as.matrix(data[, 1L:nobjs]))),
-               as.integer(nobjs),
-               as.integer(cumsum(npoints)),
-               as.integer(nsets),
-               as.numeric(percentiles)))
+  .Call(compute_eaf_C,
+    t(data),
+    nobjs,
+    as.integer(cumsum(npoints)),
+    nsets,
+    as.numeric(percentiles))
 }
 
-compute.eaf.as.list <- function(data, percentiles = NULL)
+compute_eaf_as_list <- function(data, percentiles = NULL)
 {
-  eaf <- compute.eaf (data, percentiles = percentiles)
+  eaf <- compute_eaf(data, percentiles = percentiles)
   setcol <- ncol(eaf)
   nobjs <- setcol - 1L
   eaf_sets <- eaf[, setcol]
   uniq_eaf_sets <- unique.default(eaf[, setcol])
-  return(split.data.frame(eaf[,1:nobjs, drop=FALSE],
-                          factor(eaf_sets,
-                                 levels = uniq_eaf_sets,
-                                 labels = uniq_eaf_sets)))
+  split.data.frame(eaf[,1:nobjs, drop=FALSE],
+    factor(eaf_sets,
+      levels = uniq_eaf_sets,
+      labels = uniq_eaf_sets))
 }
 
-compute.eafdiff.helper <- function(data, intervals)
+compute_eafdiff_helper <- function(data, intervals)
 {
   # Last column is the set number.
   setcol <- ncol(data)
   nobjs <- setcol - 1L
-  # the C code expects points within a set to be contiguous.
-  data <- data[order(data[, setcol]), ]
   sets <- data[, setcol]
+  # the C code expects points within a set to be contiguous.
+  data <- as.matrix(data[order(sets), 1L:nobjs])
   nsets <- length(unique(sets))
   npoints <- tabulate(sets)
   # FIXME: Ideally this would be computed by the C code, but it is hard-coded.
   ## division <- nsets %/% 2
   ## nsets1 <- division
   ## nsets2 <- nsets - division
-  return(.Call(compute_eafdiff_C,
-                as.double(t(as.matrix(data[, 1L:nobjs]))),
-                nobjs,
-                as.integer(cumsum(npoints)),
-                as.integer(nsets),
-                as.integer(intervals)))
+  .Call(compute_eafdiff_C,
+    as.double(t(data)),
+    nobjs,
+    as.integer(cumsum(npoints)),
+    nsets,
+    as.integer(intervals))
 }
 
 #' Compute empirical attainment function differences 
@@ -200,12 +202,12 @@ eafdiff <- function(x, y, intervals = NULL, maximise = c(FALSE, FALSE),
   }
 
   data <- rbind_datasets(x, y)
-  data <- check.eaf.data(data)
+  data <- check_eaf_data(data)
   # FIXME: Is it faster to subset or to multiply the third column by 1?
-  data[,1:2] <- matrix.maximise(data[,1:2, drop=FALSE], maximise = maximise)
+  data[,1L:2L] <- matrix_maximise(data[,1L:2L, drop=FALSE], maximise = maximise)
   
-  DIFF <- if (rectangles) compute.eafdiff.rectangles(data, intervals = intervals)
-          else compute.eafdiff.helper(data, intervals = intervals)
+  DIFF <- if (rectangles) compute_eafdiff_rectangles(data, intervals = intervals)
+          else compute_eafdiff_helper(data, intervals = intervals)
   # FIXME: We should remove duplicated rows in C code.
 
   # FIXME: Check that we do not generate duplicated nor overlapping rectangles
@@ -214,9 +216,9 @@ eafdiff <- function(x, y, intervals = NULL, maximise = c(FALSE, FALSE),
   return(DIFF)
 }
 
-compute.eafdiff <- function(data, intervals)
+compute_eafdiff <- function(data, intervals)
 {
-  DIFF <- compute.eafdiff.helper(data, intervals)
+  DIFF <- compute_eafdiff_helper(data, intervals)
   #print(DIFF)
   # FIXME: Do this computation in C code. See compute_eafdiff_area_C
   setcol <- ncol(data)
@@ -229,31 +231,31 @@ compute.eafdiff <- function(data, intervals)
 
 
 # FIXME: The default intervals should be nsets / 2
-compute.eafdiff.rectangles <- function(data, intervals = 1L)
+compute_eafdiff_rectangles <- function(data, intervals = 1L)
 {
   # Last column is the set number.
   nobjs <- ncol(data) - 1L
   # the C code expects points within a set to be contiguous.
-  data <- data[order(data[, nobjs + 1L]), ]
-  sets <- data[ , nobjs + 1L]
+  sets <- data[ , ncol(data)]
+  data <- as.matrix(data[order(sets), 1L:nobjs, drop=FALSE])
   nsets <- length(unique(sets))
   npoints <- tabulate (sets)
-  return(.Call(compute_eafdiff_rectangles_C,
-               as.double(t(as.matrix(data[, 1L:nobjs]))),
-               nobjs,
-               as.integer(cumsum(npoints)),
-               as.integer(nsets),
-               as.integer(intervals)))
+  .Call(compute_eafdiff_rectangles_C,
+    as.double(t(data)),
+    nobjs,
+    as.integer(cumsum(npoints)),
+    nsets,
+    as.integer(intervals))
 }
 
 # FIXME: The default intervals should be nsets / 2
-compute.eafdiff.polygon <- function(data, intervals = 1L)
+compute_eafdiff_polygon <- function(data, intervals = 1L)
 {
   # Last column is the set number.
   nobjs <- ncol(data) - 1L
+  sets <- data[ , ncol(data)]
   # the C code expects points within a set to be contiguous.
-  data <- data[order(data[, nobjs + 1L]), ]
-  sets <- data[ , nobjs + 1L]
+  data <- as.matrix(data[order(sets), 1L:nobjs])
   nsets <- length(unique(sets))
   npoints <- tabulate(sets)
   # FIXME: Ideally this would be computed by the C code, but it is hard-coded.
@@ -262,50 +264,16 @@ compute.eafdiff.polygon <- function(data, intervals = 1L)
   ## nsets2 <- nsets - division
   # FIMXE: This function may require a lot of memory for 900 sets. Is there a
   # way to save memory?
-  return(.Call(compute_eafdiff_area_C,
-               as.double(t(as.matrix(data[, 1L:nobjs]))),
-               nobjs,
-               as.integer(cumsum(npoints)),
-               as.integer(nsets),
-               as.integer(intervals)))
+  .Call(compute_eafdiff_area_C,
+    as.double(t(data)),
+    nobjs,
+    as.integer(cumsum(npoints)),
+    nsets,
+    as.integer(intervals))
 }
 
 
-rm.inf <- function(x, xmax)
-{
-  x[is.infinite(x)] <- xmax
-  return(x)
-}
-
-
-# FIXME: Accept ...
-max.finite <- function (x)
-{
-  x <- as.vector(x)
-  x <- x[is.finite(x)]
-  if (length(x)) return(max(x))
-  return(NULL)
-}
-
-# FIXME: Accept ...
-min.finite <- function (x)
-{
-  x <- as.vector(x)
-  x <- x[is.finite(x)]
-  if (length(x)) return(min(x))
-  return(NULL)
-}
-
-# FIXME: Accept ...
-range.finite <- function(x)
-{
-  x <- as.vector(x)
-  x <- x[is.finite(x)]
-  if (length(x)) return(range(x))
-  return(NULL)
-}
-
-matrix.maximise <- function(z, maximise)
+matrix_maximise <- function(z, maximise)
 {
   stopifnot(ncol(z) == length(maximise))
   if (is.data.frame(z)) {
@@ -335,23 +303,6 @@ rbind_datasets <- function(x,y)
   y[,3] <- y[,3] + max(x[,3])
   rbind(x, y)
 }
-
-## Calculate the intermediate points in order to plot a staircase-like
-## polygon.
-## Example: given ((1,2), (2,1)), it returns ((1,2), (2,2), (2,1)).
-## Input should be already in the correct order.
-points.steps <- function(x)
-{
-  n <- nrow(x)
-  if (n == 1L) return(x)
-  x <- rbind(x, cbind(x=x[-1L, 1L, drop=FALSE], y=x[-n, 2L, drop=FALSE]))
-  idx <- c(as.vector(outer(c(0L, n), 1L:(n - 1L), "+")), n)
-  stopifnot(length(idx) == nrow(x))
-  stopifnot(!anyDuplicated(idx))
-  x[idx, ]
-}
-
-
 
 #' Exact computation of the EAF in 2D or 3D
 #'
@@ -411,60 +362,23 @@ points.steps <- function(x)
 eafs <- function (points, sets, groups = NULL, percentiles = NULL)
 {
   if (!is.numeric(sets)) {
-    if (is.factor(sets)) sets <- as.numeric(levels(sets))[sets]
-    else sets <- suppressWarnings(as.numeric(sets))
+    sets <- if (is.factor(sets)) as.numeric(levels(sets))[sets]
+    else suppressWarnings(as.numeric(sets))
   }
   if (anyNA(sets)) stop("'sets' must have only non-NA numerical values")
   
   points <- cbind(points, sets)
   if (is.null(groups)) {
-    attsurfs <- compute.eaf (points, percentiles)
+    attsurfs <- compute_eaf (points, percentiles)
   } else {
     attsurfs <- data.frame()
     groups <- factor(groups)
     for (g in levels(groups)) {
-      tmp <- compute.eaf(points[groups == g,], percentiles)
+      tmp <- compute_eaf(points[groups == g,], percentiles)
       attsurfs <- rbind(attsurfs, data.frame(tmp, groups = g))
     }
   }
   attsurfs
-}
-
-
-# Get correct xlim or ylim when maximising / minimising.
-get.xylim <- function(lim, maximise, data)
-{
-  # FIXME: This seems too complicated.
-  if (!is.null(lim) && maximise) lim <- -lim 
-  if (is.null(lim)) lim <- range(data)
-  if (maximise) lim <- range(-lim)
-  lim
-}
-  
-get.extremes <- function(xlim, ylim, maximise, log)
-{
-  if (length(log) && log != "")
-    log <- strsplit(log, NULL)[[1L]]
-  if ("x" %in% log) xlim <- log(xlim)
-  if ("y" %in% log) ylim <- log(ylim)
-  
-  extreme1 <- ifelse(maximise[1],
-                     xlim[1] - 0.05 * diff(xlim),
-                     xlim[2] + 0.05 * diff(xlim))
-  extreme2 <- ifelse(maximise[2],
-                     ylim[1] - 0.05 * diff(ylim),
-                     ylim[2] + 0.05 * diff(ylim))
-  
-  if ("x" %in% log) extreme1 <- exp(extreme1)
-  if ("y" %in% log) extreme2 <- exp(extreme2)
-  c(extreme1, extreme2)
-}
-
-add.extremes <- function(x, extremes, maximise)
-{
-  best1 <- if (maximise[1]) max else min
-  best2 <- if (maximise[2]) max else min
-  rbind(c(best1(x[,1]), extremes[2]), x, c(extremes[1], best2(x[,2])))
 }
 
 #' Convert a list of attainment surfaces to a data.frame
@@ -473,7 +387,7 @@ add.extremes <- function(x, extremes, maximise)
 #'
 #' @param x (`list()`) List of data.frames or matrices. The names of the list
 #'   give the percentiles of the attainment surfaces.  This is the format
-#'   returned by [eaf::eafplot()] (and the internal function `compute.eaf.as.list`).
+#'   returned by [eaf::eafplot()] (and the internal function `compute_eaf_as_list`).
 #'
 #' @return A data.frame with as many columns as objectives and an additional column `percentiles`.
 #'

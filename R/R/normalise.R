@@ -1,13 +1,13 @@
 #' Normalise points
 #'
-#' Normalise points per coordinate to a range, e.g., \code{c(1,2)}, where the
+#' Normalise points per coordinate to a range, e.g., `c(1,2)`, where the
 #' minimum value will correspond to 1 and the maximum to 2. If bounds are
 #' given, they are used for the normalisation.
 #'
 #' @template arg_data
 #'
 #' @param to_range Normalise values to this range. If the objective is
-#'   maximised, it is normalised to \code{c(to_range[1], to_range[0])}
+#'   maximised, it is normalised to `c(to_range[1], to_range[0])`
 #'   instead.
 #'
 #' @param lower,upper Bounds on the values. If NA, the maximum and minimum
@@ -35,26 +35,26 @@ normalise <- function(data, to_range = c(1, 2), lower = NA, upper = NA, maximise
   data <- check_dataset(data)
   nobjs <- ncol(data)
   npoints <- nrow(data)
-  lower <- as.double(rep_len(lower, nobjs))
-  upper <- as.double(rep_len(upper, nobjs))
+  lower <- rep_len(as.double(lower), nobjs)
+  upper <- rep_len(as.double(upper), nobjs)
   # Handle NA
   no.lower <- is.na(lower)
   no.upper <- is.na(upper)
   minmax <- colRanges(data)
   lower[no.lower] <- minmax[no.lower, 1L]
   upper[no.upper] <- minmax[no.upper, 2L]
-  maximise <- as.logical(rep_len(maximise, nobjs))
+  maximise <- rep_len(as.logical(maximise), nobjs)
 
   if (length(to_range) != 2L)
     stop("to_range must be a vector of length 2")
-  
-  z <- t(.Call(normalise_C,
-                 as.double(t(data)),
-                 as.integer(nobjs),
-                 as.integer(npoints),
-                 as.double(to_range),
-                 lower, upper, maximise))
-  colnames(z) <- colnames(data)
-  rownames(z) <- rownames(data)
-  return(z)
+
+  out <- t.default(data)
+  .Call(normalise_C,
+    out, # This is modified by normalise_C
+    as.integer(nobjs),
+    as.integer(npoints),
+    as.double(to_range),
+    lower, upper, maximise)
+  # FIXME: Transposing in C may avoid a copy.
+  t.default(out)
 }

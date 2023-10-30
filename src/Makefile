@@ -56,7 +56,7 @@ endif
 uname_S := $(shell gcc -dumpmachine 2>&1)
 uname_S := $(subst MINGW,mingw,$(uname_S))
 ifneq (,$(findstring mingw,$(uname_S)))
-RM=-del /Q
+RM=del /Q
 CC=gcc
 uname_S :=mingw
 else
@@ -77,13 +77,13 @@ DIST_OTHER_FILES =  git_version *.mk configure.ac configure
 DIST_ROOT_FILES = Makefile README.md LICENSE
 OBJS  = $(SRCS:.c=.o)
 
--include Makevars
+include Makevars
 # We do not need $(GSL_LIBS) yet because we don't compile whv_hype.c into any executable.
 EXE_LDFLAGS=-lm 
 ECHO = @echo "$(1)"
 
--include gitversion.mk
--include gcc.mk
+include gitversion.mk
+include gcc.mk
 
 ifneq ($(uname_S),Cygwin)
 CPPFLAGS += -D_GNU_SOURCE
@@ -144,15 +144,15 @@ $(hvexe): HEADERS=hv.h timer.h
 io.o: io_priv.h io.h
 
 $(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
-	@mkdir -p $(BINDIR)
+	@-mkdir -p $(BINDIR)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
 $(OBJS): $(HEADERS) common.h gcc_attribs.h
 
 clean:
-	@$(RM) config.status config.log Makevars 
-	@test -d autom4te.cache/ || $(RM) -r autom4te.cache
+	@-$(RM) config.status config.log Makevars 
+	@-$(RM) -r autom4te.cache
 
 	$(call ECHO,---> Removing $(igd) <---)
 	@$(RM) $(igd)

@@ -62,10 +62,10 @@
 # define __used		__attribute__((used))
 #endif
 /* FIXME: add the explanation from the GCC documentation to each attribute. */
-#ifndef __unused
-# define __unused	__attribute__((unused))
+#ifndef _no_warn_unused
+# define _no_warn_unused __attribute__((unused))
 #endif
-/* FIXME: add the explanation from the GCC documentation to each attribute. */
+/* This attribute, attached to a function, means that the function is meant to be possibly unused. GCC does not produce a warning for this function. */
 #ifndef __packed
 # define __packed	__attribute__((packed))
 #endif
