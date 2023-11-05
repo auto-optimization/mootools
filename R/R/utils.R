@@ -30,4 +30,14 @@ check_dataset <- function(x)
   return(x)
 }
 
+rbind_datasets <- function(x, y)
+{
+  # FIXME: We could relax this condition by re-encoding  the column.
+  stopifnot(min(x[,3L]) == 1L)
+  stopifnot(min(y[,3L]) == 1L)
+  # We have to make all sets unique.
+  y[,3L] <- y[,3L] + max(x[,3L])
+  rbind(x, y)
+}
 
+nunique <- function(x) length(unique.default(x))

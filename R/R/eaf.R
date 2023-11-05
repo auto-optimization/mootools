@@ -73,16 +73,19 @@ compute_eaf <- function(data, percentiles = NULL)
   setcol <- ncol(data)
   nobjs <- setcol - 1L
   sets <- data[, setcol]
+  order_sets <- order(sets)
   # The C code expects points within a set to be contiguous.
-  data <- data[order(sets), 1L:nobjs, drop=FALSE]
-  nsets <- length(unique(sets))
+  data <- data[order_sets, 1L:nobjs, drop=FALSE]
+  sets <- sets[order_sets]
+  nsets <- nunique(sets)
   npoints <- tabulate(sets)
   if (is.null(percentiles)) {
     # FIXME: We should compute this in the C code.
     percentiles <- 1L:nsets * (100 / nsets)
+  } else {
+    # FIXME: We should handle only integral levels inside the C code. 
+    percentiles <- unique.default(sort.int(percentiles))
   }
-  # FIXME: We should handle only integral levels inside the C code. 
-  percentiles <- unique.default(sort.int(percentiles))
   .Call(compute_eaf_C,
     t(data),
     nobjs,
@@ -110,16 +113,18 @@ compute_eafdiff_helper <- function(data, intervals)
   setcol <- ncol(data)
   nobjs <- setcol - 1L
   sets <- data[, setcol]
-  # the C code expects points within a set to be contiguous.
-  data <- as.matrix(data[order(sets), 1L:nobjs])
-  nsets <- length(unique(sets))
+  order_sets <- order(sets)
+  # The C code expects points within a set to be contiguous.
+  data <- as.matrix(data[order_sets, 1L:nobjs])
+  sets <- sets[order_sets]
+  nsets <- nunique(sets)
   npoints <- tabulate(sets)
   # FIXME: Ideally this would be computed by the C code, but it is hard-coded.
   ## division <- nsets %/% 2
   ## nsets1 <- division
   ## nsets2 <- nsets - division
   .Call(compute_eafdiff_C,
-    as.double(t(data)),
+    t(data),
     nobjs,
     as.integer(cumsum(npoints)),
     nsets,
@@ -234,14 +239,17 @@ compute_eafdiff <- function(data, intervals)
 compute_eafdiff_rectangles <- function(data, intervals = 1L)
 {
   # Last column is the set number.
-  nobjs <- ncol(data) - 1L
-  # the C code expects points within a set to be contiguous.
-  sets <- data[ , ncol(data)]
-  data <- as.matrix(data[order(sets), 1L:nobjs, drop=FALSE])
-  nsets <- length(unique(sets))
+  setcol <- ncol(data)
+  nobjs <- setcol - 1L
+  sets <- data[, setcol]
+  order_sets <- order(sets)
+  # The C code expects points within a set to be contiguous.
+  data <- as.matrix(data[order_sets, 1L:nobjs, drop=FALSE])
+  sets <- sets[order_sets]
+  nsets <- nunique(sets)
   npoints <- tabulate (sets)
   .Call(compute_eafdiff_rectangles_C,
-    as.double(t(data)),
+    t(data),
     nobjs,
     as.integer(cumsum(npoints)),
     nsets,
@@ -252,11 +260,14 @@ compute_eafdiff_rectangles <- function(data, intervals = 1L)
 compute_eafdiff_polygon <- function(data, intervals = 1L)
 {
   # Last column is the set number.
-  nobjs <- ncol(data) - 1L
-  sets <- data[ , ncol(data)]
-  # the C code expects points within a set to be contiguous.
-  data <- as.matrix(data[order(sets), 1L:nobjs])
-  nsets <- length(unique(sets))
+  setcol <- ncol(data)
+  nobjs <- setcol - 1L
+  sets <- data[, setcol]
+  order_sets <- order(sets)
+  # The C code expects points within a set to be contiguous.
+  data <- data[order_sets, 1L:nobjs, drop=FALSE]
+  sets <- sets[order_sets]
+  nsets <- nunique(sets)
   npoints <- tabulate(sets)
   # FIXME: Ideally this would be computed by the C code, but it is hard-coded.
   ## division <- nsets %/% 2
@@ -265,7 +276,7 @@ compute_eafdiff_polygon <- function(data, intervals = 1L)
   # FIMXE: This function may require a lot of memory for 900 sets. Is there a
   # way to save memory?
   .Call(compute_eafdiff_area_C,
-    as.double(t(data)),
+    t(data),
     nobjs,
     as.integer(cumsum(npoints)),
     nsets,
@@ -295,15 +306,6 @@ matrix_maximise <- function(z, maximise)
 }
 
 
-rbind_datasets <- function(x,y)
-{
-  stopifnot(min(x[,3]) == 1)
-  stopifnot(min(y[,3]) == 1)
-  # We have to make all sets unique.
-  y[,3] <- y[,3] + max(x[,3])
-  rbind(x, y)
-}
-
 #' Exact computation of the EAF in 2D or 3D
 #'
 #' This function computes the EAF given a set of 2D or 3D points and a vector `set`
@@ -327,7 +329,9 @@ rbind_datasets <- function(x,y)
 #'
 #' @author  Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
-#'@note There are several examples of data sets in `system.file(package="moocore","extdata")`. The current implementation only supports two and three dimensional points.
+#' @note There are several examples of data sets in
+#'   `system.file(package="moocore","extdata")`. The current implementation
+#'   only supports two and three dimensional points.
 #'
 #' @references
 #' 

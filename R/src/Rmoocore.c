@@ -5,38 +5,25 @@ static eaf_t **
 compute_eaf_helper (SEXP DATA, int nobj, SEXP CUMSIZES, int nruns, 
                     const double *percentile, int nlevels)
 {
-    int k;
     SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, cumsizes_len);
     if (cumsizes_len < nruns)
         Rf_error("length of cumsizes (%d) is less than nruns (%d)",
                  cumsizes_len, nruns);
 
-    int *level;
-
-    if (percentile != NULL) {
-        level = malloc(sizeof(int) * nlevels);
-        for (k = 0; k < nlevels; k++)
-            level[k] = percentile2level(percentile[k], nruns);
-    } else {
-        eaf_assert (nlevels == nruns);
-        level = malloc(sizeof(int) * nruns);
-        for (k = 0; k < nruns; k++)
-            level[k] = k + 1;
-    }
-
+    int *level = levels_from_percentiles(percentile, nlevels, nruns);
     double *data = REAL(DATA);
 
     DEBUG2(
         Rprintf ("attsurf ({(%f, %f", data[0], data[1]);
-        for (k = 2; k < nobj; k++) {
+        for (int k = 2; k < nobj; k++) {
             Rprintf (", %f", data[k]);
         }
         Rprintf (")...}, %d, { %d", nobj, cumsizes[0]);
-        for (k = 1; k < nruns; k++) {
+        for (int k = 1; k < nruns; k++) {
             Rprintf (", %d", cumsizes[k]);
         }
         Rprintf ("}, %d, { %d", nruns, level[0]);
-        for (k = 1; k < nlevels; k++) {
+        for (int k = 1; k < nlevels; k++) {
             Rprintf (", %d", level[k]);
         }
         Rprintf ("}, %d)\n", nlevels);
@@ -47,18 +34,11 @@ compute_eaf_helper (SEXP DATA, int nobj, SEXP CUMSIZES, int nruns,
 
     DEBUG2(
         Rprintf ("eaf computed\n");
-        for (k = 0; k < nlevels; k++) {
+        for (int k = 0; k < nlevels; k++) {
             Rprintf ("eaf[%d] = %d\n", k, eaf[k]->size);
         });
 
     return eaf;
-}
-
-static void free_eaf(eaf_t ** eaf, int nruns)
-{
-    for (int k = 0; k < nruns; k++)
-        eaf_delete (eaf[k]);
-    free(eaf);
 }
 
 SEXP
@@ -73,45 +53,22 @@ compute_eaf_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP PERCENTILE)
 
     SEXP mat;
     PROTECT(mat = Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
-    double * rmat = REAL(mat);
-
-    int pos = 0;
-    int k;
-    for (k = 0; k < nlevels; k++) {
-        int npoints = eaf[k]->size;
-
-        DEBUG2(
-            int totalsize = npoints * nobj;
-            Rprintf ("totalpoints eaf[%d] = %d\n", k, totalsize)
-            );
-
-        int i;
-        for (i = 0; i < npoints; i++) {
-            int j;
-            for (j = 0; j < nobj; j++) {
-                rmat[pos + j * totalpoints] = eaf[k]->data[j + i * nobj];
-            }
-            rmat[pos + nobj * totalpoints] = percentile[k];
-            pos++;
-        }
-    }
-    free_eaf(eaf, nlevels);
-    UNPROTECT (1);
+    eaf2matrix_R(REAL(mat), eaf, nobj, totalpoints, percentile, nlevels);
+    eaf_free(eaf, nlevels);
+    UNPROTECT(1);
     return mat;
 }
 
 SEXP 
-compute_eafdiff_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
-                  SEXP INTERVALS)
+compute_eafdiff_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP INTERVALS)
 {
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NRUNS, nruns);
     SEXP_2_INT(INTERVALS, intervals);
     eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
 
-    int nsets1 = nruns / 2;
-    int nsets2 = nruns - nsets1;
-    int totalpoints = eaf_totalpoints (eaf, nruns);
+    const int nsets1 = nruns / 2;
+    const int totalpoints = eaf_totalpoints (eaf, nruns);
 
     SEXP mat;
     PROTECT(mat = Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
@@ -138,21 +95,13 @@ compute_eafdiff_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     }
     pos += (nobj - 1) * totalpoints;
     for (k = 0; k < nruns; k++) {
-        int i;
         int npoints = eaf[k]->size;
-        for (i = 0; i < npoints; i++) {
-            int count_left;
-            int count_right;
-            /* bit_array_check(bit_array_offset(eaf[k]->bit_attained,i, eaf[k]->nruns), */
-            /*                 eaf[k]->attained + i * eaf[k]->nruns, npoints, nruns); */
-            attained_left_right (bit_array_offset(eaf[k]->bit_attained, i, eaf[k]->nruns),
-                                 nsets1, nruns, &count_left, &count_right);
-            rmat[pos] = intervals * (double) ((count_left / (double) nsets1) - 
-                                              (count_right / (double) nsets2));
+        for (int i = 0; i < npoints; i++) {
+            rmat[pos] = eafdiff_percentile(eaf[k], i, nsets1, nruns, intervals);
             pos++;
         }
     }
-    free_eaf(eaf, nruns);
+    eaf_free(eaf, nruns);
     UNPROTECT (1);
     return mat;
 }
@@ -194,8 +143,8 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     int k;
     
     eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
-    eaf_polygon_t * rects = eaf_compute_rectangles(eaf, nruns);
-    free_eaf(eaf, nruns);
+    eaf_polygon_t * rects = eaf_compute_rectangles(eaf, nobj, nruns);
+    eaf_free(eaf, nruns);
 
     const int division = nruns / 2;
     int nrow = vector_int_size(&rects->col);
@@ -233,15 +182,14 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
 {
     int nprotected = 0;
 
-    int k;
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NRUNS, nruns);
     SEXP_2_INT(INTERVALS, intervals);
 
     eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
 
-    eaf_polygon_t *p = eaf_compute_area(eaf, nruns);
-    free_eaf(eaf, nruns);
+    eaf_polygon_t *p = eaf_compute_area(eaf, nobj, nruns);
+    eaf_free(eaf, nruns);
 
     const int division = nruns / 2;
 
@@ -255,7 +203,7 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     /* First compute the adjusted colors, and how much space we need
        on each side. */
     double * p_xy = vector_objective_begin(&p->xy);
-    for (k = 0; k < ncol; k++) {
+    for (int k = 0; k < ncol; k++) {
         // Truncate colors to interval
         int color = vector_int_at(&p->col, k) * intervals / (double) division;
         int len = polygon_len (p_xy, nobj);
@@ -288,7 +236,7 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     p_xy = vector_objective_begin(&p->xy);
     left_len = right_len = 0;
     left_ncol = right_ncol = 0;
-    for (k = 0; k < ncol; k++) {
+    for (int k = 0; k < ncol; k++) {
         int len;
         int color = vector_int_at(&p->col, k);
         if (color >= 1) {
@@ -339,7 +287,7 @@ R_read_datasets(SEXP FILENAME)
 
     /* FIXME: Is this the fastest way to transfer a matrix from C to R ? */
     SEXP DATA;
-    PROTECT(DATA = Rf_allocMatrix(REALSXP, cumsizes[nruns-1], nobj + 1));
+    PROTECT(DATA = Rf_allocMatrix(REALSXP, ntotal, nobj + 1));
     double *rdata = REAL(DATA);
     matrix_transpose_double (rdata, data, ntotal, nobj);
 

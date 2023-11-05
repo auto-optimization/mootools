@@ -29,7 +29,9 @@ This function computes the EAF given a set of 2D or 3D points and a vector \code
 that indicates to which set each point belongs.
 }
 \note{
-There are several examples of data sets in \code{system.file(package="moocore","extdata")}. The current implementation only supports two and three dimensional points.
+There are several examples of data sets in
+\code{system.file(package="moocore","extdata")}. The current implementation
+only supports two and three dimensional points.
 }
 \examples{
 extdata_path <- system.file(package="moocore", "extdata")

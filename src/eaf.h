@@ -75,25 +75,24 @@
 #include "bit_array.h"
 
 typedef struct {
-    int nobj; /* FIXME: there is no point to store this here.  */
-    int nruns;
+    int nruns; /* FIXME: there is no point in storing this here.  */
     size_t size;
     size_t maxsize;
-    int nreallocs;
+    unsigned int nreallocs;
     bit_array *bit_attained;
-    bool *attained;
     objective_t *data;
 } eaf_t;
 
 
 void
-eaf_print_attsurf (eaf_t *,
+eaf_print_attsurf (const eaf_t *, int nobj,
                    FILE *coord_file, /* output file (coordinates)           */
                    FILE *indic_file, /* output file (attainment indicators) */
                    FILE *diff_file); /* output file (difference nruns/2)    */
 
 eaf_t * eaf_create (int nobj, int nruns, int npoints);
 void eaf_delete (eaf_t * eaf);
+void eaf_free (eaf_t ** eaf, int nruns);
 objective_t *
 eaf_store_point_help (eaf_t * eaf, int nobj, const int *save_attained);
 
@@ -158,7 +157,8 @@ attained_left_right (const bit_array *attained, int division, int total,
     *count_right = count_r;
 }
 
-static inline int percentile2level (double p, int n)
+static inline int
+percentile2level (double p, int n)
 {
     const double tolerance = sqrt(DBL_EPSILON);
     double x = (n * p) / 100.0;
@@ -171,6 +171,52 @@ static inline int percentile2level (double p, int n)
     return level;
 }
 
+_no_warn_unused static int *
+levels_from_percentiles(const double * percentile, int nlevels, int nruns)
+{
+    int *level;
+    if (percentile) {
+        level = malloc(sizeof(int) * nlevels);
+        for (int k = 0; k < nlevels; k++)
+            level[k] = percentile2level(percentile[k], nruns);
+    } else {
+        eaf_assert (nlevels == nruns);
+        level = malloc(sizeof(int) * nruns);
+        for (int k = 0; k < nruns; k++)
+            level[k] = k + 1;
+    }
+    return level;
+}
+
+_no_warn_unused static void
+all_percentiles (double * percentiles, int n_sets)
+{
+    const double x = 100.0 / (double)n_sets;
+    for (int i = 1; i <= n_sets; i++)
+        percentiles[i-1] = i * x;
+}
+
+static inline double
+eafdiff_percentile (const eaf_t * eaf, size_t i, int division, int nruns, int n_intervals)
+{
+    const bit_array *bit_attained = bit_array_offset(eaf->bit_attained, i, nruns);
+    int count_left, count_right;
+    attained_left_right (bit_attained, division, nruns, &count_left, &count_right);
+    return n_intervals * (double) ((count_left / (double) division) - 
+                                   (count_right / (double) (nruns - division)));
+}
+
+void
+eaf2matrix_R (double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
+              const double * percentile, int nlevels);
+
+void
+eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _no_warn_unused int totalpoints,
+            const double * percentile, int nlevels);
+
+double *
+eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsizes, int nruns,
+                   const double * percentile, int nlevels);
 
 
 #define cvector_assert(X) eaf_assert(X)
@@ -185,8 +231,8 @@ typedef struct {
 
 #define eaf_compute_area eaf_compute_polygon
 
-eaf_polygon_t *eaf_compute_polygon (eaf_t **eaf, int nlevels);
-eaf_polygon_t *eaf_compute_polygon_old (eaf_t **eaf, int nlevels);
-void eaf_print_polygon (FILE* stream, eaf_t **eaf, int nlevels);
-eaf_polygon_t * eaf_compute_rectangles (eaf_t **eaf, int nlevels);
+eaf_polygon_t *eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels);
+eaf_polygon_t *eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels);
+void eaf_print_polygon (FILE* stream, eaf_t **eaf, int nobj, int nlevels);
+eaf_polygon_t * eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels);
 

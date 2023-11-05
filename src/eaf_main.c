@@ -150,12 +150,13 @@ static int read_ints (int *levels, char *str)
     return k - 1;
 }
 
-void eaf_print (eaf_t **eaf, int nlevels,
-                FILE *coord_file, FILE *indic_file, FILE *diff_file)
+static void
+eaf_print (eaf_t **eaf, int nobj, int nlevels, 
+           FILE *coord_file, FILE *indic_file, FILE *diff_file)
 {
     int k;
     for (k = 0; k < nlevels; k++) {
-        eaf_print_attsurf (eaf[k], coord_file, indic_file, diff_file);
+        eaf_print_attsurf (eaf[k], nobj, coord_file, indic_file, diff_file);
         if (coord_file)
             fprintf (coord_file, "\n");
         else if (indic_file)
@@ -437,10 +438,10 @@ int main(int argc, char *argv[])
     eaf_t **eaf = attsurf (data, nobj, cumsizes, nruns, level, nlevels);
 
     if (polygon_flag) {
-        eaf_print_polygon (coord_file, eaf, nlevels);
+        eaf_print_polygon (coord_file, eaf, nobj, nlevels);
         fclose (coord_file);
     } else {
-        eaf_print (eaf, nlevels, 
+        eaf_print (eaf, nobj, nlevels, 
                    coord_file, indic_file, diff_file);
         fclose (coord_file);
         if (indic_file && indic_file != coord_file)
@@ -452,6 +453,6 @@ int main(int argc, char *argv[])
     free(level);
     free(data);
     free(cumsizes);
-    
+    eaf_free(eaf, nlevels);
     return 0;
 }

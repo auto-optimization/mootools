@@ -47,9 +47,6 @@
 #define DEBUG_POLYGONS 0
 #endif
 
-//#define OLD_ATTAINED(X) do { X; } while(0);
-#define OLD_ATTAINED(X) while(0) { X; };
-
 static int compare_x_asc (const void *p1, const void *p2)
 {
     objective_t x1 = **(objective_t **)p1;
@@ -84,7 +81,6 @@ eaf_t * eaf_create (int nobj, int nruns, int npoints)
 {
     eaf_t *eaf;
     EAF_MALLOC (eaf, 1, eaf_t);
-    eaf->nobj = nobj;
     eaf->nruns = nruns;
     eaf->size = 0;
     eaf->nreallocs = 0;
@@ -95,29 +91,29 @@ eaf_t * eaf_create (int nobj, int nruns, int npoints)
     /*         eaf->maxsize, npoints, nruns); */
     EAF_MALLOC (eaf->data, nobj * eaf->maxsize, objective_t);
     eaf->bit_attained = malloc (bit_array_bytesize(nruns) * eaf->maxsize);
-    eaf->attained = NULL;
-    OLD_ATTAINED(eaf->attained = malloc(sizeof(bool) * nruns * eaf->maxsize));
     return eaf;
 }
 
 void eaf_delete (eaf_t * eaf)
 {
     free (eaf->data);
-    OLD_ATTAINED(free (eaf->attained));
     free (eaf->bit_attained);
     free (eaf);
 }
+
+void eaf_free(eaf_t ** eaf, int nruns)
+{
+    for (int k = 0; k < nruns; k++)
+        eaf_delete (eaf[k]);
+    free(eaf);
+}
+
 void eaf_realloc(eaf_t * eaf, size_t nobj)
 {
     const int nruns = eaf->nruns;
     eaf->data = realloc (eaf->data,
                          sizeof(objective_t) * nobj * eaf->maxsize);
     eaf_assert(eaf->data);
-    OLD_ATTAINED(
-        eaf->attained = realloc (eaf->attained, 
-                                 sizeof(bool) * nruns * eaf->maxsize);
-        eaf_assert(eaf->attained);
-        );
     eaf->bit_attained = realloc (eaf->bit_attained, 
                                  bit_array_bytesize(nruns) * eaf->maxsize);
     eaf_assert(eaf->bit_attained);
@@ -143,12 +139,7 @@ eaf_store_point_help (eaf_t * eaf, int nobj,
     // FIXME: provide a bit_array function to do this.
     for (int k = 0; k < nruns; k++) {
         bit_array_set(bit_array_offset(eaf->bit_attained, eaf->size, nruns), k, (bool) save_attained[k]);
-        OLD_ATTAINED(eaf->attained[nruns * eaf->size + k] = (bool) save_attained[k]);
     }
-    OLD_ATTAINED(
-    bitset_check(bit_array_offset(eaf->bit_attained, eaf->size, eaf->nruns),
-                 eaf->attained + eaf->size * eaf->nruns, eaf->nruns));
- 
     return eaf->data + nobj * eaf->size;
 }
 
@@ -160,8 +151,6 @@ eaf_adjust_memory (eaf_t * eaf, int nobj)
         eaf->maxsize = eaf->size;
         eaf_realloc(eaf, nobj);
     }
-    OLD_ATTAINED(
-        bit_array_check(eaf->bit_attained, eaf->attained, eaf->size, eaf->nruns));
 }
 
 static void
@@ -180,10 +169,6 @@ eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
                 const objective_t *x, int nobj,
                 const bit_array *attained, int nruns)
 {
-    int count1 = 0;
-    int count2 = 0;
-    int k;
-
     if (coord_file) {
         point_printf(coord_file, x, nobj);
         fprintf (coord_file, 
@@ -191,6 +176,7 @@ eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
                  ? "\t" : "\n");
     }
 
+    int k, count1 = 0, count2 = 0;
     if (indic_file) {
         fprintf (indic_file, "%d", 
                  bit_array_get(attained, 0) ? (count1++,1) : 0);
@@ -203,7 +189,7 @@ eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
 
         fprintf (indic_file, (indic_file == diff_file) ? "\t" : "\n");
     } else if (diff_file) {
-        attained_left_right (attained, nruns/2, nruns, &count1, &count2);
+        attained_left_right(attained, nruns/2, nruns, &count1, &count2);
     }
 
     if (diff_file)
@@ -212,19 +198,13 @@ eaf_print_line (FILE *coord_file, FILE *indic_file, FILE *diff_file,
 
 /* Print one attainment surface of the EAF.  */
 void
-eaf_print_attsurf (eaf_t * eaf, FILE *coord_file,  FILE *indic_file, FILE *diff_file)
+eaf_print_attsurf (const eaf_t * eaf, int nobj, FILE *coord_file,  FILE *indic_file, FILE *diff_file)
 {
-    OLD_ATTAINED(
-    bit_array_check(eaf->bit_attained,
-                    eaf->attained, eaf->size, eaf->nruns));
-      
     for (size_t i = 0; i < eaf->size; i++) {
-        const objective_t *p = eaf->data + i * eaf->nobj;
+        const objective_t *p = eaf->data + i * nobj;
         /* bit_array_fprintf(stderr, eaf->bit_attained, eaf->nruns * eaf->size); */
-        OLD_ATTAINED(bitset_check(bit_array_offset(eaf->bit_attained, i, eaf->nruns),
-                                  eaf->attained + i * eaf->nruns, eaf->nruns));
         eaf_print_line (coord_file, indic_file, diff_file,
-                        p, eaf->nobj,
+                        p, nobj,
                         bit_array_offset(eaf->bit_attained, i, eaf->nruns),
                         eaf->nruns);
     }
@@ -238,6 +218,56 @@ fprint_set2d (FILE *stream, const objective_t * const *data, int ntotal)
                  data[k][0], data[k][1]);
 }
 
+void
+eaf2matrix_R (double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
+              const double * percentile, int nlevels)
+{
+    int pos = 0;
+    for (int k = 0; k < nlevels; k++) {
+        int npoints = eaf[k]->size;
+        for (int i = 0; i < npoints; i++) {
+            for (int j = 0; j < nobj; j++) {
+                rmat[pos + j * totalpoints] = eaf[k]->data[j + i * nobj];
+            }
+            rmat[pos + nobj * totalpoints] = percentile[k];
+            pos++;
+        }
+    }
+}
+
+void
+eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _no_warn_unused int totalpoints,
+            const double * percentile, int nlevels)
+{
+    int pos = 0;
+    int ncol = nobj + 1;
+    for (int k = 0; k < nlevels; k++) {
+        int npoints = eaf[k]->size;
+        for (int i = 0; i < npoints; i++) {
+            for (int j = 0; j < nobj; j++) {
+                rmat[j + pos * ncol] = eaf[k]->data[j + i * nobj];
+            }
+            rmat[nobj + pos * ncol] = percentile[k];
+            pos++;
+        }
+    }
+}
+
+double *
+eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsizes, int nruns,
+                   const double * percentile, int nlevels)
+{
+    int *level = levels_from_percentiles(percentile, nlevels, nruns);
+    eaf_t **eaf = attsurf(data, nobj, cumsizes, nruns, level, nlevels);
+    free (level);
+
+    int totalpoints = eaf_totalpoints (eaf, nlevels);
+    double *mat = malloc(sizeof(double) * totalpoints * (nobj + 1));
+    eaf2matrix_R(mat, eaf, nobj, totalpoints, percentile, nlevels);
+    eaf_free(eaf, nlevels);
+    *eaf_npoints = totalpoints;
+    return mat;
+}
 /* 
    eaf2d: compute attainment surfaces from points in objective space,
           using dimension sweeping.
@@ -419,9 +449,6 @@ static int
 eaf_diff_color(const eaf_t * eaf, size_t k, int nruns)
 {
     const bit_array *bit_attained = bit_array_offset(eaf->bit_attained, k, nruns);
-    OLD_ATTAINED(
-        const bool *attained = eaf->attained + k * nruns;
-        bitset_check(bit_attained, attained, nruns););
     int count_left, count_right;
     attained_left_right (bit_attained, nruns/2, nruns, &count_left, &count_right);
     return count_left - count_right;
@@ -558,7 +585,7 @@ eaf_check_polygons(eaf_polygon_t *p, int nobj)
 
 /* Produce a polygon suitable to be plotted by the polygon function in R.  */
 eaf_polygon_t *
-eaf_compute_polygon (eaf_t **eaf, int nlevels)
+eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels)
 {
 /* FIXME: Don't add anything if color_0 == 0 */
 
@@ -588,7 +615,6 @@ eaf_compute_polygon (eaf_t **eaf, int nlevels)
     
     int _poly_size_check = 0;
     int nruns = eaf[0]->nruns;
-    int nobj = eaf[0]->nobj;
 
     eaf_assert(nruns % 2 == 0);
 
@@ -775,7 +801,7 @@ eaf_compute_polygon (eaf_t **eaf, int nlevels)
    much simpler, but it produces artifacts when plotted with the
    polygon function in R.  */
 eaf_polygon_t *
-eaf_compute_polygon_old (eaf_t **eaf, int nlevels)
+eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels)
 {
     int _poly_size_check = 0;
     eaf_polygon_t * polygon;
@@ -783,7 +809,6 @@ eaf_compute_polygon_old (eaf_t **eaf, int nlevels)
     int *color;
     int max_size = eaf_max_size(eaf, nlevels);
     int nruns = eaf[0]->nruns;
-    int nobj = eaf[0]->nobj;
 
     eaf_assert(nruns % 2 == 0);
 
@@ -906,9 +931,9 @@ eaf_compute_polygon_old (eaf_t **eaf, int nlevels)
 #undef POLY_SIZE_CHECK
 
 void
-eaf_print_polygon (FILE *stream, eaf_t **eaf, int nlevels)
+eaf_print_polygon (FILE *stream, eaf_t **eaf, int nobj, int nlevels)
 {
-    eaf_polygon_t *p = eaf_compute_area (eaf, nlevels);
+    eaf_polygon_t *p = eaf_compute_area (eaf, nobj, nlevels);
     
     for(size_t i = 0; i < vector_objective_size(&p->xy); i += 2) {
         point2d_printf(stream, vector_objective_at(&p->xy, i),
@@ -948,7 +973,7 @@ rectangle_add(eaf_polygon_t * regions,
 }
 
 eaf_polygon_t *
-eaf_compute_rectangles (eaf_t **eaf, int nlevels)
+eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels)
 {
 #define eaf_point(A,K) (eaf[(A)]->data + (K) * nobj)
 #if 0
@@ -959,7 +984,6 @@ eaf_compute_rectangles (eaf_t **eaf, int nlevels)
 #define printf_points(ka,kb,pka,pkb)                                           
 #endif    
     int nruns = eaf[0]->nruns;
-    const int nobj = eaf[0]->nobj;
 
     eaf_assert(nruns % 2 == 0);
 
