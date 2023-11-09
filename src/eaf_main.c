@@ -51,10 +51,7 @@
 
 static void usage(void)
 {
-    printf("\n"
-           "Usage:\n"
-           " %s [OPTIONS] [FILE...]\n\n", program_invocation_short_name);
-
+    printf("\nUsage:\t%s [OPTIONS] [FILE...]\n\n", program_invocation_short_name);
     printf(
 "Computes the empirical attainment function (EAF) of all input FILEs. \n"
 "With no FILE, or when FILE is -, read standard input.\n\n"

@@ -6,8 +6,8 @@ def np2d_to_double_array(x):
     x = np.ascontiguousarray(x)
     nrows = ffi.cast("int", x.shape[0])
     ncols = ffi.cast("int", x.shape[1])
-    x_p = ffi.from_buffer("double []", x)
-    return x_p, nrows, ncols
+    x = ffi.from_buffer("double []", x)
+    return x, nrows, ncols
 
 
 def np1d_to_double_array(x):
@@ -16,6 +16,11 @@ def np1d_to_double_array(x):
     x = ffi.from_buffer("double []", x)
     return x, size
 
+def np1d_to_int_array(x):
+    x = np.ascontiguousarray(x, dtype=np.intc())
+    size = ffi.cast("int", x.shape[0])
+    x = ffi.from_buffer("int []", x)
+    return x, size
 
 def atleast_1d_of_length_n(x, n):
     x = np.atleast_1d(x)

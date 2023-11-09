@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 ## The CFFI library is used to create C bindings.
-from moocore.c_bindings import lib, ffi
+from moocore._libmoocore import lib, ffi
 import lzma
 import shutil
 import tempfile
@@ -88,9 +88,9 @@ def read_datasets(filename):
     # Encode filename to a binary string
     filename = filename.encode("utf-8")
     # Create return pointers for function
-    data_p = ffi.new("double **", ffi.NULL)
-    ncols_p = ffi.new("int *", 0)
-    datasize_p = ffi.new("int *", 0)
+    data_p = ffi.new("double **")
+    ncols_p = ffi.new("int *")
+    datasize_p = ffi.new("int *")
     err_code = lib.read_datasets(filename, data_p, ncols_p, datasize_p)
     if fdst:
         os.remove(fdst.name)
@@ -243,6 +243,7 @@ def epsilon_mult(data, ref, maximise=False):
     data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(data, ref, maximise)
     return lib.epsilon_mult (data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
+# FIXME: TODO maximise option
 def hypervolume(data, ref):
     """Hypervolume indicator
 
@@ -297,7 +298,7 @@ def hypervolume(data, ref):
 
 
 def is_nondominated(data, maximise=False, keep_weakly=False):
-    """Identify, and remove dominated points according to Pareto optimality.
+    """Identify dominated points according to Pareto optimality.
 
     Parameters
     ----------
@@ -309,7 +310,7 @@ def is_nondominated(data, maximise=False, keep_weakly=False):
         Either a single boolean value that applies to all objectives or a list of boolean values, with one value per objective. \
         Also accepts a 1d numpy array with value 0/1 for each objective
     keep_weakly: bool
-        If FALSE, return FALSE for any duplicates of nondominated points
+        If False, return False for any duplicates of nondominated points
 
     Returns
     -------
@@ -356,48 +357,46 @@ def filter_dominated(data, maximise=False, keep_weakly=False):
     return data[is_nondominated(data, maximise, keep_weakly)]
 
 
-def filter_dominated_sets(dataset, maximise=False, keep_weakly=False):
-    """Filter dominated sets for multiple sets
+# def filter_dominated_sets(dataset, maximise=False, keep_weakly=False):
+#     """Filter dominated sets for multiple sets
 
-    Executes the :func:`filter_dominated` function for every set in a dataset \
-    and returns back a dataset, preserving set 
+#     Executes the :func:`filter_dominated` function for every set in a dataset \
+#     and returns back a dataset, preserving set 
 
-    Examples
-    --------
-    >>> dataset = moocore.read_datasets("./doc/examples/input1.dat")
-    >>> subset = moocore.subset(dataset, range = [3,5])
-    >>> moocore.filter_dominated_sets(subset)
-    array([[2.60764118, 6.31309852, 3.        ],
-           [3.22509709, 6.1522834 , 3.        ],
-           [0.37731545, 9.02211752, 3.        ],
-           [4.61023932, 2.29231998, 3.        ],
-           [0.2901393 , 8.32259412, 4.        ],
-           [1.54506255, 0.38303122, 4.        ],
-           [4.43498452, 4.13150648, 5.        ],
-           [9.78758589, 1.41238277, 5.        ],
-           [7.85344142, 3.02219054, 5.        ],
-           [0.9017068 , 7.49376946, 5.        ],
-           [0.17470556, 8.89066343, 5.        ]])
+#     Examples
+#     --------
+#     >>> dataset = moocore.read_datasets("./doc/examples/input1.dat")
+#     >>> subset = moocore.subset(dataset, range = [3,5])
+#     >>> moocore.filter_dominated_sets(subset)
+#     array([[2.60764118, 6.31309852, 3.        ],
+#            [3.22509709, 6.1522834 , 3.        ],
+#            [0.37731545, 9.02211752, 3.        ],
+#            [4.61023932, 2.29231998, 3.        ],
+#            [0.2901393 , 8.32259412, 4.        ],
+#            [1.54506255, 0.38303122, 4.        ],
+#            [4.43498452, 4.13150648, 5.        ],
+#            [9.78758589, 1.41238277, 5.        ],
+#            [7.85344142, 3.02219054, 5.        ],
+#            [0.9017068 , 7.49376946, 5.        ],
+#            [0.17470556, 8.89066343, 5.        ]])
 
-    The above returns sets 3,4,5 with dominated points within each set removed.
+#     The above returns sets 3,4,5 with dominated points within each set removed.
 
-    See Also
-    --------
-    This function for data without set numbers - :func:`filter_dominated` 
-    """
-    # FIXME: it will be faster to stack filter_set, then do:
-    # dataset[filter_set, :]
-    # to filter in one go.
-    new_sets = []
-    for set in np.unique(dataset[:, -1]):
-        set_data = dataset[dataset[:, -1] == set, :-1]
-        filter_set = filter_dominated(set_data, maximise, keep_weakly)
-        set_nums = np.full(filter_set.shape[0], set).reshape(-1, 1)
-        new_set = np.hstack((filter_set, set_nums))
-        new_sets.append(new_set)
-    return np.vstack(new_sets)
-
-
+#     See Also
+#     --------
+#     This function for data without set numbers - :func:`filter_dominated` 
+#     """
+#     # FIXME: it will be faster to stack filter_set, then do:
+#     # dataset[filter_set, :]
+#     # to filter in one go.
+#     new_sets = []
+#     for set in np.unique(dataset[:, -1]):
+#         set_data = dataset[dataset[:, -1] == set, :-1]
+#         filter_set = filter_dominated(set_data, maximise, keep_weakly)
+#         set_nums = np.full(filter_set.shape[0], set).reshape(-1, 1)
+#         new_set = np.hstack((filter_set, set_nums))
+#         new_sets.append(new_set)
+#     return np.vstack(new_sets)
 
 
 def normalise(data, to_range=[0.0, 1.0], lower=np.nan, upper=np.nan, maximise=False):
@@ -473,47 +472,47 @@ def normalise(data, to_range=[0.0, 1.0], lower=np.nan, upper=np.nan, maximise=Fa
     return data
 
 
-def normalise_sets(dataset, range=[0, 1], lower="na", upper="na", maximise=False):
-    """Normalise dataset with multiple sets
+# def normalise_sets(dataset, range=[0, 1], lower="na", upper="na", maximise=False):
+#     """Normalise dataset with multiple sets
 
-    Executes the :func:`normalise` function for every set in a dataset (Performs normalise on every set seperately)
+#     Executes the :func:`normalise` function for every set in a dataset (Performs normalise on every set seperately)
 
-    Examples
-    --------
-    >>> dataset = moocore.read_datasets("./doc/examples/input1.dat")
-    >>> subset = moocore.subset(dataset, range = [4,5])
-    >>> moocore.normalise_sets(subset)
-    array([[1.        , 0.38191742, 4.        ],
-           [0.70069111, 0.5114669 , 4.        ],
-           [0.12957487, 0.29411141, 4.        ],
-           [0.28059067, 0.53580626, 4.        ],
-           [0.32210885, 0.21797067, 4.        ],
-           [0.39161668, 0.92106178, 4.        ],
-           [0.        , 1.        , 4.        ],
-           [0.62293227, 0.11315216, 4.        ],
-           [0.76936124, 0.58159784, 4.        ],
-           [0.12957384, 0.        , 4.        ],
-           [0.82581672, 0.66566917, 5.        ],
-           [0.44318444, 0.35888982, 5.        ],
-           [0.80036477, 0.23242446, 5.        ],
-           [0.88550836, 0.51482968, 5.        ],
-           [0.89293026, 1.        , 5.        ],
-           [1.        , 0.        , 5.        ],
-           [0.79879657, 0.21247419, 5.        ],
-           [0.07562783, 0.80266586, 5.        ],
-           [0.        , 0.98703813, 5.        ],
-           [0.6229605 , 0.8613516 , 5.        ]])
+#     Examples
+#     --------
+#     >>> dataset = moocore.read_datasets("./doc/examples/input1.dat")
+#     >>> subset = moocore.subset(dataset, range = [4,5])
+#     >>> moocore.normalise_sets(subset)
+#     array([[1.        , 0.38191742, 4.        ],
+#            [0.70069111, 0.5114669 , 4.        ],
+#            [0.12957487, 0.29411141, 4.        ],
+#            [0.28059067, 0.53580626, 4.        ],
+#            [0.32210885, 0.21797067, 4.        ],
+#            [0.39161668, 0.92106178, 4.        ],
+#            [0.        , 1.        , 4.        ],
+#            [0.62293227, 0.11315216, 4.        ],
+#            [0.76936124, 0.58159784, 4.        ],
+#            [0.12957384, 0.        , 4.        ],
+#            [0.82581672, 0.66566917, 5.        ],
+#            [0.44318444, 0.35888982, 5.        ],
+#            [0.80036477, 0.23242446, 5.        ],
+#            [0.88550836, 0.51482968, 5.        ],
+#            [0.89293026, 1.        , 5.        ],
+#            [1.        , 0.        , 5.        ],
+#            [0.79879657, 0.21247419, 5.        ],
+#            [0.07562783, 0.80266586, 5.        ],
+#            [0.        , 0.98703813, 5.        ],
+#            [0.6229605 , 0.8613516 , 5.        ]])
 
-    See Also
-    --------
-    This function for data without set numbers - :func:`normalise`
-    """
-    for set in np.unique(dataset[:, -1]):
-        setdata = dataset[dataset[:, -1] == set, :-1]
-        dataset[dataset[:, -1] == set, :-1] = normalise(
-            setdata, to_range=range, lower=np.nan, upper=np.nan, maximise=False
-        )
-    return dataset
+#     See Also
+#     --------
+#     This function for data without set numbers - :func:`normalise`
+#     """
+#     for set in np.unique(dataset[:, -1]):
+#         setdata = dataset[dataset[:, -1] == set, :-1]
+#         dataset[dataset[:, -1] == set, :-1] = normalise(
+#             setdata, to_range=range, lower=np.nan, upper=np.nan, maximise=False
+#         )
+#     return dataset
 
 def eaf(data, percentiles=[]):
     """Empirical attainment function (EAF) calculation
@@ -537,40 +536,36 @@ def eaf(data, percentiles=[]):
     Examples
     --------
     >>> x = moocore.read_datasets("./doc/examples/input1.dat")
-    >>> moocore.eaf(x)
-    array([[  0.62230271,   3.56945324,  25.        ],
-           [  0.86723965,   1.58599089,  25.        ],
-           [  6.43135537,   1.00153569,  25.        ],
-           [  9.7398055 ,   0.36688707,  25.        ],
-           [  0.6510164 ,   9.42381213,  50.        ],
-           [  0.79293574,   6.46605414,  50.        ],
-           [  1.30291449,   4.50417698,  50.        ],
-           [  1.58498886,   2.87955367,  50.        ],
-           [  7.04694467,   1.83484358,  50.        ],
-           [  9.7398055 ,   1.00153569,  50.        ],
-           [  0.99008784,   8.84691923,  75.        ],
-           [  1.06855707,   6.7102429 ,  75.        ],
-           [  3.34035397,   2.89377444,  75.        ],
-           [  9.30137043,   2.14328532,  75.        ],
-           [  9.7398055 ,   1.83484358,  75.        ],
-           [  9.94332713,   1.50186503,  75.        ],
-           [  1.06855707,   8.84691923, 100.        ],
-           [  3.34035397,   6.7102429 , 100.        ],
-           [  4.93663823,   6.20957074, 100.        ],
+    >>> moocore.eaf(x)                                         # doctest: +ELLIPSIS
+    array([[  0.17470556,   8.89066343,  10.        ],
+           [  0.20816431,   4.62275469,  10.        ],
+           [  0.22997367,   1.11772205,  10.        ],
+           [  0.58799475,   0.73891181,  10.        ],
+           [  1.54506255,   0.38303122,  10.        ],
+           [  8.57911868,   0.35169752,  10.        ],
+           [  0.20816431,   8.89066343,  20.        ],
+           [  0.2901393 ,   8.32259412,  20.        ],
+           ...
+           [  9.78758589,   2.8124162 ,  90.        ],
+           [  1.13096306,   9.72645436, 100.        ],
+           [  2.71891214,   8.84691923, 100.        ],
+           [  3.34035397,   7.49376946, 100.        ],
+           [  4.43498452,   6.94327481, 100.        ],
+           [  4.96525837,   6.20957074, 100.        ],
            [  7.92511295,   3.92669598, 100.        ]])
 
     """
     data = np.asfarray(data)
     ncols = data.shape[1]
-    if ncols != 3:
-        assert NotImplementedError(
-            "Only 2d Datasets are currently supported for calculating eaf"
-        )
-
+    if ncols < 3:
+        raise ValueError("'data' must have at least 3 columns (2 objectives + set column)")
+    if ncols > 4:
+        raise NotImplementedError("Only 2D or 3D datasets are currently supported for computing the EAF")
+    
     _, cumsizes = np.unique(data[:, -1], return_counts=True)
     nsets = len(cumsizes)
     cumsizes = np.cumsum(cumsizes)
-    cumsizes_p, ncumsizes = np1d_to_double_array(cumsizes)
+    cumsizes_p, ncumsizes = np1d_to_int_array(cumsizes)
     if len(percentiles) == 0:
         percentiles = np.arange(1., nsets+1) * (100.0 / nsets)
     else:
@@ -578,9 +573,9 @@ def eaf(data, percentiles=[]):
     percentile_p, npercentiles = np1d_to_double_array(percentiles)
 
     # Get C pointers + matrix size for calling CFFI generated extension module
-    data_p, npoints, nobjs = np2d_to_double_array(data[:,:2])
-    eaf_npoints = ffi.new("int *", 0)
-    eaf_data_p = lib.compute_eaf_matrix(
+    data_p, npoints, nobjs = np2d_to_double_array(data[:,:-1])
+    eaf_npoints = ffi.new("int *")
+    eaf_data_p = lib.eaf_compute_matrix(
         eaf_npoints,
         data_p,
         nobjs,
@@ -589,8 +584,9 @@ def eaf(data, percentiles=[]):
         percentile_p,
         npercentiles
     )
-    eaf_buf = ffi.buffer(eaf_data_p, eaf_npoints[0])
-    return np.frombuffer(eaf_buf).reshape((eaf_npoints[0], -1))
+    eaf_npoints = eaf_npoints[0]
+    eaf_buf = ffi.buffer(eaf_data_p, ffi.sizeof("double") * eaf_npoints * ncols)
+    return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 # def eafdiff(x, y, intervals = None, maximise = False):
 #     x = np.asfarray(x).copy()

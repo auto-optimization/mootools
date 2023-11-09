@@ -138,7 +138,7 @@ def test_is_nondominated():
     assert np.array_equal(non_dominated_weak, expct_nondom_weak)
     assert np.array_equal(moocore.filter_dominated(T, keep_weakly=True), expct_nondom_weak)
 
-    max = np.array(
+    x = np.array(
         [
             [0, 0, 0, 0],
             [0, 0, 0, 1],
@@ -150,10 +150,10 @@ def test_is_nondominated():
             [2, 2, 0, 0],
         ]
     )
-    max_nondom = max[moocore.is_nondominated(max, maximise=True)]
-    expected_max_nondom = np.array([[0, 0, 1, 2], [10, 20, 0, 0], [20, 10, 0, 0]])
-    assert np.array_equal(max_nondom, expected_max_nondom)
-    assert np.array_equal(moocore.filter_dominated(max, maximise=True), expected_max_nondom)
+    x_nondom = x[moocore.is_nondominated(x, maximise=True)]
+    expected_x_nondom = np.array([[0, 0, 1, 2], [10, 20, 0, 0], [20, 10, 0, 0]])
+    assert np.array_equal(x_nondom, expected_x_nondom)
+    assert np.array_equal(moocore.filter_dominated(x, maximise=True), expected_x_nondom)
     minmax = np.array([1, 2, 2, 1, 5, 6, 7, 5]).reshape((-1, 2))
     assert np.array_equal(
         moocore.filter_dominated(minmax, maximise=[True, False]), np.array([[2, 1], [7, 5]])
@@ -198,18 +198,16 @@ def test_normalise():
 
 def test_docstrings():
     import doctest
-
     doctest.FLOAT_EPSILON = 1e-9
-
-    # Run doctests for "eaf" module and fail if one of the docstring tests is incorrect.
+    # Run doctests for "moocore" module and fail if one of the docstring tests is incorrect.
     # Pass in the "eaf" module so that the docstrings don't have to import every time
+    doctest.testmod(moocore.moocore, raise_on_error=True, extraglobs={"moocore": moocore})
 
-    doctest.testmod(moocore.eaf, raise_on_error=True, extraglobs={"eaf": eaf})
 
-
-def test_get_eaf():
+def test_eaf(request):
+    test_data_path = request.path.parent.joinpath("test_data")
+    
     # FIXME ALG_1_dat is creating slightly different percentile values than expected in its EAF output
-
     test_names = [
         "input1.dat",
         "spherical-250-10-3d.txt",
@@ -219,39 +217,23 @@ def test_get_eaf():
         # "ALG_1_dat.xz",
     ]
     expected_eaf_names = [
-        "dat1_get_eaf.txt",
-        "spherical_get_eaf.txt",
-        "uniform_get_eaf.txt",
-        "wrots_l10_get_eaf.txt",
-        "wrots_l100_get_eaf.txt",
+        "dat1_eaf.txt",
+        "spherical_eaf.txt",
+        "uniform_eaf.txt",
+        "wrots_l10_eaf.txt",
+        "wrots_l100_eaf.txt",
         # "ALG_1_dat_get_eaf.txt"
     ]
-    expected_eaf_pct_names = [f"pct_{name}" for name in expected_eaf_names]
-    expected_eaf_results = [
-        np.loadtxt(f"tests/test_data/expected_output/get_eaf/{name}")
-        for name in expected_eaf_names
-    ]
-    expected_eaf_pct_results = [
-        np.loadtxt(f"tests/test_data/expected_output/get_eaf/{name}")
-        for name in expected_eaf_pct_names
-    ]
-
-    datasets = [moocore.read_datasets(f"tests/test_data/{name}") for name in test_names]
-    eaf_test = [moocore.get_eaf(dataset) for dataset in datasets]
-
-    eaf_pct_test = [
-        moocore.get_eaf(dataset, percentiles=[0, 50, 100]) for dataset in datasets
-    ]
-
-    for test, expected, test_name in zip(eaf_test, expected_eaf_results, test_names):
-        assert np.allclose(test, expected), f"{test_name} test for get_eaf failed"
-
-    for test, expected in zip(eaf_pct_test, expected_eaf_pct_results):
-        assert np.allclose(
-            test, expected
-        ), f"{test_name} test for get_eaf with percentiles failed"
-
-
+    for test_name, expected_eaf_name in zip(test_names, expected_eaf_names):
+        dataset = moocore.read_datasets(test_data_path.joinpath(test_name))
+        eaf_test = moocore.eaf(dataset)
+        eaf_pct_test = moocore.eaf(dataset, percentiles=[0, 50, 100])
+        expected_eaf_result = np.loadtxt(test_data_path.joinpath(f"expected_output/eaf/{expected_eaf_name}"))
+        expected_eaf_pct_result = np.loadtxt(test_data_path.joinpath(f"expected_output/eaf/pct_{expected_eaf_name}"))
+        assert eaf_test.shape == expected_eaf_result.shape, f"Shapes of {test_name} and {expected_eaf_name} do not match"
+        assert np.allclose(eaf_test, expected_eaf_result), f"{expected_eaf_name} test failed"
+        assert np.allclose(eaf_pct_test, expected_eaf_pct_result), f"pct_{expected_eaf_name} test failed"
+        
 # def test_get_diff_eaf():
 #     diff1 = np.loadtxt("tests/test_data/100_diff_points_1.txt")
 #     diff2 = np.loadtxt("tests/test_data/100_diff_points_2.txt")

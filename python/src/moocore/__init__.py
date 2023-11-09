@@ -1,21 +1,16 @@
-from .moocore import read_datasets, ReadDatasetsError
 from .moocore import (
-    hypervolume,
+    ReadDatasetsError,
+    read_datasets, 
     igd,
     igd_plus,
     avg_hausdorff_dist,
-    is_nondominated,
-    filter_dominated,
     epsilon_additive,
     epsilon_mult,
+    hypervolume,
+    is_nondominated,
+    filter_dominated,
     normalise,
-    subset,
-    data_subset,
-    normalise_sets,
-    filter_dominated_sets,
-    get_eaf,
-    get_diff_eaf,
-    rand_non_dominated_sets,
+    eaf,
 )
 
 from importlib.metadata import version as _metadata_version

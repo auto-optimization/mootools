@@ -23,17 +23,15 @@ ffibuilder.cdef(
     double epsilon_additive (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
     double epsilon_mult (const double *data, int nobj, int npoints, const double *ref, int ref_size, const bool * maximise);
     bool * is_nondominated (const double * data, int nobj, int npoint, const bool * maximise, bool keep_weakly);
-    void agree_normalise (double *data, int nobj, int npoint, const bool * maximise, const double lower_range, const double upper_range,
-                          const double *lbound, const double *ubound);
-    double * eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsizes, int nruns,
-                                const double * percentile, int nlevels);
+    void agree_normalise (double *data, int nobj, int npoint, const bool * maximise, const double lower_range, const double upper_range, const double *lbound, const double *ubound);
+    double * eaf_compute_matrix (int *eaf_npoints, double * data, int nobj, const int *cumsizes, int nruns, const double * percentile, int nlevels);
     """
 )
 
 file_path = os.path.dirname(os.path.realpath(__file__))
 libmoocore_path = os.path.join(file_path, "libmoocore")
 ffibuilder.set_source(
-    "moocore.c_bindings",
+    "moocore._libmoocore",
     """
     #include "io.h"
     #include "hv.h"   
@@ -48,8 +46,11 @@ ffibuilder.set_source(
         "eaf3d.c",
         "hv.c",
         "io.c",
+        "cmdline.c", # For fatal_error()
     ]],
     include_dirs=[libmoocore_path],
+#    extra_compile_args = ["-flto"],
+#    extra_link_args = ["-flto"],
 )
 
 if __name__ == "__main__":

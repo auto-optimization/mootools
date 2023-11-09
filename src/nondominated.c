@@ -64,8 +64,7 @@ static bool normalise_flag = false;
 static bool force_bounds_flag = false;
 static const char *suffix = "_dat";
 
-static void 
-usage(void)
+static void usage(void)
 {
     printf("\n"
            "Usage:\n"
@@ -258,7 +257,6 @@ force_bounds (double *points, int dim, int *cumsizes, int nsets,
               const double *lbound, const double *ubound)
 {
     int n, n2, k;
-
     int size = cumsizes[nsets - 1];
     bool *outbounds = malloc (sizeof(bool) * size);
     int outbounds_found = -1;

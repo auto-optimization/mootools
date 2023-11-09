@@ -263,11 +263,12 @@ eaf_compute_matrix(int *eaf_npoints, double * data, int nobj, const int *cumsize
 
     int totalpoints = eaf_totalpoints (eaf, nlevels);
     double *mat = malloc(sizeof(double) * totalpoints * (nobj + 1));
-    eaf2matrix_R(mat, eaf, nobj, totalpoints, percentile, nlevels);
+    eaf2matrix(mat, eaf, nobj, totalpoints, percentile, nlevels);
     eaf_free(eaf, nlevels);
     *eaf_npoints = totalpoints;
     return mat;
 }
+
 /* 
    eaf2d: compute attainment surfaces from points in objective space,
           using dimension sweeping.

@@ -128,9 +128,8 @@ read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasiz
 void
 vector_fprintf (FILE *stream, const double * vector, int size)
 {
-    int k;
     fprintf (stream, point_printf_format, vector[0]);
-    for (k = 1; k < size; k++)
+    for (int k = 1; k < size; k++)
         fprintf (stream, point_printf_sep "" point_printf_format, vector[k]);
 }
 
@@ -138,6 +137,19 @@ void
 vector_printf (const double *vector, int size)
 {
     vector_fprintf (stdout, vector, size);
+}
+
+void
+vector_int_fprintf (FILE *stream, const int * vector, int size)
+{
+    for (int k = 0; k < size; k++)
+        fprintf (stream, "%d ", vector[k]);
+}
+
+void
+vector_int_printf (const int *vector, int size)
+{
+    vector_int_fprintf (stdout, vector, size);
 }
 
 int 

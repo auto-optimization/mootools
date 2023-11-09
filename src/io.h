@@ -33,6 +33,8 @@ read_double_data (const char *filename, double **data_p,
 
 void vector_fprintf (FILE *stream, const double * vector, int size);
 void vector_printf (const double *vector, int size);
+void vector_int_fprintf (FILE *stream, const int * vector, int size);
+void vector_int_printf (const int *vector, int size);
 int read_datasets(const char * filename, double **data_p, int *ncols_p, int *datasize_p);
 int write_sets (FILE *outfile, const double *data, int ncols, 
                 const int *cumsizes, int nruns);
