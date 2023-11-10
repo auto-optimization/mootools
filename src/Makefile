@@ -69,7 +69,7 @@ DEBUG?=0
 BINDIR=../bin/
 ## Define source files
 SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
-	eaf.c eaf_main.c eaf3d.c avl.c cmdline.c libmootools.c main-hv.c timer.c
+	eaf.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c
 HEADERS = io.h io_priv.h common.h gcc_attribs.h igd.h epsilon.h nondominated.h hv.h cmdline.h whv.h whv_hype.h \
 	eaf.h cvector.h avl.h bit_array.h
 # Relative to root folder.
@@ -84,6 +84,8 @@ ECHO = @echo "$(1)"
 
 include gitversion.mk
 include gcc.mk
+
+MEX?=mkoctfile --mex # mex
 
 ifneq ($(uname_S),Cygwin)
 CPPFLAGS += -D_GNU_SOURCE
@@ -153,7 +155,7 @@ $(OBJS): $(HEADERS) common.h gcc_attribs.h
 clean:
 	@-$(RM) config.status config.log Makevars 
 	@-$(RM) -r autom4te.cache
-
+	@-$(RM) Hypervolume_MEX.mex
 	$(call ECHO,---> Removing $(igd) <---)
 	@$(RM) $(igd)
 
@@ -223,8 +225,8 @@ all: clean
 
 mex: MEX?=mex
 mex: Hypervolume_MEX.c $(HV_SRCS)
-	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O CFLAGS=-std=c99"' to pass flags to mex. Code compiled by MEX is less optimized (slower) than the default 'hv' command-line program <---)
-	$(MEX) -v $(MEXFLAGS) CFLAGS='$$CFLAGS -std=c99' $^
+	$(call ECHO,---> You can use 'make mex MEXFLAGS="-O -std=c99"' to pass flags to mex. Code compiled by MEX is less optimized (slower) than the default 'hv' command-line program <---)
+	$(MEX) -v $(MEXFLAGS) -std=c99 $^
 
 DIST_SRC_FILES = $(DIST_OTHER_FILES) $(OBJS:.o=.c) $(HEADERS) 
 DIST_SRC:= mootools-$(VERSION)-src

@@ -35,7 +35,7 @@ ffibuilder.set_source(
         "eaf3d.c",
         "hv.c",
         "io.c",
-        "cmdline.c", # For fatal_error()
+        "libutil.c", # For fatal_error()
     ]],
     include_dirs=[libmoocore_path],
     extra_compile_args = ["-flto", "-march=native", "-Ofast"],
