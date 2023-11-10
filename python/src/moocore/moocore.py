@@ -102,7 +102,6 @@ def read_datasets(filename):
     # Convert 1d numpy array to 2d array with (n obj... , sets) columns
     return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
 
-
 def _parse_maximise(maximise, nobj):
     # Converts maximise array or single bool to ndarray format
     return atleast_1d_of_length_n(maximise, nobj).astype(bool)
@@ -284,15 +283,15 @@ def hypervolume(data, ref):
     # something like ref = np.array([10, 10]) then numpy would interpret it as
     # an int array.
     data = np.asfarray(data)
-    ref = np.asfarray(ref)
-
-    if data.shape[1] != ref.shape[0]:
+    nobj = data.shape[1]
+    ref = atleast_1d_of_length_n(np.asfarray(ref), nobj)
+    if nobj != ref.shape[0]:
         raise ValueError(
-            f"data and ref need to have the same number of objectives ({data.shape[1]} != {ref.shape[0]})"
+            f"data and ref need to have the same number of objectives ({nobj} != {ref.shape[0]})"
         )
 
-    ref_buf = ffi.from_buffer("double []", ref)
     data_p, npoints, nobj = np2d_to_double_array(data)
+    ref_buf = ffi.from_buffer("double []", ref)
     hv = lib.fpli_hv(data_p, nobj, npoints, ref_buf)
     return hv
 
@@ -452,8 +451,8 @@ def normalise(data, to_range=[0.0, 1.0], lower=np.nan, upper=np.nan, maximise=Fa
     to_range = np.asfarray(to_range)
     if to_range.shape[0] != 2:
         raise ValueError("'to_range' must have length 2")
-    lower = atleast_1d_of_length_n(lower, nobj).astype(float)
-    upper = atleast_1d_of_length_n(upper, nobj).astype(float)
+    lower = atleast_1d_of_length_n(np.asfarray(lower), nobj)
+    upper = atleast_1d_of_length_n(np.asfarray(upper), nobj)
     if np.any(np.isnan(lower)):
         lower = np.where(np.isnan(lower), data.min(axis=0), lower)
     if np.any(np.isnan(upper)):
@@ -658,4 +657,127 @@ def eaf(data, percentiles=[]):
 #     eaf_arr = np.frombuffer(eaf_buf)
 #     # The C code gets diff EAF in Column Major order so I return it in column major order than transpose to fix into row major order
 #     return np.reshape(eaf_arr, (num_data_columns, -1)).T
+
+# def whv_hype(data, reference, ideal, maximise = False,
+#              dist = dict(type = "uniform"), nsamples = 1e5, seed = None):
+#     '''Approximation of the (weighted) hypervolume by Monte-Carlo sampling (2D only)
+
+#     Return an estimation of the hypervolume of the space dominated by the input
+#     data following the procedure described by AugBadBroZit2009gecco. A weight
+#     distribution describing user preferences may be specified.
+
+#     Parameters
+#     ----------
+#     data : numpy.ndarray
+#         Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
+#         If the array is created from the :func:`read_datasets` function, remove the last (set) column.
+
+#     reference : numpy.ndarray or list
+#         Reference point as a numpy array or list. Must have same length as the number of columns of the dataset.
+
+#     ideal : numpy.ndarray or list
+#         Ideal point as a numpy array or list. Must have same length as the number of columns of the dataset.
+
+#     maximise : bool or or list of bool
+#         Whether the objectives must be maximised instead of minimised.
+#         Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective.
+#         Also accepts a 1D numpy array with values 0 or 1 for each objective.
+
+#     dist : dict
+#         Weight distribution. See Details.
+    
+#     nsamples : int
+#         Number of samples for Monte-Carlo sampling.
+
+#     seed : int or numpy.random.Generator
+#         Either an integer to seed the NumPy random generator or a RNG of type `numpy.random.Generator`.
+
+#     Details
+#     -------
+#     The current implementation only supports 2 objectives.
+
+#     A weight distribution  AugBadBroZit2009gecco can be provided via the `dist` argument. The ones currently supported are:
+#      * `dict(type="uniform")` corresponds to the default hypervolume (unweighted).
+#      * `dict(type="point")` describes a goal in the objective space, where `mu` gives the coordinates of the goal. The resulting weight distribution is a multivariate normal distribution centred at the goal. 
+#      * `dict(type="exponential")` describes an exponential distribution with rate parameter `1/mu`, i.e., \eqn{\lambda = \frac{1}{\mu}}.
+
+#     Returns
+#     -------
+#     float:
+#         A single numerical value, the weighted hypervolume.
+
+#     See Also
+#     --------
+#     :func:`read_datasets`, :func:`hypervolume`
+
+#     Examples
+#     --------
+#     >>> moocore.whv_hype(np.full((1,2), 2), reference = 4, ideal = 1)
+
+#     '''
+#     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1)
+    
+#     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1)
+    
+#     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="exponential", mu=0.2))
+    
+#     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="exponential", mu=0.2))
+    
+#     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="point", mu=c(1,1)))
+    
+#     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1,
+#     #           dist = list(type="point", mu=c(1,1)))
+
+#     # Convert to numpy.array in case the user provides a list.  We use
+#     # np.asfarray to convert it to floating-point, otherwise if a user inputs
+#     # something like ref = np.array([10, 10]) then numpy would interpret it as
+#     # an int array.
+#     data = np.asfarray(data)
+#     nobj = data.shape[1]
+#     if nobj != 2:
+#         raise NotImplementedError("Only 2D datasets are currently supported")
+
+#     reference = np.atleast_1d_of_length_n(np.asfarray(reference), nobj)
+#     ideal = np.atleast_1d_of_length_n(np.asfarray(ideal), nobj)
+#     if nobj != reference.shape[0]:
+#         raise ValueError(
+#             f"data and reference need to have the same number of objectives ({nobj} != {reference.shape[0]})"
+#         )
+#     if nobj != ideal.shape[0]:
+#         raise ValueError(
+#             f"data and ideal need to have the same number of objectives ({nobj} != {ideal.shape[0]})"
+#         )
+
+#     maximise = _parse_maximise(maximise, nobj)
+#     data[:, maximise] = -data[:, maximise]
+#     reference[maximise] = -reference[maximise]
+#     ideal[maximise] = -ideal[maximise]
+
+#     if type(seed) != int:
+#         seed = rng.integers(low, 4294967295)
+
+#     data_p, npoints, nobj = np2d_to_double_array(data)
+#     reference = ffi.from_buffer("double []", reference)
+#     ideal = ffi.from_buffer("double []", ideal)
+#     seed = ffi.cast("unsigned long", seed)
+#     nsamples = ffi.cast("size_t", nsamples)
+
+#     if dist["type"] == "uniform":
+#         dist_p = lib.hype_dist_unif_new(seed)
+#     elif dist["type"] == "exponential":
+#         dist_p = lib.hype_dist_exp_new(ffi.cast("double", dist["mu"]), seed)
+#     elif dist["type"] == "exponential":
+#         mu = np.atleast_1d_of_length_n(np.asfarray(dist["mu"]), nobj)
+#         mu, _ = np1d_to_double_array(mu)
+#         dist_p = lib.hype_dist_guassian_new(mu, seed)
+#     else:
+#         raise ValueError("Unknown value of dist['type] = {dist['type]}")
+
+#     hv = lib.whv_hype_estimate(data_p, npoints, ideal, reference,
+#                                dist_p, nsamples);
+#     lib.hype_dist_free(dist_p)
+#     return hv    
 

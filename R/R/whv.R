@@ -134,9 +134,9 @@ total_whv_rect <- function(data, rectangles, reference, maximise = FALSE, ideal 
 #'
 #' @template arg_ideal
 #'
-#' @param nsamples (`integer(1)`) number of samples for Monte-Carlo sampling.
-#'
 #' @param dist (`list()`) weight distribution. See Details.
+#'
+#' @param nsamples (`integer(1)`) number of samples for Monte-Carlo sampling.
 #'
 #' @details
 #' The current implementation only supports 2 objectives.
