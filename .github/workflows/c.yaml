@@ -4,13 +4,13 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/c.yml'
+      - '.github/workflows/c.yaml'
       - 'src/**'
       
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/c.yml'
+      - '.github/workflows/c.yaml'
       - 'src/**'
 
 concurrency:
@@ -26,9 +26,19 @@ jobs:
         os: [windows-latest, ubuntu-latest, macOS-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Install macos dependencies
+      - name: Install GSL
         if: runner.os == 'macOS'
         run: brew install gsl
+        
+      - name: Install GSL
+        if: runner.os == 'Windows'
+        run: |
+          GSL_PATH=${{ runner.temp }}/gsl
+          mkdir $GSL_PATH
+          curl https://github.com/rwinlib/gsl/archive/v2.7.zip --output ${GSL_PATH}/gsl.zip
+          cd $GSL_PATH && 7z x gsl.zip
+        shell: bash
+
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
       - name: Functional tests
