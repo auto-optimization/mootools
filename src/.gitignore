@@ -9,5 +9,6 @@ igd
 ndsort
 nondominated
 Makevars
+Makevars.win
 git_version
 Hypervolume_MEX.mex
