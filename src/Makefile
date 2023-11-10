@@ -58,6 +58,7 @@ ifeq ($(OS),Windows_NT)
   ECHO = @echo $(1)
   RM=del /Q
   MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
+  -include Makevars.win
 else
   uname_S := $(shell gcc -dumpmachine 2>&1)
   uname_S := $(subst MINGW,mingw,$(uname_S))
@@ -72,6 +73,7 @@ else
     uname_M :=$(shell uname -m || echo unknown)
     ECHO = @echo "$(1)"
     MKDIR= @mkdir -p $(1)
+   include Makevars
   endif
 endif
 
@@ -87,7 +89,6 @@ DIST_OTHER_FILES =  git_version *.mk configure.ac configure
 DIST_ROOT_FILES = Makefile README.md LICENSE
 OBJS  = $(SRCS:.c=.o)
 
-include Makevars
 # We do not need $(GSL_LIBS) yet because we don't compile whv_hype.c into any executable.
 EXE_LDFLAGS=-lm 
 
@@ -116,7 +117,7 @@ hvexe=$(BINDIR)/hv$(EXE)
 
 .PHONY : all clean dist default check test eaf hv
 
-default: Makevars $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
+default: $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
 
 configure: configure.ac
 	autoreconf configure.ac

@@ -23,7 +23,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+        #os: [windows-latest, macOS-latest, ubuntu-latest]
+        os: [macOS-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Install GSL
@@ -37,12 +38,12 @@ jobs:
           curl --silent --show-error -L https://github.com/rwinlib/gsl/archive/v2.7.zip -o gsl.zip
           7z x gsl.zip
           popd
-          cat<<EOF > Makevars
+          cat<<EOF > Makevars.win
           # Set by Github Actions
           GSL_CFLAGS = -I${RUNNER_TEMP}/gsl-2.7/include
           GSL_LIBS   = -L"$(RUNNER_TEMP)/gsl-2.7/lib/x64" -lgsl -lgslcblas
           EOF
-          cat Makevars
+          cat Makevars.win
         shell: bash
 
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'

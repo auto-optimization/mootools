@@ -1788,7 +1788,7 @@ else
   PATH and PKG_CONFIG_PATH contains a $PKG_CONFIG_NAME.pc file. If $PKG_CONFIG_NAME
   is unavailable you can set INCLUDE_DIR and LIB_DIR manually via (you will
   need to adjust paths and library names):
-  make GSL_CFLAGS=-I/usr/include GLS_LIBS=-L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm
+  make GSL_CFLAGS=-I/usr/include GSL_LIBS=-L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm
   -------------------------- ERROR MESSAGE ---------------------------
   cat configure.log
   --------------------------------------------------------------------
