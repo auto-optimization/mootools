@@ -1,0 +1,41 @@
+# .github/workflows/build.yaml
+name: C
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/c.yml'
+      - 'src/**'
+      
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/c.yml'
+      - 'src/**'
+
+concurrency:
+  group: ${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
+      - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
+      - name: Functional tests
+        run: |
+          ./bin/dominatedsets --help
+          ./bin/dominatedsets --help
+          ./bin/eaf --help
+          ./bin/epsilon --help
+          ./bin/hv --help
+          ./bin/igd --help
+          ./bin/ndsort --help
+          ./bin/nondominated --help
+
