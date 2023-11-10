@@ -53,20 +53,30 @@ ifneq ($(findstring $(MAKEFLAGS),s),s)
   endif
 endif
 
-uname_S := $(shell gcc -dumpmachine 2>&1)
-uname_S := $(subst MINGW,mingw,$(uname_S))
-ifneq (,$(findstring mingw,$(uname_S)))
-RM=del /Q
-CC=gcc
-uname_S :=mingw
+ifeq ($(OS),Windows_NT)
+  uname_S:=Windows
+  ECHO = @echo $(1)
+  RM=del /Q
+  MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
 else
-## Detect system and machine type:
-uname_S :=$(shell uname -s || echo unknown)
-uname_M :=$(shell uname -m || echo unknown)
+  uname_S := $(shell gcc -dumpmachine 2>&1)
+  uname_S := $(subst MINGW,mingw,$(uname_S))
+  ifneq (,$(findstring mingw,$(uname_S)))
+    MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
+    RM=del /Q
+    uname_S:=mingw
+    ECHO = @echo $(1)
+  else
+    ## Detect system and machine type:
+    uname_S :=$(shell uname -s || echo unknown)
+    uname_M :=$(shell uname -m || echo unknown)
+    ECHO = @echo "$(1)"
+    MKDIR= @mkdir -p $(1)
+  endif
 endif
 
 DEBUG?=0
-BINDIR=../bin/
+BINDIR=../bin
 ## Define source files
 SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
 	eaf.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c
@@ -80,7 +90,6 @@ OBJS  = $(SRCS:.c=.o)
 include Makevars
 # We do not need $(GSL_LIBS) yet because we don't compile whv_hype.c into any executable.
 EXE_LDFLAGS=-lm 
-ECHO = @echo "$(1)"
 
 include gitversion.mk
 include gcc.mk
@@ -96,7 +105,6 @@ endif
 EXE_CFLAGS += $(OPT_CFLAGS) $(GSL_CFLAGS) $(WARN_CFLAGS) \
 	-DDEBUG=$(DEBUG) -DVERSION='"$(VERSION)"' -DMARCH='"$(gcc-guess-march)"'
 
-BINDIR:=$(realpath $(BINDIR))
 igd = $(BINDIR)/igd$(EXE)
 epsilon = $(BINDIR)/epsilon$(EXE)
 dominatedsets = $(BINDIR)/dominatedsets$(EXE)
@@ -104,6 +112,7 @@ nondominated = $(BINDIR)/nondominated$(EXE)
 ndsort = $(BINDIR)/ndsort$(EXE)
 eafexe=$(BINDIR)/eaf$(EXE)
 hvexe=$(BINDIR)/hv$(EXE)
+
 
 .PHONY : all clean dist default check test eaf hv
 
@@ -118,6 +127,8 @@ Makevars: configure Makevars.in
 eaf: $(eafexe)
 
 hv: $(hvexe)
+
+include libhv.mk
 
 $(igd): OBJS=igd.o io.o cmdline.o
 $(igd): HEADERS=igd.h nondominated.h cmdline.h
@@ -134,8 +145,6 @@ $(nondominated): HEADERS= epsilon.h nondominated.h cmdline.h
 $(eafexe): OBJS=eaf.o io.o eaf_main.o eaf3d.o avl.o cmdline.o
 $(eafexe): HEADERS=eaf.h 
 
-include libhv.mk
-
 $(ndsort): OBJS=ndsort.o pareto.o io.o hv_contrib.c $(LIBHV_OBJS) cmdline.o
 $(ndsort): HEADERS=nondominated.h cmdline.h
 
@@ -146,7 +155,7 @@ $(hvexe): HEADERS=hv.h timer.h
 io.o: io_priv.h io.h
 
 $(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe) $(hvexe): $(OBJS) $(HEADERS)
-	@-mkdir -p $(BINDIR)
+	$(call MKDIR, $(BINDIR)/)
 	$(call ECHO,--> Building $@ version $(VERSION) <---)
 	$(QUIET_LINK)$(CC) -o $@  $(OBJS) $(EXE_CFLAGS) $(CFLAGS) $(EXE_LDFLAGS)
 
@@ -233,8 +242,8 @@ DIST_SRC:= mootools-$(VERSION)-src
 dist: DEBUG=0
 dist: CDEBUG=
 dist: all
-	@(mkdir -p ../$(DIST_SRC) \
-	&& rsync -rlpC --exclude=.svn $(DIST_SRC_FILES) ../$(DIST_SRC)/ \
+	$(call MKDIR,../$(DIST_SRC)
+	@(rsync -rlpC --exclude=.svn $(DIST_SRC_FILES) ../$(DIST_SRC)/ \
 	&& cd .. \
 	&& tar cf - $(DIST_SRC) | gzip -f9 > $(DIST_SRC).tar.gz \
 	&& rm -rf ./$(DIST_SRC)/* && rmdir ./$(DIST_SRC)/ \
