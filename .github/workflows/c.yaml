@@ -26,6 +26,9 @@ jobs:
         os: [windows-latest, ubuntu-latest, macOS-latest]
     steps:
       - uses: actions/checkout@v3
+      - name: Install macos dependencies
+        if: runner.os == 'macOS'
+        run: brew install gsl
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
       - name: Functional tests
