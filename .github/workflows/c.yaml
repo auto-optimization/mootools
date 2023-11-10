@@ -33,12 +33,19 @@ jobs:
       - name: Install GSL
         if: runner.os == 'Windows'
         env:
-          GSL_PATH: ${{ runner.temp }}/gsl
+          GSL_ROOT: ${{ runner.temp }}/gsl
         run: |
-          mkdir $GSL_PATH
-          cd $GSL_PATH
+          mkdir $GSL_ROOT
+          pushd $GSL_ROOT
           curl https://github.com/rwinlib/gsl/archive/v2.7.zip --output gsl.zip
           7z x gsl.zip
+          popd
+          cat<<EOF > Makevars
+          # Set by Github Actions
+          GSL_CFLAGS = -I$GSL_ROOT/include
+          GSL_LIBS   = -L"$(GSL_ROOT)/lib64" -lgsl -lgslcblas
+          EOF
+          cat Makevars
         shell: bash
 
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
