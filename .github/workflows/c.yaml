@@ -33,11 +33,12 @@ jobs:
       - name: Install GSL
         if: runner.os == 'Windows'
         env:
-          GSL_PATH: /tmp/gsl
+          GSL_PATH: ${{ runner.temp }}/gsl
         run: |
           mkdir $GSL_PATH
-          curl https://github.com/rwinlib/gsl/archive/v2.7.zip --output ${GSL_PATH}/gsl.zip
-          cd $GSL_PATH && 7z x gsl.zip
+          cd $GSL_PATH
+          curl https://github.com/rwinlib/gsl/archive/v2.7.zip --output gsl.zip
+          7z x gsl.zip
         shell: bash
 
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
