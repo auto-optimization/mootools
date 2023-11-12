@@ -64,8 +64,7 @@ else:
     if sse2:
         extra_compile_args.append("-msse2")
 
-ffibuilder = cffi.FFI()
-
+ffibuilder = FFI()
 file_path = os.path.dirname(os.path.realpath(__file__))
 libmoocore_path = os.path.join(file_path, "libmoocore")
 
