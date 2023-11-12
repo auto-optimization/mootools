@@ -37,7 +37,7 @@ jobs:
           7z x gsl.zip
           popd
           echo "GSL_CFLAGS=-I${RUNNER_TEMP}/gsl-2.7/include" >> $GITHUB_ENV
-          echo "GSL_LIBS=-L"$(RUNNER_TEMP)/gsl-2.7/lib/x64" >> $GITHUB_ENV
+          echo "GSL_LIBS=-L$(RUNNER_TEMP)/gsl-2.7/lib/x64" >> $GITHUB_ENV
         shell: bash
 
       - run: cd src && ./configure

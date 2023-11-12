@@ -1,42 +1,101 @@
 /*************************************************************************
 
- Simple timer functions.
-
- ---------------------------------------------------------------------
-
- Copyright (c) 2005, 2006, 2007 Manuel Lopez-Ibanez
- TeX: \copyright 2005, 2006, 2007 Manuel L{\'o}pez-Ib{\'a}{\~n}ez
-
- This program is free software (software libre); you can redistribute
- it and/or modify it under the terms of the GNU General Public License
- as published by the Free Software Foundation; either version 2 of the
- License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, you can obtain a copy of the GNU
- General Public License at:
-                 http://www.gnu.org/copyleft/gpl.html
- or by writing to:
-           Free Software Foundation, Inc., 59 Temple Place,
-                 Suite 330, Boston, MA 02111-1307 USA
-
- ----------------------------------------------------------------------
-
- NOTES: based on source code from Thomas Stuetzle.
+ Global timer functions.
 
 *************************************************************************/
-
+#include <stddef.h>
+#if DEBUG >= 1
 #include <stdio.h>
+#endif
 #include <sys/time.h> /* for struct timeval */
 #ifndef WIN32
 #include <sys/resource.h> /* for getrusage */
 #else
-#include "resource.h"
+/*
+  getrusage
+  Implementation according to:
+  The Open Group Base Specifications Issue 6
+  IEEE Std 1003.1, 2004 Edition
+
+  THIS SOFTWARE IS NOT COPYRIGHTED
+
+  This source code is offered for use in the public domain. You may
+  use, modify or distribute it freely.
+
+  This code is distributed in the hope that it will be useful but
+  WITHOUT ANY WARRANTY. ALL WARRANTIES, EXPRESS OR IMPLIED ARE HEREBY
+  DISCLAIMED. This includes but is not limited to warranties of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  Contributed by:
+  Ramiro Polla <ramiro@lisha.ufsc.br>
+
+  Modified by: 
+ 
+  Manuel Lopez-Ibanez <manuel.lopez-ibanez@manchester.ac.uk>
+    * Remove dependency with <sys/resources.h>
+    
+**************************************************************************/
+/*
+ * resource.h
+ * This file has no copyright assigned and is placed in the Public Domain.
+ * This file is a part of the mingw-runtime package.
+ * No warranty is given; refer to the file DISCLAIMER within the package.
+ *
+ * Based on:
+ * http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/resource.h.html
+ */
+#define RUSAGE_SELF     (1<<0)
+#define RUSAGE_CHILDREN (1<<1)
+
+struct rusage
+{
+    struct timeval ru_utime;	/* user time used */
+    struct timeval ru_stime;	/* system time used */
+};
+
+/* Include only the minimum from windows.h */
+#define WIN32_LEAN_AND_MEAN 
+#include <errno.h>
+#include <stdint.h>
+#include <windows.h>
+
+static void
+FILETIME_to_timeval (struct timeval *tv, FILETIME *ft)
+{
+    int64_t fulltime = ((((int64_t) ft->dwHighDateTime) << 32) 
+                        | ((int64_t) ft->dwLowDateTime));
+    fulltime /= 10LL; /* 100-ns -> us */
+    tv->tv_sec  = fulltime / 1000000L;
+    tv->tv_usec = fulltime % 1000000L;
+}
+static int __cdecl
+getrusage(int who, struct rusage *r_usage)
+{
+    FILETIME starttime;
+    FILETIME exittime;
+    FILETIME kerneltime;
+    FILETIME usertime;
+    
+    if (!r_usage) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    if (who != RUSAGE_SELF) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (GetProcessTimes (GetCurrentProcess (),
+                         &starttime, &exittime, 
+                         &kerneltime, &usertime) == 0) {
+        return -1;
+    }
+    FILETIME_to_timeval (&r_usage->ru_stime, &kerneltime);
+    FILETIME_to_timeval (&r_usage->ru_utime, &usertime);
+    return 0;
+}
 #endif
 
 #include "timer.h"
@@ -95,10 +154,9 @@ double Timer_elapsed_virtual (void)
 
 double Timer_elapsed_real (void)
 {
-    double timer_tmp_time;
     
     gettimeofday (&tp, NULL);
-    timer_tmp_time = TIMER_WALLTIME(tp) - real_time;
+    double timer_tmp_time = TIMER_WALLTIME(tp) - real_time;
 
 #if DEBUG >= 2
     if (timer_tmp_time  < 0.0) {
