@@ -106,6 +106,7 @@ jobs:
           install: >-
             make
           pacboy: >-
+            ${{ matrix.config.cc }}:p
             gsl:p
             pkg-config:p
           
