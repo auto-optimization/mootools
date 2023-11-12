@@ -16,16 +16,19 @@ on:
 jobs:
   build:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
-    name: Build C code on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build C code on ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: windows-latest }
-          - {os: macOS-latest }
-          - {os: ubuntu-latest }
-        
+          - {os: windows-latest, cc: gcc }
+          - {os: ubuntu-latest, cc: gcc }
+          - {os: macOS-latest, cc: clang }
+          - {os: macOS-latest, cc: gcc }
+    env:
+      CC: ${{ matrix.config.cc }}
+      
     steps:
       - uses: actions/checkout@v4
       - name: Install GSL
@@ -47,13 +50,11 @@ jobs:
           popd
           echo "GSL_CFLAGS=-I${{ runner.temp }} }}{GITHUB_ACTION_PATH}/gsl-2.7/include" >> $GITHUB_ENV
           echo "GSL_LIBS=-L${{ runner.temp }}/gsl-2.7/lib/x64" >> $GITHUB_ENV
-          echo "CC=gcc" >> &GITHUB_ENV
-          gcc --version
-          cc --version
+          $CC --version
         
       - run: cd src && ./configure
-      - run: CC=gcc make -C src all DEBUG=1 WARN_FLAGS='-Werror'
-      - run: CC=gcc make -C src all DEBUG=0 WARN_FLAGS='-Werror'
+      - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
+      - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
         
       - name: Functional tests
         run: |
