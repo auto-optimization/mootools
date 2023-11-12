@@ -41,8 +41,8 @@ ffibuilder.set_source(
         ]
     ],
     include_dirs=[libmoocore_path],
-    extra_compile_args=["-flto", "-march=native", "-Ofast"],
-    extra_link_args=["-flto", "-march=native", "-Ofast"],
+    extra_compile_args=["-flto", "-Ofast"],
+    extra_link_args=["-flto", "-Ofast"],
 )
 
 if __name__ == "__main__":
