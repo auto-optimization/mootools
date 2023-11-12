@@ -53,6 +53,10 @@ jobs:
           echo "CC=$CC"
                   
       - run: cd src && ./configure
+        env:
+          GSL_CFLAGS: ${{ env.GSL_CFLAGS }}
+          GSL_LIBS: ${{ env.GSL_LIBS }}
+          
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
         

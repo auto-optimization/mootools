@@ -15,24 +15,26 @@ PKG_DEB_NAME="libgsl-dev"
 PKG_RPM_NAME="libgsl-dev"
 PKG_BREW_NAME="gsl"
 
+gsl_cflags=
 AC_ARG_WITH([gsl-cflags],
             AS_HELP_STRING([--with-gsl-cflags=GSL_CFLAGS],[GNU GSL CFLAGS]),
-            [gls_cflags_path=$withval])
-if test [ -n "gsl_cflags_path" ] ; then
+            [gsl_cflags=$withval])
+if test -n "${gsl_cflags}" ; then
    GSL_CFLAGS="${gsl_cflags}"
 else
-  if test [ -n "${GSL_CFLAGS}" ] ; then
+  if test -n "${GSL_CFLAGS}" ; then
      GSL_CFLAGS="${GSL_CFLAGS}"
   fi
 fi
 
+gsl_libs=
 AC_ARG_WITH([gsl-libs],
             AS_HELP_STRING([--with-gsl-libs=GSL_LIBS],[GNU GSL libs]),
-            [gls_libs=$withval])
-if test [ -n "gsl_libs" ] ; then
+            [gsl_libs=$withval])
+if test -n "${gsl_libs}" ; then
    GSL_LIBS="${gsl_libs}"
 else
-  if test [ -n "${GSL_LIBS}" ] ; then
+  if test -n "${GSL_LIBS}" ; then
      GSL_LIBS="${GSL_LIBS}"
   else
     ## Use gsl-config to find arguments for compiler and linker flags
@@ -64,6 +66,9 @@ else
   fi
 fi
 
+AC_MSG_NOTICE([Creating Makevars with:
+GSL_CFLAGS=$GSL_CFLAGS
+GSL_LIBS=$GSL_LIBS])
 
 # Now substitute these variables in Makevars.in to create Makevars
 AC_SUBST(GSL_CFLAGS)

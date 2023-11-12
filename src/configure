@@ -1734,32 +1734,34 @@ PKG_DEB_NAME="libgsl-dev"
 PKG_RPM_NAME="libgsl-dev"
 PKG_BREW_NAME="gsl"
 
+gsl_cflags=
 
 # Check whether --with-gsl-cflags was given.
 if test ${with_gsl_cflags+y}
 then :
-  withval=$with_gsl_cflags; gls_cflags_path=$withval
+  withval=$with_gsl_cflags; gsl_cflags=$withval
 fi
 
-if test  -n "gsl_cflags_path"  ; then
+if test -n "${gsl_cflags}" ; then
    GSL_CFLAGS="${gsl_cflags}"
 else
-  if test  -n "${GSL_CFLAGS}"  ; then
+  if test -n "${GSL_CFLAGS}" ; then
      GSL_CFLAGS="${GSL_CFLAGS}"
   fi
 fi
 
+gsl_libs=
 
 # Check whether --with-gsl-libs was given.
 if test ${with_gsl_libs+y}
 then :
-  withval=$with_gsl_libs; gls_libs=$withval
+  withval=$with_gsl_libs; gsl_libs=$withval
 fi
 
-if test  -n "gsl_libs"  ; then
+if test -n "${gsl_libs}" ; then
    GSL_LIBS="${gsl_libs}"
 else
-  if test  -n "${GSL_LIBS}"  ; then
+  if test -n "${GSL_LIBS}" ; then
      GSL_LIBS="${GSL_LIBS}"
   else
     ## Use gsl-config to find arguments for compiler and linker flags
@@ -1835,6 +1837,12 @@ fi
   fi
 fi
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: Creating Makevars with:
+GSL_CFLAGS=$GSL_CFLAGS
+GSL_LIBS=$GSL_LIBS" >&5
+printf "%s\n" "$as_me: Creating Makevars with:
+GSL_CFLAGS=$GSL_CFLAGS
+GSL_LIBS=$GSL_LIBS" >&6;}
 
 # Now substitute these variables in Makevars.in to create Makevars
 
