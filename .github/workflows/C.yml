@@ -90,24 +90,12 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           update: true
-          install: git
-          pacboy: >-
-            cc:p
-            gsl:p
+          install: |
+            gcc
+            gsl
+            make
+            pkg-config
           
-      - name: Install GSL
-        if: runner.os == 'Windows'
-        run: |
-          pushd ${{ runner.temp }}
-          curl --silent --show-error -L https://github.com/rwinlib/gsl/archive/v2.7.zip -o gsl.zip
-          7z x gsl.zip
-          popd
-          echo "GSL_CFLAGS=-I${{ runner.temp }} }}{GITHUB_ACTION_PATH}/gsl-2.7/include" >> $GITHUB_ENV
-          echo "GSL_LIBS=-L${{ runner.temp }}/gsl-2.7/lib/x64" >> $GITHUB_ENV
-          echo "CC=gcc" >> &GITHUB_ENV
-          gcc --version
-          cc --version
-        
       - run: cd src && ./configure
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'

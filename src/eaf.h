@@ -57,19 +57,25 @@
 
 /* If the input are always integers, adjusting this type will
    certainly improve performance.  */
-#ifndef objective_t
-#define objective_t double
+#define OBJECTIVE_TYPE_INT 0
+#define OBJECTIVE_TYPE_DOUBLE 1
+#ifndef OBJECTIVE_TYPE
+# define OBJECTIVE_TYPE OBJECTIVE_TYPE_DOUBLE
 #endif
-#if objective_t == double
+#if OBJECTIVE_TYPE == OBJECTIVE_TYPE_DOUBLE
+# define objective_t double
 # define objective_MAX INFINITY
 # define objective_MIN -INFINITY
 # define objective_t_scanf_format "%lf"
 # define read_objective_t_data read_double_data
-#else
+#elif OBJECTIVE_TYPE == OBJECTIVE_TYPE_INT 
+# define objective_t int
 # define objective_MAX INT_MAX
 # define objective_MIN INT_MIN
 # define objective_t_scanf_format "%d"
 # define read_objective_t_data read_int_data
+#else
+#error "Unknown OBJECTIVE_TYPE= value"
 #endif
 
 #include "bit_array.h"
