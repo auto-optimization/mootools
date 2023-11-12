@@ -24,7 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
-        src: "./python"
+        with:
+          src: "./python"
 
   run-tests:
     timeout-minutes: 15
