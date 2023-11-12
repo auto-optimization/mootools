@@ -58,8 +58,11 @@ jobs:
         env:
           GSL_CFLAGS: ${{ env.GSL_CFLAGS }}
           GSL_LIBS: ${{ env.GSL_LIBS }}
-          
+        
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
+        if: runner.os != 'Windows'
+        # FIXME: How to install sanitizers?
+        
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
         
       - name: Functional tests
@@ -85,19 +88,23 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+
     steps:
       - name: Disable autocrlf
         shell: pwsh
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
+          
       - uses: actions/checkout@v4
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.sys }}
           update: true
+          install: >-
+            make
           pacboy: >-
-            make:p
             gsl:p
             pkg-config:p
           
