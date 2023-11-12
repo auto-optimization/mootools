@@ -15,5 +15,7 @@ doc:
 
 clean:
 	$(RM) -rf .pytest_cache/ .tox/ build/ src/*.egg-info/ __pycache__/
+	find . -name '*.so' | xargs $(RM)
+	find . -name '__pycache__' | xargs $(RM) -r
 	$(MAKE) -C doc clean
 

@@ -14,9 +14,9 @@ on:
       - "src/**"
       - "python/**"
 
-concurrency:
-  group: ${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.event.pull_request.number || github.run_id }}
+#   cancel-in-progress: true
 
 jobs:
   lint-black:
@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ matrix.c.os }}
     strategy:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
-      fail-fast: true
+      fail-fast: false
       # The maximum number of jobs that can run simultaneously
       max-parallel: 1
       matrix:

@@ -1,5 +1,5 @@
 import numpy as np
-from moocore.c_bindings import ffi
+from moocore._libmoocore import ffi
 
 
 def np2d_to_double_array(x):
