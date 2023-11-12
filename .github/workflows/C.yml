@@ -12,7 +12,6 @@ on:
       - '.github/workflows/C.yml'
       - 'src/**'
 
-
 jobs:
   build:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
@@ -40,6 +39,11 @@ jobs:
           echo "GSL_LIBS=-L$(RUNNER_TEMP)/gsl-2.7/lib/x64" >> $GITHUB_ENV
         shell: bash
 
+      - name: Add Msys64 to PATH (https://github.com/actions/runner-images/issues/1613)
+        if: runner.os == 'Windows'
+        run: echo "::add-path::/c/msys64/mingw64/bin:/c/msys64/usr/bin"
+        shell: bash
+        
       - run: cd src && ./configure
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
