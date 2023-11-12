@@ -1,13 +1,14 @@
 name: C
+
 on:
   push:
-    branches: [ main ]
+    branches-ignore: [gh-pages]
     paths:
       - '.github/workflows/C.yml'
       - 'src/**'
       
   pull_request:
-    branches: [ main ]
+    branches-ignore: [gh-pages]
     paths:
       - '.github/workflows/C.yml'
       - 'src/**'
@@ -39,12 +40,11 @@ jobs:
           echo "GSL_LIBS=-L$(RUNNER_TEMP)/gsl-2.7/lib/x64" >> $GITHUB_ENV
         shell: bash
 
-    - name: Put MSYS2_MinGW64 on PATH (https://github.com/actions/runner-images/issues/1613)
-      if: runner.os == 'Windows'
-      run: |
-        echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        echo "${{ runner.temp }}/msys64/mingw64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        (https://github.com/actions/runner-images/issues/1613)
+      - name: Put MSYS2_MinGW64 on PATH (https://github.com/actions/runner-images/issues/1613)
+        if: runner.os == 'Windows'
+        run: |
+          echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "${{ runner.temp }}/msys64/mingw64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         
       - run: cd src && ./configure
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
