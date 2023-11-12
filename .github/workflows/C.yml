@@ -29,22 +29,24 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install gsl
         
-      - name: Install GSL
-        if: runner.os == 'Windows'
-        run: |
-          pushd $RUNNER_TEMP
-          curl --silent --show-error -L https://github.com/rwinlib/gsl/archive/v2.7.zip -o gsl.zip
-          7z x gsl.zip
-          popd
-          echo "GSL_CFLAGS=-I${RUNNER_TEMP}/gsl-2.7/include" >> $GITHUB_ENV
-          echo "GSL_LIBS=-L$(RUNNER_TEMP)/gsl-2.7/lib/x64" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Put MSYS2_MinGW64 on PATH (https://github.com/actions/runner-images/issues/1613)
+      - name: Put MSYS2_MinGW64 on PATH
         if: runner.os == 'Windows'
         run: |
           echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "${{ runner.temp }}/msys64/mingw64/usr/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          
+      - name: Install GSL
+        if: runner.os == 'Windows'
+        run: |
+          pushd ${{ runner.temp }}
+          curl --silent --show-error -L https://github.com/rwinlib/gsl/archive/v2.7.zip -o gsl.zip
+          7z x gsl.zip
+          popd
+          echo "GSL_CFLAGS=-I${{ runner.temp }}/gsl-2.7/include" >> $GITHUB_ENV
+          echo "GSL_LIBS=-L${{ runner.temp }}/gsl-2.7/lib/x64" >> $GITHUB_ENV
+          gcc --version
+          cc --version
+        shell: bash
         
       - run: cd src && ./configure
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
