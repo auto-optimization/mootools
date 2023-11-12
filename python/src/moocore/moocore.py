@@ -8,6 +8,7 @@ import shutil
 import tempfile
 from ._utils import *
 
+
 class ReadDatasetsError(Exception):
     """Custom exception class for an error returned by the read_datasets function
 
@@ -102,9 +103,11 @@ def read_datasets(filename):
     # Convert 1d numpy array to 2d array with (n obj... , sets) columns
     return np.frombuffer(data_buf).reshape((-1, ncols_p[0]))
 
+
 def _parse_maximise(maximise, nobj):
     # Converts maximise array or single bool to ndarray format
     return atleast_1d_of_length_n(maximise, nobj).astype(bool)
+
 
 def _unary_refset_common(data, ref, maximise):
     # Convert to numpy.array in case the user provides a list.  We use
@@ -169,7 +172,9 @@ def igd(data, ref, maximise=False):
     1.0627908666722465
 
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(data, ref, maximise)
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
     return lib.IGD(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
@@ -178,7 +183,9 @@ def igd_plus(data, ref, maximise=False):
 
     See :func:`igd`
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(data, ref, maximise)
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
     return lib.IGD_plus(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
@@ -190,11 +197,12 @@ def avg_hausdorff_dist(data, ref, maximise=False, p=1):
     if p <= 0:
         raise ValueError(f"'p' must be larger than zero")
 
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(data, ref, maximise)
-    p = ffi.cast("unsigned int", p)
-    return lib.avg_Hausdorff_dist(
-        data_p, nobj, npoints, ref_p, ref_size, maximise_p, p
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
     )
+    p = ffi.cast("unsigned int", p)
+    return lib.avg_Hausdorff_dist(data_p, nobj, npoints, ref_p, ref_size, maximise_p, p)
+
 
 def epsilon_additive(data, ref, maximise=False):
     """Computes the epsilon metric, either additive or multiplicative. 
@@ -229,8 +237,10 @@ def epsilon_additive(data, ref, maximise=False):
     >>> moocore.epsilon_mult(dat, ref = ref)
     3.5
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(data, ref, maximise)
-    return lib.epsilon_additive (data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.epsilon_additive(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
 
 
 def epsilon_mult(data, ref, maximise=False):
@@ -239,8 +249,11 @@ def epsilon_mult(data, ref, maximise=False):
     See :func:`epsilon_additive`
 
     """
-    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(data, ref, maximise)
-    return lib.epsilon_mult (data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+    data_p, nobj, npoints, ref_p, ref_size, maximise_p = _unary_refset_common(
+        data, ref, maximise
+    )
+    return lib.epsilon_mult(data_p, nobj, npoints, ref_p, ref_size, maximise_p)
+
 
 # FIXME: TODO maximise option
 def hypervolume(data, ref):
@@ -360,7 +373,7 @@ def filter_dominated(data, maximise=False, keep_weakly=False):
 #     """Filter dominated sets for multiple sets
 
 #     Executes the :func:`filter_dominated` function for every set in a dataset \
-#     and returns back a dataset, preserving set 
+#     and returns back a dataset, preserving set
 
 #     Examples
 #     --------
@@ -383,7 +396,7 @@ def filter_dominated(data, maximise=False, keep_weakly=False):
 
 #     See Also
 #     --------
-#     This function for data without set numbers - :func:`filter_dominated` 
+#     This function for data without set numbers - :func:`filter_dominated`
 #     """
 #     # FIXME: it will be faster to stack filter_set, then do:
 #     # dataset[filter_set, :]
@@ -513,6 +526,7 @@ def normalise(data, to_range=[0.0, 1.0], lower=np.nan, upper=np.nan, maximise=Fa
 #         )
 #     return dataset
 
+
 def eaf(data, percentiles=[]):
     """Empirical attainment function (EAF) calculation
     
@@ -557,35 +571,34 @@ def eaf(data, percentiles=[]):
     data = np.asfarray(data)
     ncols = data.shape[1]
     if ncols < 3:
-        raise ValueError("'data' must have at least 3 columns (2 objectives + set column)")
+        raise ValueError(
+            "'data' must have at least 3 columns (2 objectives + set column)"
+        )
     if ncols > 4:
-        raise NotImplementedError("Only 2D or 3D datasets are currently supported for computing the EAF")
-    
+        raise NotImplementedError(
+            "Only 2D or 3D datasets are currently supported for computing the EAF"
+        )
+
     _, cumsizes = np.unique(data[:, -1], return_counts=True)
     nsets = len(cumsizes)
     cumsizes = np.cumsum(cumsizes)
     cumsizes_p, ncumsizes = np1d_to_int_array(cumsizes)
     if len(percentiles) == 0:
-        percentiles = np.arange(1., nsets+1) * (100.0 / nsets)
+        percentiles = np.arange(1.0, nsets + 1) * (100.0 / nsets)
     else:
         percentiles = np.unique(np.asfarray(percentiles))
     percentile_p, npercentiles = np1d_to_double_array(percentiles)
 
     # Get C pointers + matrix size for calling CFFI generated extension module
-    data_p, npoints, nobjs = np2d_to_double_array(data[:,:-1])
+    data_p, npoints, nobjs = np2d_to_double_array(data[:, :-1])
     eaf_npoints = ffi.new("int *")
     eaf_data_p = lib.eaf_compute_matrix(
-        eaf_npoints,
-        data_p,
-        nobjs,
-        cumsizes_p,
-        ncumsizes,
-        percentile_p,
-        npercentiles
+        eaf_npoints, data_p, nobjs, cumsizes_p, ncumsizes, percentile_p, npercentiles
     )
     eaf_npoints = eaf_npoints[0]
     eaf_buf = ffi.buffer(eaf_data_p, ffi.sizeof("double") * eaf_npoints * ncols)
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
+
 
 # def eafdiff(x, y, intervals = None, maximise = False):
 #     x = np.asfarray(x).copy()
@@ -611,7 +624,7 @@ def eaf(data, percentiles=[]):
 #     else:
 #         assert type(intervals) == int
 #         intervals = min(intervals, int(nsets / 2.0))
-    
+
 #     data_p, npoints, ncols = np2d_to_double_array(data)
 
 #     # FIXME: We should remove duplicated rows in C code.
@@ -619,7 +632,7 @@ def eaf(data, percentiles=[]):
 #     # FIXME: Check that we do not generate duplicated nor overlapping
 #     # rectangles with different colors. That would be a bug.
 
-    
+
 # def get_diff_eaf(x, y, intervals=None, debug=False):
 
 #     if np.min(x[:, -1]) != 1 or np.min(y[:, -1]) != 1:
@@ -685,7 +698,7 @@ def eaf(data, percentiles=[]):
 
 #     dist : dict
 #         Weight distribution. See Details.
-    
+
 #     nsamples : int
 #         Number of samples for Monte-Carlo sampling.
 
@@ -698,7 +711,7 @@ def eaf(data, percentiles=[]):
 
 #     A weight distribution  AugBadBroZit2009gecco can be provided via the `dist` argument. The ones currently supported are:
 #      * `dict(type="uniform")` corresponds to the default hypervolume (unweighted).
-#      * `dict(type="point")` describes a goal in the objective space, where `mu` gives the coordinates of the goal. The resulting weight distribution is a multivariate normal distribution centred at the goal. 
+#      * `dict(type="point")` describes a goal in the objective space, where `mu` gives the coordinates of the goal. The resulting weight distribution is a multivariate normal distribution centred at the goal.
 #      * `dict(type="exponential")` describes an exponential distribution with rate parameter `1/mu`, i.e., \eqn{\lambda = \frac{1}{\mu}}.
 
 #     Returns
@@ -716,18 +729,18 @@ def eaf(data, percentiles=[]):
 
 #     '''
 #     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1)
-    
+
 #     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1)
-    
+
 #     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1,
 #     #           dist = list(type="exponential", mu=0.2))
-    
+
 #     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1,
 #     #           dist = list(type="exponential", mu=0.2))
-    
+
 #     # whv_hype (matrix(2, ncol=2), reference = 4, ideal = 1,
 #     #           dist = list(type="point", mu=c(1,1)))
-    
+
 #     # whv_hype (matrix(c(3,1), ncol=2), reference = 4, ideal = 1,
 #     #           dist = list(type="point", mu=c(1,1)))
 
@@ -779,5 +792,4 @@ def eaf(data, percentiles=[]):
 #     hv = lib.whv_hype_estimate(data_p, npoints, ideal, reference,
 #                                dist_p, nsamples);
 #     lib.hype_dist_free(dist_p)
-#     return hv    
-
+#     return hv

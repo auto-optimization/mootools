@@ -161,7 +161,11 @@ pip install -r requirements_dev.txt
 
 Pre-commit is a package that should now be installed, it adds some hooks that will execute when you make a new git commit, such as formatting the code with `black`.The `.pre-commmit-config.yaml` configures which hooks are used. You need to install these hooks locally using:
 
-`pre-commit install`
+    pre-commit install
+
+It is a good idea to run the them:
+
+    pre-commit run --all-files
 
 #### Make sure you have a reccomended C compiler
 

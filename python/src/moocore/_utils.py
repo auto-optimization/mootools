@@ -16,11 +16,13 @@ def np1d_to_double_array(x):
     x = ffi.from_buffer("double []", x)
     return x, size
 
+
 def np1d_to_int_array(x):
     x = np.ascontiguousarray(x, dtype=np.intc())
     size = ffi.cast("int", x.shape[0])
     x = ffi.from_buffer("int []", x)
     return x, size
+
 
 def atleast_1d_of_length_n(x, n):
     x = np.atleast_1d(x)
@@ -31,4 +33,3 @@ def atleast_1d_of_length_n(x, n):
             f"array must have same number of elements as data columns {x.shape[0]} != {n}"
         )
     return x
-

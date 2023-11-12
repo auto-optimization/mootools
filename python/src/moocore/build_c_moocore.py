@@ -29,17 +29,20 @@ ffibuilder.set_source(
     #include "epsilon.h"
     #include "eaf.h"
     """,
-    sources= [ "src/moocore/libmoocore/" + f for f in [
-        "avl.c",
-        "eaf.c",
-        "eaf3d.c",
-        "hv.c",
-        "io.c",
-        "libutil.c", # For fatal_error()
-    ]],
+    sources=[
+        "src/moocore/libmoocore/" + f
+        for f in [
+            "avl.c",
+            "eaf.c",
+            "eaf3d.c",
+            "hv.c",
+            "io.c",
+            "libutil.c",  # For fatal_error()
+        ]
+    ],
     include_dirs=[libmoocore_path],
-    extra_compile_args = ["-flto", "-march=native", "-Ofast"],
-    extra_link_args = ["-flto",  "-march=native", "-Ofast"],
+    extra_compile_args=["-flto", "-march=native", "-Ofast"],
+    extra_link_args=["-flto", "-march=native", "-Ofast"],
 )
 
 if __name__ == "__main__":

@@ -98,6 +98,7 @@ def test_hv_wrong_ref():
         hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
     assert expt.type == ValueError
 
+
 def test_igd():
     ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
     A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
@@ -136,7 +137,9 @@ def test_is_nondominated():
     expct_nondom_weak = np.array([[1, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 0]])
 
     assert np.array_equal(non_dominated_weak, expct_nondom_weak)
-    assert np.array_equal(moocore.filter_dominated(T, keep_weakly=True), expct_nondom_weak)
+    assert np.array_equal(
+        moocore.filter_dominated(T, keep_weakly=True), expct_nondom_weak
+    )
 
     x = np.array(
         [
@@ -156,10 +159,12 @@ def test_is_nondominated():
     assert np.array_equal(moocore.filter_dominated(x, maximise=True), expected_x_nondom)
     minmax = np.array([1, 2, 2, 1, 5, 6, 7, 5]).reshape((-1, 2))
     assert np.array_equal(
-        moocore.filter_dominated(minmax, maximise=[True, False]), np.array([[2, 1], [7, 5]])
+        moocore.filter_dominated(minmax, maximise=[True, False]),
+        np.array([[2, 1], [7, 5]]),
     )
     assert np.array_equal(
-        moocore.filter_dominated(minmax, maximise=[False, True]), np.array([[1, 2], [5, 6]])
+        moocore.filter_dominated(minmax, maximise=[False, True]),
+        np.array([[1, 2], [5, 6]]),
     )
 
 
@@ -198,15 +203,18 @@ def test_normalise():
 
 def test_docstrings():
     import doctest
+
     doctest.FLOAT_EPSILON = 1e-9
     # Run doctests for "moocore" module and fail if one of the docstring tests is incorrect.
     # Pass in the "eaf" module so that the docstrings don't have to import every time
-    doctest.testmod(moocore.moocore, raise_on_error=True, extraglobs={"moocore": moocore})
+    doctest.testmod(
+        moocore.moocore, raise_on_error=True, extraglobs={"moocore": moocore}
+    )
 
 
 def test_eaf(request):
     test_data_path = request.path.parent.joinpath("test_data")
-    
+
     # FIXME ALG_1_dat is creating slightly different percentile values than expected in its EAF output
     test_names = [
         "input1.dat",
@@ -228,12 +236,23 @@ def test_eaf(request):
         dataset = moocore.read_datasets(test_data_path.joinpath(test_name))
         eaf_test = moocore.eaf(dataset)
         eaf_pct_test = moocore.eaf(dataset, percentiles=[0, 50, 100])
-        expected_eaf_result = np.loadtxt(test_data_path.joinpath(f"expected_output/eaf/{expected_eaf_name}"))
-        expected_eaf_pct_result = np.loadtxt(test_data_path.joinpath(f"expected_output/eaf/pct_{expected_eaf_name}"))
-        assert eaf_test.shape == expected_eaf_result.shape, f"Shapes of {test_name} and {expected_eaf_name} do not match"
-        assert np.allclose(eaf_test, expected_eaf_result), f"{expected_eaf_name} test failed"
-        assert np.allclose(eaf_pct_test, expected_eaf_pct_result), f"pct_{expected_eaf_name} test failed"
-        
+        expected_eaf_result = np.loadtxt(
+            test_data_path.joinpath(f"expected_output/eaf/{expected_eaf_name}")
+        )
+        expected_eaf_pct_result = np.loadtxt(
+            test_data_path.joinpath(f"expected_output/eaf/pct_{expected_eaf_name}")
+        )
+        assert (
+            eaf_test.shape == expected_eaf_result.shape
+        ), f"Shapes of {test_name} and {expected_eaf_name} do not match"
+        assert np.allclose(
+            eaf_test, expected_eaf_result
+        ), f"{expected_eaf_name} test failed"
+        assert np.allclose(
+            eaf_pct_test, expected_eaf_pct_result
+        ), f"pct_{expected_eaf_name} test failed"
+
+
 # def test_get_diff_eaf():
 #     diff1 = np.loadtxt("tests/test_data/100_diff_points_1.txt")
 #     diff2 = np.loadtxt("tests/test_data/100_diff_points_2.txt")
@@ -249,6 +268,4 @@ def test_eaf(request):
 #     assert np.allclose(diff, expected_diff12)
 #     assert np.allclose(diff_intervals, expected_diff12_intervals3)
 
-    # FIXME add more tests including intervals
-
-
+# FIXME add more tests including intervals
