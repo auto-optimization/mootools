@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=42","cffi>=1.15.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moocore"
+version = "0.0.9999"
+authors = [
+  { name="Fergus Rooney", email="fergus.rooney@outlook.com" }, {name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk"}
+]
+description = "Core Algorithms for Multi-Objective Optimization"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+  "cffi >=1.15.1",
+  "numpy >= 1.22.3",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://auto-optimization.github.io/moocore/"
+Documentation = "https://auto-optimization.github.io/moocore/"
+Source = "https://github.com/auto-optimization/moocore/"
+Tracker = "https://github.com/auto-optimization/moocore/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+pythonpath = [
+  "src"
+]
+testpaths = [
+    "tests"
+]

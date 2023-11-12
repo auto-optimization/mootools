@@ -1,0 +1,219 @@
+name: R
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths:
+      - ".github/workflows/R.yml"
+      - "src/**"
+      - "r/**"
+  pull_request:
+    branches-ignore:  [gh-pages]
+    paths:
+      - ".github/workflows/R.yml"
+      - "src/**"
+      - "r/**"
+
+env:
+  R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+  _R_CHECK_FORCE_SUGGESTS_: false
+  _R_CHECK_CRAN_INCOMING_REMOTE_: false
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+
+jobs:
+  R-CMD-check:
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ${{ matrix.config.os }}
+    name: Check ${{ matrix.config.os }} (${{ matrix.config.r }})
+    strategy:
+      # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
+      fail-fast: true
+      matrix:
+        config:
+          - {os: windows-latest, r: 'release'}
+          - {os: macOS-latest,   r: 'release'}
+          - {os: ubuntu-22.04,   r: 'release'}
+          - {os: ubuntu-20.04,   r: '3.6'}
+          # Use latest ubuntu to make it easier to install dependencies
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Disable autocrlf
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+      
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::remotes, any::rcmdcheck
+          needs: check
+          working-directory: 'r'
+          
+      - name: Install macos dependencies
+        if: runner.os == 'macOS'
+        run: brew install gsl gawk automake
+
+      - name: Check (CRAN)
+        env:
+          NOT_CRAN: false
+        run: |
+          setwd("r/")
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check", timeout = 360)
+        shell: Rscript {0}
+
+      - name: Check (NOT CRAN)
+        if: success()
+        env:
+          NOT_CRAN: true
+        run: |
+          setwd("r/")
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--run-donttest", "--run-dontrun", "--timings"), error_on = "warning", check_dir = "check", timeout = 360)
+        shell: Rscript {0}
+
+      - name: Show testthat output
+        if: failure()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Install package
+        run: |
+          remotes::install_local("R", force = TRUE, upgrade = "never", build_manual = TRUE, build_vignettes = TRUE)
+        shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: r/check
+
+  rchk:
+    needs: R-CMD-check
+    name: rchk ${{ matrix.config.os }} (${{ matrix.config.r }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'release'}
+    container:
+      image: rhub/ubuntu-rchk
+      options: --user=root
+      
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      
+    steps:
+      - uses: actions/checkout@v4
+        
+      - uses: r-lib/actions/run-rchk@v2
+        with:
+          setup-only: true
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+          r-version: ${{ matrix.config.r }}
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, local::.
+          needs: check
+          working-directory: 'r'
+          
+      - uses: r-lib/actions/run-rchk@v2
+        with:
+          run-only: true
+
+  coverage:
+    needs: R-CMD-check
+    name: Coverage ${{ matrix.config.os }} (${{ matrix.config.r }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'release'}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+ 
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+          r-version: ${{ matrix.config.r }}
+          
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::covr
+          needs: coverage
+          working-directory: 'r'
+
+      - name: Test coverage
+        env:
+          NOT_CRAN: false
+        run: |
+          setwd("r/")
+          covr::codecov(type="all", quiet=FALSE, commentDonttest = FALSE, commentDontrun = FALSE)
+        shell: Rscript {0}
+
+  pkgdown:
+    needs: R-CMD-check
+    if: contains('
+        refs/heads/master
+        refs/heads/main
+      ', github.ref) && github.event_name == 'push'
+    name: pkgdown ${{ matrix.config.os }} (${{ matrix.config.r }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'release'}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+          working-directory: 'r'
+
+      - name: Deploy package
+        if: success() && runner.os == 'Linux' && matrix.config.r == 'release' && github.event_name == 'push'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          Rscript -e 'setwd("r/");pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
+        shell: bash {0}
+
