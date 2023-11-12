@@ -142,7 +142,7 @@ jobs:
           run-only: true
 
   coverage:
-    needs: rchk
+    needs: R-CMD-check
     name: Coverage ${{ matrix.config.os }} (${{ matrix.config.r }})
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -214,7 +214,6 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          setwd("R/")
-          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
+          Rscript -e 'setwd("R/");pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
         shell: bash {0}
 
