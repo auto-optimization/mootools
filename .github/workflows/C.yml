@@ -1,16 +1,15 @@
-# .github/workflows/build.yaml
 name: C
 on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/c.yaml'
+      - '.github/workflows/C.yml'
       - 'src/**'
       
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/c.yaml'
+      - '.github/workflows/C.yml'
       - 'src/**'
 
 concurrency:
@@ -19,14 +18,15 @@ concurrency:
 
 jobs:
   build:
-    name: build
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    name: Build C code on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         #os: [windows-latest, macOS-latest, ubuntu-latest]
         os: [macOS-latest, ubuntu-latest]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install GSL
         if: runner.os == 'macOS'
         run: brew install gsl
