@@ -81,10 +81,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sys:
-          - clang64
-          - mingw64
-          - ucrt64
+        config:
+          - { sys: clang64, cc: clang }
+          - { sys: mingw64, cc: gcc }
+          - { sys: ucrt64, cc: gcc }
+          
     defaults:
       run:
         shell: msys2 {0}
@@ -100,7 +101,7 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.sys }}
+          msystem: ${{ matrix.config.sys }}
           update: true
           install: >-
             make
@@ -109,8 +110,8 @@ jobs:
             pkg-config:p
           
       - run: cd src && ./configure
-      - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
-      - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
+      - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror' CC=${{ matrix.config.cc }}
+      - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror' CC=${{ matrix.config.cc }}
         
       - name: Functional tests
         run: |
