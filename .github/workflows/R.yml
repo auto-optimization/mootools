@@ -6,13 +6,13 @@ on:
     paths:
       - ".github/workflows/R.yml"
       - "src/**"
-      - "R/**"
+      - "r/**"
   pull_request:
     branches-ignore:  [gh-pages]
     paths:
       - ".github/workflows/R.yml"
       - "src/**"
-      - "R/**"
+      - "r/**"
 
 env:
   R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -62,7 +62,7 @@ jobs:
         with:
           extra-packages: any::remotes, any::rcmdcheck
           needs: check
-          working-directory: 'R'
+          working-directory: 'r'
           
       - name: Install macos dependencies
         if: runner.os == 'macOS'
@@ -72,7 +72,7 @@ jobs:
         env:
           NOT_CRAN: false
         run: |
-          setwd("R/")
+          setwd("r/")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check", timeout = 360)
         shell: Rscript {0}
@@ -82,7 +82,7 @@ jobs:
         env:
           NOT_CRAN: true
         run: |
-          setwd("R/")
+          setwd("r/")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--run-donttest", "--run-dontrun", "--timings"), error_on = "warning", check_dir = "check", timeout = 360)
         shell: Rscript {0}
@@ -102,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: R/check
+          path: r/check
 
   rchk:
     needs: R-CMD-check
@@ -135,7 +135,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck, local::.
           needs: check
-          working-directory: 'R'
+          working-directory: 'r'
           
       - uses: r-lib/actions/run-rchk@v2
         with:
@@ -167,13 +167,13 @@ jobs:
         with:
           extra-packages: any::covr
           needs: coverage
-          working-directory: 'R'
+          working-directory: 'r'
 
       - name: Test coverage
         env:
           NOT_CRAN: false
         run: |
-          setwd("R/")
+          setwd("r/")
           covr::codecov(type="all", quiet=FALSE, commentDonttest = FALSE, commentDontrun = FALSE)
         shell: Rscript {0}
 
@@ -207,13 +207,13 @@ jobs:
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
-          working-directory: 'R'
+          working-directory: 'r'
 
       - name: Deploy package
         if: success() && runner.os == 'Linux' && matrix.config.r == 'release' && github.event_name == 'push'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          Rscript -e 'setwd("R/");pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
+          Rscript -e 'setwd("r/");pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
         shell: bash {0}
 
