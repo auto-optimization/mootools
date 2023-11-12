@@ -21,7 +21,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macOS-latest, ubuntu-latest]
+        config:
+          - {os: windows-latest }
+          - {os: macOS-latest }
+          - {os: ubuntu-latest }
         
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +47,63 @@ jobs:
           popd
           echo "GSL_CFLAGS=-I${{ runner.temp }} }}{GITHUB_ACTION_PATH}/gsl-2.7/include" >> $GITHUB_ENV
           echo "GSL_LIBS=-L${{ runner.temp }}/gsl-2.7/lib/x64" >> $GITHUB_ENV
+          echo "CC=gcc" >> &GITHUB_ENV
+          gcc --version
+          cc --version
+        
+      - run: cd src && ./configure
+      - run: CC=gcc make -C src all DEBUG=1 WARN_FLAGS='-Werror'
+      - run: CC=gcc make -C src all DEBUG=0 WARN_FLAGS='-Werror'
+        
+      - name: Functional tests
+        run: |
+          ./bin/dominatedsets --help
+          ./bin/dominatedsets --help
+          ./bin/eaf --help
+          ./bin/epsilon --help
+          ./bin/hv --help
+          ./bin/igd --help
+          ./bin/ndsort --help
+          ./bin/nondominated --help
+
+  msys2:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sys:
+          - clang64
+          - mingw64
+          - ucrt64
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Disable autocrlf
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          update: true
+          install: git
+          pacboy: >-
+            cc:p
+            gsl:p
+          
+      - name: Install GSL
+        if: runner.os == 'Windows'
+        run: |
+          pushd ${{ runner.temp }}
+          curl --silent --show-error -L https://github.com/rwinlib/gsl/archive/v2.7.zip -o gsl.zip
+          7z x gsl.zip
+          popd
+          echo "GSL_CFLAGS=-I${{ runner.temp }} }}{GITHUB_ACTION_PATH}/gsl-2.7/include" >> $GITHUB_ENV
+          echo "GSL_LIBS=-L${{ runner.temp }}/gsl-2.7/lib/x64" >> $GITHUB_ENV
+          echo "CC=gcc" >> &GITHUB_ENV
           gcc --version
           cc --version
         
@@ -61,4 +121,3 @@ jobs:
           ./bin/igd --help
           ./bin/ndsort --help
           ./bin/nondominated --help
-
