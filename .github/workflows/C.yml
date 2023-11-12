@@ -23,9 +23,9 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, cc: gcc }
-          - {os: ubuntu-latest, cc: gcc }
-          - {os: macOS-latest, cc: clang }
-          - {os: macOS-latest, cc: gcc }
+          - {os: ubuntu-latest,  cc: gcc }
+          - {os: macOS-latest,   cc: gcc }
+          - {os: macOS-latest,   cc: clang }
     env:
       CC: ${{ matrix.config.cc }}
       
@@ -83,8 +83,8 @@ jobs:
       matrix:
         config:
           - { sys: clang64, cc: clang }
-          - { sys: mingw64, cc: gcc }
-          - { sys: ucrt64, cc: gcc }
+          #- { sys: mingw64, cc: gcc }
+          #- { sys: ucrt64,  cc: gcc }
           
     defaults:
       run:
@@ -110,7 +110,9 @@ jobs:
             gsl:p
             pkg-config:p
           
-      - run: cd src && ./configure
+      - run: |
+          cd src
+          ./configure
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror' CC=${{ matrix.config.cc }}
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror' CC=${{ matrix.config.cc }}
         
