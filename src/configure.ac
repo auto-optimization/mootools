@@ -8,7 +8,7 @@
 ## Licensed under GNU GPL 2 or later
 
 # The version set here will propagate to other files from here
-AC_INIT([mootools], 0.9)
+AC_INIT([mootools],[0.9])
 
 PKG_CONFIG_NAME="gsl-config"
 PKG_DEB_NAME="libgsl-dev"
@@ -16,8 +16,7 @@ PKG_RPM_NAME="libgsl-dev"
 PKG_BREW_NAME="gsl"
 
 AC_ARG_WITH([gsl-cflags],
-            AC_HELP_STRING([--with-gsl-cflags=GSL_CFLAGS],
-                           [GNU GSL CFLAGS]),
+            AS_HELP_STRING([--with-gsl-cflags=GSL_CFLAGS],[GNU GSL CFLAGS]),
             [gls_cflags_path=$withval])
 if test [ -n "gsl_cflags_path" ] ; then
    GSL_CFLAGS="${gsl_cflags}"
@@ -28,8 +27,7 @@ else
 fi
 
 AC_ARG_WITH([gsl-libs],
-            AC_HELP_STRING([--with-gsl-libs=GSL_LIBS],
-                           [GNU GSL libs]),
+            AS_HELP_STRING([--with-gsl-libs=GSL_LIBS],[GNU GSL libs]),
             [gls_libs=$withval])
 if test [ -n "gsl_libs" ] ; then
    GSL_LIBS="${gsl_libs}"
