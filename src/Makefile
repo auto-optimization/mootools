@@ -53,29 +53,31 @@ ifneq ($(findstring $(MAKEFLAGS),s),s)
   endif
 endif
 
-ifeq ($(OS),Windows_NT)
-  uname_S:=Windows
-  ECHO = @echo $(1)
-  RM=del /Q
-  MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
-  -include Makevars.win
-else
-  uname_S := $(shell gcc -dumpmachine 2>&1)
-  uname_S := $(subst MINGW,mingw,$(uname_S))
-  ifneq (,$(findstring mingw,$(uname_S)))
-    MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
-    RM=del /Q
-    uname_S:=mingw
-    ECHO = @echo $(1)
-  else
-    ## Detect system and machine type:
-    uname_S :=$(shell uname -s || echo unknown)
-    uname_M :=$(shell uname -m || echo unknown)
-    ECHO = @echo "$(1)"
-    MKDIR= @mkdir -p $(1)
-   include Makevars
-  endif
-endif
+# ifeq ($(OS),Windows_NT)
+#   uname_S:=Windows
+#   ECHO = @echo $(1)
+#   RM=del /Q
+#   MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
+#   -include Makevars.win
+# else
+#   uname_S := $(shell gcc -dumpmachine 2>&1)
+#   uname_S := $(subst MINGW,mingw,$(uname_S))
+#   ifneq (,$(findstring mingw,$(uname_S)))
+#     MKDIR= @mkdir $(subst /,\,$(1)) > nul 2>&1 || (exit 0)
+#     RM=del /Q
+#     uname_S:=mingw
+#     ECHO = @echo $(1)
+#   else
+#     ## Detect system and machine type:
+#     uname_S :=$(shell uname -s || echo unknown)
+#     uname_M :=$(shell uname -m || echo unknown)
+#     ECHO = @echo "$(1)"
+#    include Makevars
+#   endif
+# endif
+MKDIR= @mkdir -p $(1)
+
+-include Makevars
 
 DEBUG?=0
 BINDIR=../bin
@@ -119,12 +121,6 @@ hvexe=$(BINDIR)/hv$(EXE)
 
 default: $(igd) $(epsilon) $(dominatedsets) $(nondominated) $(ndsort) $(eafexe) $(hvexe)
 
-configure: configure.ac
-	autoreconf configure.ac
-
-Makevars: configure Makevars.in
-	./configure
-
 eaf: $(eafexe)
 
 hv: $(hvexe)
@@ -163,9 +159,9 @@ $(igd) $(epsilon) $(nondominated) $(dominatedsets) $(ndsort) $(eafexe) $(hvexe):
 $(OBJS): $(HEADERS) common.h gcc_attribs.h
 
 clean:
-	@-$(RM) config.status config.log Makevars 
-	@-$(RM) -r autom4te.cache
+	@-$(RM) config.status config.log
 	@-$(RM) Hypervolume_MEX.mex
+
 	$(call ECHO,---> Removing $(igd) <---)
 	@$(RM) $(igd)
 

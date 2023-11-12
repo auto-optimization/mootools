@@ -22,7 +22,7 @@ all: $(SHLIB)
 $(SHLIB): $(OBJECTS) 
 
 clean:
-	@-rm -f *.o *.so *.dll
+	@-$(RM) *.o *.so *.dll
 	$(MAKE) -C moocore clean EXE=$(EXEEXT) BINDIR=./
 
 

@@ -10,7 +10,8 @@ Depends: R (>= 3.5)
 Imports:
         matrixStats,
         Rdpack
-Suggests: testthat (>= 3.0.0)
+Suggests: testthat (>= 3.0.0),
+          withr    
 License: LGPL (>= 2)
 BugReports: https://github.com/auto-optimization/moocore/issues
 URL: https://github.com/auto-optimization/moocore/, 

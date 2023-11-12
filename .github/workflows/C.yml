@@ -12,9 +12,6 @@ on:
       - '.github/workflows/C.yml'
       - 'src/**'
 
-concurrency:
-  group: ${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -22,9 +19,10 @@ jobs:
     name: Build C code on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        #os: [windows-latest, macOS-latest, ubuntu-latest]
-        os: [macOS-latest, ubuntu-latest]
+        os: [windows-latest, macOS-latest, ubuntu-latest]
+        
     steps:
       - uses: actions/checkout@v4
       - name: Install GSL
@@ -38,16 +36,14 @@ jobs:
           curl --silent --show-error -L https://github.com/rwinlib/gsl/archive/v2.7.zip -o gsl.zip
           7z x gsl.zip
           popd
-          cat<<EOF > Makevars.win
-          # Set by Github Actions
-          GSL_CFLAGS = -I${RUNNER_TEMP}/gsl-2.7/include
-          GSL_LIBS   = -L"$(RUNNER_TEMP)/gsl-2.7/lib/x64" -lgsl -lgslcblas
-          EOF
-          cat Makevars.win
+          echo "GSL_CFLAGS=-I${RUNNER_TEMP}/gsl-2.7/include" >> $GITHUB_ENV
+          echo "GSL_LIBS=-L"$(RUNNER_TEMP)/gsl-2.7/lib/x64" >> $GITHUB_ENV
         shell: bash
 
+      - run: cd src && ./configure
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror'
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror'
+        
       - name: Functional tests
         run: |
           ./bin/dominatedsets --help
