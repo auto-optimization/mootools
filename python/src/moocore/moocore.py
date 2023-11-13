@@ -1,12 +1,13 @@
 import os
 import numpy as np
 
-## The CFFI library is used to create C bindings.
-from moocore._libmoocore import lib, ffi
 import lzma
 import shutil
 import tempfile
 from ._utils import *
+
+## The CFFI library is used to create C bindings.
+from ._libmoocore import lib, ffi
 
 
 class ReadDatasetsError(Exception):

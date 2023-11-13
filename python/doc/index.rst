@@ -1,10 +1,10 @@
-.. eafpy documentation master file, created by
+.. moocore documentation master file, created by
    sphinx-quickstart on Thu Jun 15 13:39:40 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-EAF documentation
-=================
+moocore documentation
+=====================
 
 .. toctree::
    :maxdepth: 1
@@ -16,7 +16,7 @@ EAF documentation
 :Release: |version|
 :Date: |today|
 
-The EAF python package allows for easy calculation and visualization of the empirical attainment function (EAF).
+The moocore Python ...
 
 See the :ref:`API reference <api>` or the :ref:`examples <examples>`.
 

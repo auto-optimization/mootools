@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 from datetime import date
-import eafpy as eaf
+import moocore
 
-project = "eafpy"
-_full_version = eaf.__version__
+project = "moocore"
+_full_version = moocore.__version__
 release = _full_version.split("+", 1)[0]
 version = ".".join(release.split(".")[:2])
 year = date.today().year
@@ -40,7 +40,7 @@ html_theme_options = {
             # Label for this link
             "name": "GitHub",
             # URL where the link will redirect
-            "url": "https://github.com/auto-optimization/eafpy",  # required
+            "url": "https://github.com/auto-optimization/moocore",  # required
             # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
             "icon": "fa-brands fa-square-github",
             # The type of image to be used (see below for details)
@@ -50,7 +50,7 @@ html_theme_options = {
 }
 html_context = {
     "github_user": "auto-optimization",
-    "github_repo": "eafpy",
+    "github_repo": "moocoore",
     "github_version": "main",
     "doc_path": "doc",
 }

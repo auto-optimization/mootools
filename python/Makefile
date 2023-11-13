@@ -10,6 +10,7 @@ test:
 	tox
 
 doc:
+	$(MAKE) -C doc clean
 	tox -e docs
 	$(MAKE) -C doc html
 

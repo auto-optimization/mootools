@@ -9,5 +9,5 @@ API reference
 .. toctree::
    :maxdepth: 2
 
-   eafpy
+   moocore
 
