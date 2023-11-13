@@ -14,8 +14,8 @@ on:
       - "src/**"
       - "python/**"
 
-permissions:
-  contents: write
+#permissions:
+#  contents: write
   
 # concurrency:
 #   group: ${{ github.event.pull_request.number || github.run_id }}
@@ -63,7 +63,8 @@ jobs:
           python -m pip install tox tox-gh-actions
 
       - name: Run tox
-        run: cd python && tox
+        run: tox
+        working-directory: python
         
   build-package:
     timeout-minutes: 10
@@ -89,9 +90,8 @@ jobs:
           python3 -m pip install --upgrade build
 
       - name: Build the packages
-        run: |
-          cd python
-          python3 -m build
+        run: python3 -m build
+        working-directory: python
 
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
@@ -119,15 +119,13 @@ jobs:
           pip install --upgrade build
 
       - name: build the package
-        run: |
-          cd python
-          python3 -m build
+        run: python3 -m build
+        working-directory: python
           
       - name: install the package
-        run: |
-          cd python
-          pip install .
-          
+        run: pip install .
+        working-directory: python
+
       - name: install the doc build requirements
         run: |
           pip install -r requirements_dev.txt
@@ -155,7 +153,7 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Get the built docs 🔧
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: github-pages
           path: html
