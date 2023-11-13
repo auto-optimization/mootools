@@ -62,7 +62,7 @@ jobs:
         with:
           extra-packages: any::remotes, any::rcmdcheck
           needs: check
-          working-directory: 'r'
+          working-directory: r
           
       - name: Install macos dependencies
         if: runner.os == 'macOS'
@@ -72,30 +72,32 @@ jobs:
         env:
           NOT_CRAN: false
         run: |
-          setwd("r/")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check", timeout = 360)
         shell: Rscript {0}
+        working-directory: r
 
       - name: Check (NOT CRAN)
         if: success()
         env:
           NOT_CRAN: true
         run: |
-          setwd("r/")
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(args = c("--no-manual", "--run-donttest", "--run-dontrun", "--timings"), error_on = "warning", check_dir = "check", timeout = 360)
         shell: Rscript {0}
+        working-directory: r
 
       - name: Show testthat output
         if: failure()
         run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
+        working-directory: r
 
       - name: Install package
         run: |
-          remotes::install_local("R", force = TRUE, upgrade = "never", build_manual = TRUE, build_vignettes = TRUE)
+          remotes::install_local(".", force = TRUE, upgrade = "never", build_manual = TRUE, build_vignettes = TRUE)
         shell: Rscript {0}
+        working-directory: r
 
       - name: Upload check results
         if: failure()
@@ -135,7 +137,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck, local::.
           needs: check
-          working-directory: 'r'
+          working-directory: r
           
       - uses: r-lib/actions/run-rchk@v2
         with:
@@ -208,13 +210,14 @@ jobs:
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
-          working-directory: 'r'
+          working-directory: r
 
       - name: Deploy package Deploy 🚀
         if: success() && runner.os == 'Linux' && matrix.config.r == 'release' && github.event_name == 'push'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          Rscript -e 'setwd("r/");pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
+          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE, run_dont_run = TRUE, subdir = "r")'
         shell: bash {0}
+        working-directory: r
 

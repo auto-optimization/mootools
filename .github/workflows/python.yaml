@@ -170,14 +170,14 @@ jobs:
     
       - name: Install dependencies
         run: |
-          cd python
           python -m pip install --upgrade pip
           python -m pip install tox tox-gh-actions
+        working-directory: python
 
       - name: Run coverage using tox
         run: |
-          cd python
           tox -e coverage
+        working-directory: python
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
