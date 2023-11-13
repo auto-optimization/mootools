@@ -4,13 +4,13 @@ on:
   push:
     branches-ignore: [gh-pages]
     paths:
-      - ".github/workflows/R.yml"
+      - ".github/workflows/R.yaml"
       - "src/**"
       - "r/**"
   pull_request:
     branches-ignore:  [gh-pages]
     paths:
-      - ".github/workflows/R.yml"
+      - ".github/workflows/R.yaml"
       - "src/**"
       - "r/**"
 
@@ -120,16 +120,16 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         
-      - uses: r-lib/actions/run-rchk@v2
-        with:
-          setup-only: true
-
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
           r-version: ${{ matrix.config.r }}
+          
+      - uses: r-lib/actions/run-rchk@v2
+        with:
+          setup-only: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

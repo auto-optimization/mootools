@@ -4,13 +4,13 @@ on:
   push:
     branches-ignore: [gh-pages]
     paths:
-      - ".github/workflows/python.yml"
+      - ".github/workflows/python.yaml"
       - "src/**"
       - "python/**"
   pull_request:
     branches-ignore: [gh-pages]
     paths:
-      - ".github/workflows/python.yml"
+      - ".github/workflows/python.yaml"
       - "src/**"
       - "python/**"
 

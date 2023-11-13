@@ -4,13 +4,13 @@ on:
   push:
     branches-ignore: [gh-pages]
     paths:
-      - '.github/workflows/C.yml'
+      - '.github/workflows/C.yaml'
       - 'src/**'
       
   pull_request:
     branches-ignore: [gh-pages]
     paths:
-      - '.github/workflows/C.yml'
+      - '.github/workflows/C.yaml'
       - 'src/**'
 
 jobs:
