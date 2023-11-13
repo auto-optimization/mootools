@@ -130,15 +130,15 @@ jobs:
           
       - name: install the doc build requirements
         run: |
-          cd python
           pip install -r requirements_dev.txt
+        working-directory: python
           
       - name: Build the docs
         run: |
-          cd python
           make -C doc clean
           tox -e docs
           make -C doc html
+        working-directory: python
           
       - name: Upload docs as github pages artifact
         uses: actions/upload-pages-artifact@main
@@ -147,19 +147,23 @@ jobs:
 
   deploy-doc:
     needs: build-doc
-    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'push'
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: ubuntu-latest
     steps:
-      - name: Get the built docs
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        
+      - name: Get the built docs 🔧
         uses: actions/download-artifact@v3
         with:
           name: github-pages
-
+          path: html
+          
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: . # The folder the action should deploy.
+          folder: html # The folder the action should deploy.
           target-folder: python
 
   coverage:

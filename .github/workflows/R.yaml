@@ -184,6 +184,7 @@ jobs:
         refs/heads/main
       ', github.ref) && github.event_name == 'push'
     name: pkgdown ${{ matrix.config.os }} (${{ matrix.config.r }})
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -209,7 +210,7 @@ jobs:
           needs: website
           working-directory: 'r'
 
-      - name: Deploy package
+      - name: Deploy package Deploy 🚀
         if: success() && runner.os == 'Linux' && matrix.config.r == 'release' && github.event_name == 'push'
         run: |
           git config --local user.email "actions@github.com"
