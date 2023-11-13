@@ -102,10 +102,11 @@ jobs:
   build-doc:
     timeout-minutes: 10
     needs: build-package
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on:  ubuntu-latest
     steps:
-      - name: Checkout sources
+      - name: Checkout sources 🛎️
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -131,42 +132,23 @@ jobs:
           pip install -r requirements_dev.txt
         working-directory: python
           
-      - name: Build the docs
+      - name: Build the docs 🔧
         run: |
           make -C doc clean
           tox -e docs
           make -C doc html
         working-directory: python
           
-      - name: Upload docs as github pages artifact
-        uses: actions/upload-pages-artifact@main
-        with:
-          path: python/doc/_build/html/
-
-  deploy-doc:
-    needs: build-doc
-    if: github.event_name == 'push'
-    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v4
-        
-      - name: Get the built docs 🔧
-        uses: actions/download-artifact@main
-        with:
-          name: github-pages
-          path: html
-          
       - name: Deploy 🚀
+        if: success() && runner.os == 'Linux' && github.event_name == 'push'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: html # The folder the action should deploy.
+          folder: python/doc/_build/html/ # The folder the action should deploy.
           target-folder: python
 
   coverage:
     timeout-minutes: 15
-    needs: build-doc
+    needs: build-package
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     name: Coverage ${{ matrix.c.os }} (${{ matrix.c.python-version }})
     runs-on: ${{ matrix.c.os }}
