@@ -1,3 +1,0 @@
-# set by configure
-GSL_CFLAGS = @GSL_CFLAGS@
-GSL_LIBS   = @GSL_LIBS@
