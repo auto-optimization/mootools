@@ -2,7 +2,7 @@
 
 #  Makefile for mootools
 
-VERSION = 0.1.9999-$(REVISION)
+VERSION = 0.1.9999$(REVISION)
 
 #-----------------------------------------------------------------------
 

@@ -6,4 +6,4 @@ ifeq ($(shell sh -c 'which git 1> /dev/null 2>&1 && echo y'),y)
   endif
 endif
 ## Set version information:
-REVISION = $(shell sh -c 'cat git_version 2> /dev/null')
+REVISION=.$(shell sh -c 'cat git_version 2> /dev/null')
