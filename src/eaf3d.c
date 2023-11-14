@@ -43,8 +43,6 @@
 #include <math.h>
 #include <string.h>
 
-#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
-
 typedef struct dlnode {
     objective_t *x;             /* The data vector */
     struct dlnode *next;
@@ -213,17 +211,13 @@ find_all_promoters(avl_node_t * avlnode, int * dom_sets, int nruns)
   The values printed are the values from dimension 0 to dimension dim of each point
 */
 static void
-printlist(avl_tree_t *avltree, int dim, FILE *outfile)
+printlist(const avl_tree_t *avltree, int dim, FILE *outfile)
 {
-    avl_node_t *aux;
-    aux = avltree->head;
-    int i;
-
-    objective_t * val;
+    avl_node_t *aux = avltree->head;
     while(aux){
-        val = (objective_t *)aux->item;
+        objective_t * val = (objective_t *)aux->item;
         //printf("-> ");
-        for(i = 0; i < dim; i++){
+        for (int i = 0; i < dim; i++){
             fprintf(outfile, point_printf_format "\t", val[i]);
         }
         fprintf(outfile, "\n");
@@ -260,23 +254,19 @@ void printlevel(FILE * stream, avl_tree_t **level, int nset)
 static int
 printlist_points_indic(avl_tree_t *avltree, int dim, int nruns, FILE *outfile, FILE *outfileindic)
 {
-    avl_node_t *aux;
-    aux = avltree->head;
     int * dom_sets = (int *) malloc(nruns * sizeof(int));
     int i, k, totalp = 0;
-
-    objective_t * val;
-    while(aux){
-        val = (objective_t *)aux->item;
-        if(outfile){
+    avl_node_t *aux = avltree->head;
+    while (aux) {
+            objective_t * val  = (objective_t *)aux->item;
+        if (outfile) {
             fprintf(outfile, point_printf_format, val[0]);
             for(i = 1; i < dim; i++){
                 fprintf(outfile, "\t" point_printf_format, val[i]);
             }
-            
             fprintf(outfile, (outfile == outfileindic) ? "\t" : "\n");
         }
-        if(outfileindic){
+        if(outfileindic) {
             for(k = 0; k < nruns; k++)
                 dom_sets[k] = 0;
             find_all_promoters(aux, dom_sets, nruns);
@@ -296,8 +286,8 @@ printlist_points_indic(avl_tree_t *avltree, int dim, int nruns, FILE *outfile, F
 }
 
 /* Returns the total number of points printed */
-int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfiles, FILE **outfileindic, int noutfilesi, int * attlevel, int nlevels){
-
+int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfiles, FILE **outfileindic, int noutfilesi, int * attlevel, int nlevels)
+{
     int i, k, f, fi, totalp = 0;
     for(i = 0; i < nlevels; i++){
         k = attlevel[i] - 1;
@@ -321,13 +311,11 @@ int printoutput(avl_tree_t **level, int nset, int d, FILE **outfile, int noutfil
 
 
 
-static void print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile){
+static void print_list_indic(avl_tree_t * level, int nruns, FILE * indicfile)
+{
     int * dom_sets = (int *) malloc(nruns * sizeof(int));
-
-    avl_node_t * avlnode;
-    avlnode = level->head;
     int i;
-
+    avl_node_t * avlnode = level->head;
     while(avlnode){
         for(i = 0;  i < nruns; i++){
             dom_sets[i] = 0;
@@ -634,7 +622,7 @@ eaf3df(dlnode_t *list, avl_tree_t **set, avl_tree_t **level,
         //Second part
         do {
             setNode = setNode->next;
-            objective_t lbound = max(node_point(setNode)[1], new->x[1]);
+            objective_t lbound = MAX(node_point(setNode)[1], new->x[1]);
             
             for (k = start_at; k >= stop_at; k--) {
                 //while levelNode is dominated by new but not by any point from new's set, levelNode is promoted

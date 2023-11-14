@@ -80,7 +80,9 @@ MKDIR= @mkdir -p $(1)
 -include Makevars
 
 DEBUG?=0
-BINDIR=../bin
+BINDIR?=../bin
+BINDIR:=$(abspath $(BINDIR))
+
 ## Define source files
 SRCS  = igd.c epsilon.c dominatedsets.c nondominated.c io.c ndsort.c hv_contrib.c hv.c pareto.c whv.c whv_hype.c \
 	eaf.c eaf_main.c eaf3d.c avl.c cmdline.c libutil.c main-hv.c timer.c

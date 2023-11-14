@@ -493,7 +493,7 @@ avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
  end of functions from AVL-tree library.
 *******************************************************************************/
 typedef struct dlnode {
-    const double *x;                    /* The data vector              */
+    const double *x;              /* The data vector              */
     struct dlnode **next;         /* Next-node vector             */
     struct dlnode **prev;         /* Previous-node vector         */
     struct avl_node_t * tnode;
@@ -502,8 +502,7 @@ typedef struct dlnode {
     double *vol;                  /* Volume */
 } dlnode_t;
 
-# define STOP_DIMENSION 2 /* default: stop on dimension 3 */
-
+#define STOP_DIMENSION 2 /* default: stop on dimension 3 */
 
 static int compare_node(const void *p1, const void* p2)
 {
@@ -529,11 +528,7 @@ static int compare_tree_asc(const void *p1, const void *p2)
 static dlnode_t *
 setup_cdllist(const double *data, int d, int n)
 {
-    dlnode_t *head;
-    dlnode_t **scratch;
-    int i, j;
-
-    head  = malloc ((n+1) * sizeof(dlnode_t));
+    dlnode_t *head  = malloc ((n+1) * sizeof(dlnode_t));
 
     head->x = data;
     head->ignore = 0;  /* should never get used */
@@ -544,6 +539,7 @@ setup_cdllist(const double *data, int d, int n)
     head->area = malloc(d * (n+1) * sizeof(double));
     head->vol = malloc(d * (n+1) * sizeof(double));
 
+    int i, j;
     for (i = 1; i <= n; i++) {
         head[i].x = head[i-1].x + d;/* this will be fixed a few lines below... */
         head[i].ignore = 0;
@@ -555,7 +551,7 @@ setup_cdllist(const double *data, int d, int n)
     }
     head->x = NULL; /* head contains no data */
 
-    scratch = malloc(n * sizeof(dlnode_t*));
+    dlnode_t **scratch = malloc(n * sizeof(dlnode_t*));
     for (i = 0; i < n; i++)
         scratch[i] = head + i + 1;
 
