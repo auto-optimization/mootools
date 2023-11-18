@@ -980,6 +980,7 @@ document.write(`
     <span class="n">nsets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cumsizes</span><span class="p">)</span>
     <span class="n">cumsizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">cumsizes</span><span class="p">)</span>
     <span class="n">cumsizes_p</span><span class="p">,</span> <span class="n">ncumsizes</span> <span class="o">=</span> <span class="n">np1d_to_int_array</span><span class="p">(</span><span class="n">cumsizes</span><span class="p">)</span>
+    <span class="n">percentiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">percentiles</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">percentiles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">percentiles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">nsets</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">100.0</span> <span class="o">/</span> <span class="n">nsets</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -995,6 +996,67 @@ document.write(`
     <span class="n">eaf_npoints</span> <span class="o">=</span> <span class="n">eaf_npoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">eaf_buf</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">eaf_data_p</span><span class="p">,</span> <span class="n">ffi</span><span class="o">.</span><span class="n">sizeof</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">eaf_npoints</span> <span class="o">*</span> <span class="n">ncols</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">eaf_buf</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">eaf_npoints</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="vorobT">
+<a class="viewcode-back" href="../../api/moocore.moocore.html#moocore.moocore.vorobT">[docs]</a>
+<span class="k">def</span> <span class="nf">vorobT</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">reference</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute Vorob&#39;ev threshold, expectation and deviation :cite:p:`vorobT-BinGinRou2015gaupar,vorobT-Molchanov2005theory,vorobT-CheGinBecMol2013moda`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : numpy array</span>
+<span class="sd">        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \</span>
+<span class="sd">         of the :func:`read_datasets` function</span>
+<span class="sd">    reference : numpy array or list</span>
+<span class="sd">        Reference point set as a numpy array or list. Must be same length as a single point in the \</span>
+<span class="sd">        dataset</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; CPFs = moocore.read_datasets(&quot;./doc/examples/CPFs.txt&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; res = moocore.vorobT(CPFs, reference = (2, 200))</span>
+<span class="sd">    &gt;&gt;&gt; res[&#39;threshold&#39;]</span>
+<span class="sd">    44.140625</span>
+<span class="sd">    &gt;&gt;&gt; res[&#39;avg_hyp&#39;]</span>
+<span class="sd">    8892.824259740963</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. bibliography::</span>
+<span class="sd">         :keyprefix: vorobT-</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">ncols</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ncols</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;data&#39; must have at least 3 columns (2 objectives + set column)&quot;</span>
+        <span class="p">)</span>
+    <span class="n">nobjs</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">sets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">uniq_sets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">sets</span><span class="p">)</span>
+    <span class="n">avg_hyp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">hypervolume</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">sets</span> <span class="o">==</span> <span class="n">k</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ref</span><span class="o">=</span><span class="n">reference</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">])</span>
+    <span class="n">prev_hyp</span> <span class="o">=</span> <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># hypervolume of quantile at previous step</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="k">while</span> <span class="n">diff</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">eaf_res</span> <span class="o">=</span> <span class="n">eaf</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="n">c</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">nobjs</span><span class="p">]</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">hypervolume</span><span class="p">(</span><span class="n">eaf_res</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tmp</span> <span class="o">&gt;</span> <span class="n">avg_hyp</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">prev_hyp</span> <span class="o">-</span> <span class="n">tmp</span>
+        <span class="n">prev_hyp</span> <span class="o">=</span> <span class="n">tmp</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">VE</span><span class="o">=</span><span class="n">eaf_res</span><span class="p">,</span> <span class="n">avg_hyp</span><span class="o">=</span><span class="n">avg_hyp</span><span class="p">)</span></div>
 
 
 
