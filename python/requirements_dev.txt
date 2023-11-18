@@ -18,6 +18,7 @@ ipykernel
 kaleido
 myst-nb 
 sphinxcontrib-napoleon
+sphinxcontrib-bibtex
 
 jupyterlab
 ipywidgets

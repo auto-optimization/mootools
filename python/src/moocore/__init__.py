@@ -11,6 +11,7 @@ from .moocore import (
     filter_dominated,
     normalise,
     eaf,
+    vorobT,
 )
 
 from importlib.metadata import version as _metadata_version

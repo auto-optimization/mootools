@@ -30,7 +30,10 @@ extensions = [
     "sphinx.ext.viewcode",
     "myst_nb",
     "sphinx.ext.autosectionlabel",
+    "sphinxcontrib.bibtex",
 ]
+bibtex_bibfiles = ["REFERENCES.bib"]
+bibtex_reference_style = "author_year"
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "use_edit_page_button": True,

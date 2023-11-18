@@ -584,6 +584,7 @@ def eaf(data, percentiles=[]):
     nsets = len(cumsizes)
     cumsizes = np.cumsum(cumsizes)
     cumsizes_p, ncumsizes = np1d_to_int_array(cumsizes)
+    percentiles = np.atleast_1d(percentiles)
     if len(percentiles) == 0:
         percentiles = np.arange(1.0, nsets + 1) * (100.0 / nsets)
     else:
@@ -602,7 +603,7 @@ def eaf(data, percentiles=[]):
 
 
 def vorobT(data, reference):
-    """Compute Vorob'ev threshold, expectation and deviation.
+    """Compute Vorob'ev threshold, expectation and deviation :cite:p:`vorobT-BinGinRou2015gaupar,vorobT-Molchanov2005theory,vorobT-CheGinBecMol2013moda`.
 
     Parameters
     ----------
@@ -620,20 +621,18 @@ def vorobT(data, reference):
 
     Examples
     --------
-    >>> CPFs = moocore.read_datasets("CPFs.txt")
-    >>> res = vorobT(CPFs, reference = c(2, 200))
-    >>> res["threshold"]
+    >>> CPFs = moocore.read_datasets("./doc/examples/CPFs.txt")
+    >>> res = moocore.vorobT(CPFs, reference = (2, 200))
+    >>> res['threshold']
+    44.140625
+    >>> res['avg_hyp']
+    8892.824259740963
 
     References
     ----------
-    BinGinRou2015gaupar
-
-    C. Chevalier (2013), Fast uncertainty reduction strategies relying on
-    Gaussian process models, University of Bern, PhD thesis.
-
-    Molchanov2005theory
+    .. bibliography::
+         :keyprefix: vorobT-
     """
-
     data = np.asfarray(data)
     ncols = data.shape[1]
     if ncols < 3:
@@ -641,16 +640,16 @@ def vorobT(data, reference):
             "'data' must have at least 3 columns (2 objectives + set column)"
         )
     nobjs = ncols - 1
-    g = data[:, -1]
-    sets = np.unique(g)
-    avg_hyp = np.mean([hypervolume(data[g == k, :-1], ref=reference) for k in sets])
+    sets = data[:, -1]
+    uniq_sets = np.unique(sets)
+    avg_hyp = np.mean([hypervolume(data[sets == k, :-1], ref=reference) for k in sets])
     prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
     a = 0
     b = 100
     while diff != 0:
-        c = (a + b) // 2
-        eaf_res = eafs(x[:, 1:nobjs], x[:, setcol], percentiles=c)[:, 1:nobjs]
-        tmp = hypervolume(eaf_res, reference=reference)
+        c = (a + b) / 2.0
+        eaf_res = eaf(data, percentiles=c)[:, :nobjs]
+        tmp = hypervolume(eaf_res, ref=reference)
         if tmp > avg_hyp:
             a = c
         else:
