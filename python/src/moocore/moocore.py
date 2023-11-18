@@ -601,6 +601,66 @@ def eaf(data, percentiles=[]):
     return np.frombuffer(eaf_buf).reshape((eaf_npoints, -1))
 
 
+def vorobT(data, reference):
+    """Compute Vorob'ev threshold, expectation and deviation.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
+         of the :func:`read_datasets` function
+    reference : numpy array or list
+        Reference point set as a numpy array or list. Must be same length as a single point in the \
+        dataset
+
+    Returns
+    -------
+    dict
+        A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).
+
+    Examples
+    --------
+    >>> CPFs = moocore.read_datasets("CPFs.txt")
+    >>> res = vorobT(CPFs, reference = c(2, 200))
+    >>> res["threshold"]
+
+    References
+    ----------
+    BinGinRou2015gaupar
+
+    C. Chevalier (2013), Fast uncertainty reduction strategies relying on
+    Gaussian process models, University of Bern, PhD thesis.
+
+    Molchanov2005theory
+    """
+
+    data = np.asfarray(data)
+    ncols = data.shape[1]
+    if ncols < 3:
+        raise ValueError(
+            "'data' must have at least 3 columns (2 objectives + set column)"
+        )
+    nobjs = ncols - 1
+    g = data[:, -1]
+    sets = np.unique(g)
+    avg_hyp = np.mean([hypervolume(data[g == k, :-1], ref=reference) for k in sets])
+    prev_hyp = diff = np.inf  # hypervolume of quantile at previous step
+    a = 0
+    b = 100
+    while diff != 0:
+        c = (a + b) // 2
+        eaf_res = eafs(x[:, 1:nobjs], x[:, setcol], percentiles=c)[:, 1:nobjs]
+        tmp = hypervolume(eaf_res, reference=reference)
+        if tmp > avg_hyp:
+            a = c
+        else:
+            b = c
+        diff = prev_hyp - tmp
+        prev_hyp = tmp
+
+    return dict(threshold=c, VE=eaf_res, avg_hyp=avg_hyp)
+
+
 # def eafdiff(x, y, intervals = None, maximise = False):
 #     x = np.asfarray(x).copy()
 #     y = np.asfarray(y).copy()
