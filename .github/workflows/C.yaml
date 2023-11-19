@@ -114,9 +114,9 @@ jobs:
             gsl:p
             pkg-config:p
           
-      - run: |
-          cd src
-          ./configure
+      - run: ./configure
+        working-directory: src
+        
       - run: make -C src all DEBUG=1 WARN_FLAGS='-Werror' CC=${{ matrix.cc }}
       - run: make -C src all DEBUG=0 WARN_FLAGS='-Werror' CC=${{ matrix.cc }}
         
