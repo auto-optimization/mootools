@@ -1,5 +1,13 @@
 MOOTOOLS: Multi-Objective Optimization Toolkit 
 ==============================================
+<!-- badges: start -->
+[![C build
+status](https://github.com/auto-optimization/mootools/workflows/C/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/C.yaml)
+[![Python build
+status](https://github.com/auto-optimization/mootools/workflows/Python/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/python.yaml)
+[![R build
+status](https://github.com/auto-optimization/mootools/workflows/R/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/R.yaml)
+<!-- badges: end -->
 
 nondominated
 ------------

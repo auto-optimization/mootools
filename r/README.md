@@ -1,13 +1,8 @@
-   
 **moocore**: Core Algorithms for Multi-Objective Optimization
 ================================================================
 
 <!-- badges: start -->
 [![CRAN Status](https://www.r-pkg.org/badges/version-last-release/moocore)](https://cran.r-project.org/package=moocore) [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/grand-total/moocore)](https://CRAN.R-project.org/package=moocore) 
-[![C build
-status](https://github.com/auto-optimization/mootools/workflows/C/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/C.yaml)
-[![Python build
-status](https://github.com/auto-optimization/mootools/workflows/python/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/python.yaml)
 [![R build
 status](https://github.com/auto-optimization/mootools/workflows/R/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/R.yaml)
 [![Codecov test coverage](https://codecov.io/gh/MLopez-Ibanez/moocore/branch/master/graph/badge.svg)](https://app.codecov.io/gh/MLopez-Ibanez/moocore?branch=master)
