@@ -49,11 +49,11 @@ jobs:
           7z x gsl.zip
           echo "GSL_CFLAGS=-I../gsl-2.7/include" >> $GITHUB_ENV
           echo "GSL_LIBS=-L../gsl-2.7/lib/x64" >> $GITHUB_ENV
-          echo "CC=$CC"
         shell: bash
 
       - run: $CC -v
-
+        shell: bash
+        
       - name: configure with GSL_CFLAGS=${{ env.GSL_CFLAGS }} and GSL_LIBS=${{ env.GSL_LIBS }}
         run: |
           ./configure
