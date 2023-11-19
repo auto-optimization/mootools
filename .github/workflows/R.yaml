@@ -127,11 +127,11 @@ jobs:
         with:
           setup-only: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck, local::.
-          needs: check
-          working-directory: r
+      # - uses: r-lib/actions/setup-r-dependencies@v2
+      #   with:
+      #     extra-packages: any::rcmdcheck, local::.
+      #     needs: check
+      #     working-directory: r
           
       - uses: r-lib/actions/run-rchk@v2
         with:
