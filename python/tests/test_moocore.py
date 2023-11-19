@@ -1,10 +1,19 @@
-import sys
-import os
 import numpy as np
 import pytest
 import math
 
 import moocore
+
+
+def test_docstrings():
+    import doctest
+
+    doctest.FLOAT_EPSILON = 1e-9
+    # Run doctests for "moocore" module and fail if one of the docstring tests is incorrect.
+    # Pass in the "eaf" module so that the docstrings don't have to import every time
+    doctest.testmod(
+        moocore.moocore, raise_on_error=True, extraglobs={"moocore": moocore}
+    )
 
 
 def test_read_datasets_data():
@@ -86,6 +95,10 @@ def test_hv_output():
     hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=[10, 10])
     assert math.isclose(hv, 90.46272765), "input1.dat hypervolume produces wrong output"
 
+    X = moocore.read_datasets("tests/test_data/duplicated3.inp")[:, :-1]
+    hv = moocore.hypervolume(X, ref=[-14324, -14906, -14500, -14654, -14232, -14093])
+    assert math.isclose(hv, 1.52890128312393e20)
+
 
 def test_hv_wrong_ref():
     """
@@ -106,19 +119,9 @@ def test_igd():
     assert math.isclose(moocore.igd(A, ref), 3.707092031609239)
     assert math.isclose(moocore.igd(B, ref), 2.59148346584763)
 
-
-def test_igd_plus():
-    ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
-    A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
-    B = np.array([8, 2, 4, 4, 2, 8]).reshape((-1, 2))
     assert math.isclose(moocore.igd_plus(A, ref), 1.482842712474619)
     assert math.isclose(moocore.igd_plus(B, ref), 2.260112615949154)
 
-
-def test_avg_hausdorff_dist():
-    ref = np.array([10, 0, 6, 1, 2, 2, 1, 6, 0, 10]).reshape((-1, 2))
-    A = np.array([4, 2, 3, 3, 2, 4]).reshape((-1, 2))
-    B = np.array([8, 2, 4, 4, 2, 8]).reshape((-1, 2))
     assert math.isclose(moocore.avg_hausdorff_dist(A, ref), 3.707092031609239)
     assert math.isclose(moocore.avg_hausdorff_dist(B, ref), 2.59148346584763)
 
@@ -198,17 +201,6 @@ def test_normalise():
     )
     assert np.allclose(
         moocore.normalise(A, upper=[25, 25, 25], lower=[0, 0, 0]), expected_with_bounds
-    )
-
-
-def test_docstrings():
-    import doctest
-
-    doctest.FLOAT_EPSILON = 1e-9
-    # Run doctests for "moocore" module and fail if one of the docstring tests is incorrect.
-    # Pass in the "eaf" module so that the docstrings don't have to import every time
-    doctest.testmod(
-        moocore.moocore, raise_on_error=True, extraglobs={"moocore": moocore}
     )
 
 

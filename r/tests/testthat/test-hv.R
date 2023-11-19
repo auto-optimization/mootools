@@ -1,24 +1,22 @@
 source("helper-common.R")
 
+library(tools) # file_ext
 test_that("hypervolume", {
-test.hv.rda <- function(dataset, reference, maximise = FALSE) {
+
+test_hv_file <- function(file, reference, maximise = FALSE) {
   nobj <- length(reference)
-  load(paste0(dataset, ".rda"))
-  return(hypervolume(get(dataset)[,1:nobj], reference = reference, maximise))
-}
-test.hv.file <- function(file, reference, maximise = FALSE) {
-  nobj <- length(reference)
-  dataset <- read_datasets(file)
-  return(hypervolume(dataset[,1:nobj], reference = reference, maximise))
+  dataset <- if (file_ext(file) == "rds") readRDS(file) else read_datasets(file)
+  hypervolume(dataset[,1:nobj], reference = reference, maximise)
 }
 
-expect_equal(test.hv.rda("DTLZDiscontinuousShape.3d.front.1000pts.10",
-                         reference = c(10,10,10)),
-             719.223555475191)
+expect_equal(test_hv_file("DTLZDiscontinuousShape.3d.front.1000pts.10.rds",
+  reference = c(10,10,10)),
+  719.223555475191)
 
-expect_equal(test.hv.file("duplicated3.inp",
-                          reference = c(-14324, -14906, -14500, -14654, -14232, -14093)),
-             1.52890128312393e+20)
+expect_equal(test_hv_file("duplicated3.inp",
+  reference = c(-14324, -14906, -14500, -14654, -14232, -14093)),
+  1.52890128312393e+20)
+
 })
 
 test_that("hv_contributions", {
