@@ -124,6 +124,8 @@ jobs:
         with:
           setup-only: true
 
+      - run: ls -R /home/docker/R-svn/bin
+        
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck, local::.
