@@ -311,8 +311,6 @@ int main(int argc, char *argv[])
 {
     double *reference = NULL;
     int nobj = 0;
-    int numfiles, k;
-
     int opt; /* it's actually going to hold a char.  */
     int longopt_index;
 
@@ -326,13 +324,10 @@ int main(int argc, char *argv[])
         {"union",      no_argument,       NULL, 'u'},
         {"suffix",     required_argument, NULL, 's'},
         {"shift",      no_argument,       NULL, 'S'},
-
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
-#ifndef __USE_GNU
-    program_invocation_short_name = argv[0];
-#endif
+    set_program_invocation_short_name(argv[0]);
 
     while (0 < (opt = getopt_long (argc, argv, "hVvqur:s:S",
                                    long_options, &longopt_index))) {
@@ -384,7 +379,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    numfiles = argc - optind;
+    int numfiles = argc - optind;
 
     if (numfiles < 1) /* Read stdin.  */
         hv_file (NULL, reference, NULL, NULL, &nobj);
@@ -393,6 +388,7 @@ int main(int argc, char *argv[])
         hv_file (argv[optind], reference, NULL, NULL, &nobj);
     }
     else {
+        int k;
         double *maximum = NULL;
         double *minimum = NULL;
         if (reference == NULL) {

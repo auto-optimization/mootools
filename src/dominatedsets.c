@@ -317,9 +317,6 @@ int main(int argc, char *argv[])
     const signed char *minmax = NULL;
 
     int k, n, j;
-
-    int opt; /* it's actually going to hold a char */
-    int longopt_index;
     /* see the man page for getopt_long for an explanation of these fields */
     static struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
@@ -332,7 +329,9 @@ int main(int argc, char *argv[])
 
         {NULL, 0, NULL, 0} /* marks end of list */
     };
-
+    set_program_invocation_short_name(argv[0]);
+    int opt; /* it's actually going to hold a char */
+    int longopt_index;
     while (0 < (opt = getopt_long(argc, argv, "hVvqpo:",
                                   long_options, &longopt_index))) {
         switch (opt) {

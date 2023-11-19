@@ -279,6 +279,8 @@ int main(int argc, char *argv[])
         {NULL, 0, NULL, 0} /* marks end of list */
     };
 
+    set_program_invocation_short_name(argv[0]);
+
     int opt;
     int longopt_index;
     while (0 < (opt = getopt_long(argc, argv, "hVvqamr:us:o:",

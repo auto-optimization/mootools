@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
 
         {NULL, 0, NULL, 0} /* marks end of list */
     };
+    set_program_invocation_short_name(argv[0]);
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;

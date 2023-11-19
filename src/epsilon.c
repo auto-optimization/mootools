@@ -178,9 +178,6 @@ int main(int argc, char *argv[])
     int reference_size = 0;
     int nobj = 0;
     const signed char *minmax = NULL;
-
-    int k;
-
     /* see the man page for getopt_long for an explanation of these fields */
     static struct option long_options[] = {
         {"help",       no_argument,       NULL, 'h'},
@@ -195,6 +192,8 @@ int main(int argc, char *argv[])
 
         {NULL, 0, NULL, 0} /* marks end of list */
     };
+
+    set_program_invocation_short_name(argv[0]);
 
     int opt; /* it's actually going to hold a char */
     int longopt_index;
@@ -271,6 +270,7 @@ int main(int argc, char *argv[])
     } else if (numfiles == 1) {
         do_file (argv[optind], reference, reference_size, &nobj, minmax);
     } else {
+        int k;
         /* FIXME: Calculate the nondominated front among all input
            files to use as reference set.  */
 #if 0
