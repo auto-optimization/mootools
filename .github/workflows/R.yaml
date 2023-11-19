@@ -34,7 +34,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ windows-latest, macOS-latest, ubuntu-22.04 ]
-        r: 'release'
+        r: [release]
         include:
           - os: ubuntu-20.04
             r: '3.6'
@@ -144,8 +144,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ubuntu-latest
-        r: 'release'
+        os: [ubuntu-latest]
+        r: [release]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
@@ -186,8 +186,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ubuntu-latest
-        r: 'release'
+        os: [ubuntu-latest]
+        r: [release]
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 

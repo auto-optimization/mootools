@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-latest, ubuntu-latest, macOS-latest ]
-        cc: gcc
+        cc: [ gcc ]
         include:
           - os: macOS-latest
             cc: clang
@@ -81,8 +81,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sys: clang64
-        cc: clang
+        sys: [ clang64 ]
+        cc: [ clang ]
         #- { sys: mingw64, cc: gcc }
         #- { sys: ucrt64,  cc: gcc }
           

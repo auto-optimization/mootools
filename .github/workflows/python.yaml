@@ -34,27 +34,28 @@ jobs:
     timeout-minutes: 15
     needs: lint-black
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
-    name: Test ${{ matrix.c.os }} (${{ matrix.c.python-version }})
-    runs-on: ${{ matrix.c.os }}
+    name: Test ${{ matrix.os }} (${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       fail-fast: false
       # The maximum number of jobs that can run simultaneously
       max-parallel: 1
       matrix:
-        c:
-          - {os: ubuntu-latest,  python-version: '3.9'}
-          - {os: ubuntu-latest,  python-version: '3.10'}
-          - {os: ubuntu-latest,  python-version: '3.11'}
-          - {os: windows-latest, python-version: '3.11'}
-          - {os: macos-latest,   python-version: '3.11'}
+        os: [ ubuntu-latest]
+        python-version: [ '3.9', '3.10', '3.11' ]
+        include:
+          - os: windows-latest
+            python-version: '3.11'
+          - os: macos-latest
+            python-version: '3.11'
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.c.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.c.python-version }}
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
     
       - name: Install dependencies
@@ -150,22 +151,23 @@ jobs:
     timeout-minutes: 15
     needs: build-package
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
-    name: Coverage ${{ matrix.c.os }} (${{ matrix.c.python-version }})
-    runs-on: ${{ matrix.c.os }}
+    name: Coverage ${{ matrix.os }} (${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
       fail-fast: true
       # The maximum number of jobs that can run simultaneously
       max-parallel: 1
       matrix:
-        c:
-          - {os: ubuntu-latest,  python-version: '3.11'}
-    steps:
+        os: [ubuntu-latest]
+        python-version: ['3.11']
+
+      steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.c.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.c.python-version }}
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
     
       - name: Install dependencies
