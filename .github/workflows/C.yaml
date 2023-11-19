@@ -31,7 +31,7 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Install GSL (macOS)
         if: runner.os == 'macOS'
         run: brew install gsl
@@ -51,11 +51,14 @@ jobs:
           echo "GSL_LIBS=-L../gsl-2.7/lib/x64" >> $GITHUB_ENV
           echo "CC=$CC"
         shell: bash
-                  
-      - run: |
-          cd src
+
+      - run: $CC -v
+
+      - name: configure with GSL_CFLAGS=${{ env.GSL_CFLAGS }} and GSL_LIBS=${{ env.GSL_LIBS }}
+        run: |
           ./configure
         shell: bash
+        working-directory: src
         env:
           GSL_CFLAGS: ${{ env.GSL_CFLAGS }}
           GSL_LIBS: ${{ env.GSL_LIBS }}
