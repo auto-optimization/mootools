@@ -7,7 +7,7 @@
 \usage{
 vorobT(x, reference)
 
-vorobDev(x, VE, reference)
+vorobDev(x, reference, VE = NULL)
 }
 \arguments{
 \item{x}{Either a matrix of data values, or a data frame, or a list of data
@@ -16,8 +16,7 @@ sample, ...) identifier.}
 
 \item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
 
-\item{VE}{Vorob'ev expectation, e.g., as returned
-by \code{\link[=vorobT]{vorobT()}}.}
+\item{VE}{Vorob'ev expectation, e.g., as returned by \code{\link[=vorobT]{vorobT()}}.}
 }
 \value{
 \code{vorobT} returns a list with elements \code{threshold},

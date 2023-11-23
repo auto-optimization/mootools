@@ -669,6 +669,60 @@ def vorobT(data, reference):
     return dict(threshold=c, VE=eaf_res, avg_hyp=avg_hyp)
 
 
+def vorobDev(x, reference, VE=None):
+    r"""Compute Vorob'ev deviation  :cite:p:`vorobDev-BinGinRou2015gaupar,vorobDev-Molchanov2005theory,vorobDev-CheGinBecMol2013moda`.
+
+    Parameters
+    ----------
+    x : numpy array
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
+         of the :func:`read_datasets` function.
+    reference : numpy array or list
+        Reference point set as a numpy array or list. Must be same length as a single point in the \
+        dataset.
+    VE : numpy array, optional.
+         Vorob'ev expectation, e.g., as returned by :func:`vorobT`. If not provided, it is calculated as `vorobT(x, reference)`.
+    
+    Returns
+    -------
+    float
+        Vorob'ev deviation.
+
+    References
+    ----------
+    .. bibliography::
+         :keyprefix: vorobDev-
+
+    Examples
+    --------
+    >>> CPFs = moocore.read_datasets("./doc/examples/CPFs.txt")
+    >>> VD = moocore.vorobDev(CPFs, reference = (2, 200))
+    >>> VD
+    3017.1298940232646
+    """
+    if VE is None:
+        VE = vorobT(x, reference)["VE"]
+
+    x = np.asfarray(x)
+    ncols = x.shape[1]
+    if ncols < 3:
+        raise ValueError("'x' must have at least 3 columns (2 objectives + set column)")
+
+    # Hypervolume of the symmetric difference between A and B:
+    # 2 * H(AUB) - H(A) - H(B)
+    H2 = hypervolume(VE, ref=reference)
+    uniq_sets, uniq_index = np.unique(x[:, -1], return_index=True)
+    x_split = np.vsplit(x[:, :-1], uniq_index[1:])
+    H1 = np.fromiter((hypervolume(g, ref=reference) for g in x_split), float).mean()
+    VD = (
+        np.fromiter(
+            (hypervolume(np.row_stack((g, VE)), ref=reference) for g in x_split), float
+        ).mean()
+        * 2.0
+    )
+    return VD - H1 - H2
+
+
 # def eafdiff(x, y, intervals = None, maximise = False):
 #     x = np.asfarray(x).copy()
 #     y = np.asfarray(y).copy()

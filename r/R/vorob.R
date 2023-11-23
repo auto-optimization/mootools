@@ -63,13 +63,12 @@ vorobT <- function(x, reference)
     prev_hyp <- tmp
   }
   
-  return(list(threshold = c, VE = eaf_res, avg_hyp = avg_hyp))
+  list(threshold = c, VE = eaf_res, avg_hyp = avg_hyp)
 } 
 
 #' @concept eaf
 #' @rdname Vorob
-#' @param VE Vorob'ev expectation, e.g., as returned
-#'   by [vorobT()].
+#' @param VE Vorob'ev expectation, e.g., as returned by [vorobT()].
 #' @return `vorobDev` returns the Vorob'ev deviation.
 #' @examples
 #' 
@@ -77,7 +76,7 @@ vorobT <- function(x, reference)
 #' VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
 #' print(VD)
 #' @export
-vorobDev <- function(x, VE, reference)
+vorobDev <- function(x, reference, VE = NULL)
 {
   if (is.data.frame(x)) x <- as.matrix(x)
   if (is.null(VE)) VE <- vorobT(x, reference)$VE
@@ -88,13 +87,13 @@ vorobDev <- function(x, VE, reference)
   # Hypervolume of the symmetric difference between A and B:
   # 2 * H(AUB) - H(A) - H(B)
   H2 <- hypervolume(VE, reference = reference)
-  x.split <- split.data.frame(x[,1:nobjs, drop=FALSE], x[,setcol])
-  H1 <- mean(sapply(x.split, hypervolume, reference = reference))
+  x_split <- split.data.frame(x[,1:nobjs, drop=FALSE], x[,setcol])
+  H1 <- mean(sapply(x_split, hypervolume, reference = reference))
 
-  hv.union.VE <- function(y)
-    return(hypervolume(rbind(y[, 1:nobjs, drop=FALSE], VE), reference = reference))
+  hv_union_VE <- function(y)
+    hypervolume(rbind(y[, 1:nobjs, drop=FALSE], VE), reference = reference)
   
-  VD <- 2 * sum(sapply(x.split, hv.union.VE))
-  nruns <- length(x.split)
-  return((VD / nruns) - H1 - H2)
+  VD <- 2 * sum(sapply(x_split, hv_union_VE))
+  nruns <- length(x_split)
+  ((VD / nruns) - H1 - H2)
 }

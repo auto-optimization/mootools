@@ -12,6 +12,7 @@ from .moocore import (
     normalise,
     eaf,
     vorobT,
+    vorobDev,
 )
 
 from importlib.metadata import version as _metadata_version
