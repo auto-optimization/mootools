@@ -747,13 +747,11 @@ The last column contains an identifier for which set the data is relevant to.</p
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – <dl class="simple">
-<dt>Numpy array of numerical values and set numbers, containing multiple sets. For example the output </dt><dd><p>of the <a class="reference internal" href="#moocore.moocore.read_datasets" title="moocore.moocore.read_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_datasets()</span></code></a> function.</p>
-</dd>
-</dl>
-</p></li>
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Numpy array of numerical values and set numbers, containing multiple sets.
+For example the output of the <a class="reference internal" href="#moocore.moocore.read_datasets" title="moocore.moocore.read_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_datasets()</span></code></a> function.</p></li>
 <li><p><strong>reference</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Reference point set as a numpy array or list. Must be same length as a single point in the dataset.</p></li>
-<li><p><strong>VE</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">optional.</span></code>) – Vorob’ev expectation, e.g., as returned by <a class="reference internal" href="#moocore.moocore.vorobT" title="moocore.moocore.vorobT"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorobT()</span></code></a>. If not provided, it is calculated as <cite>vorobT(x, reference)</cite>.</p></li>
+<li><p><strong>VE</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>, <em>optional</em>) – Vorob’ev expectation, e.g., as returned by <a class="reference internal" href="#moocore.moocore.vorobT" title="moocore.moocore.vorobT"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorobT()</span></code></a>.
+If not provided, it is calculated as <cite>vorobT(x, reference)</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
