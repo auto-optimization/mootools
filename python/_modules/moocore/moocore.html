@@ -1069,6 +1069,63 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="vorobDev">
+<a class="viewcode-back" href="../../api/moocore.moocore.html#moocore.moocore.vorobDev">[docs]</a>
+<span class="k">def</span> <span class="nf">vorobDev</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">VE</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute Vorob&#39;ev deviation  :cite:p:`vorobDev-BinGinRou2015gaupar,vorobDev-Molchanov2005theory,vorobDev-CheGinBecMol2013moda`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : numpy array</span>
+<span class="sd">        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \</span>
+<span class="sd">         of the :func:`read_datasets` function.</span>
+<span class="sd">    reference : numpy array or list</span>
+<span class="sd">        Reference point set as a numpy array or list. Must be same length as a single point in the \</span>
+<span class="sd">        dataset.</span>
+<span class="sd">    VE : numpy array, optional.</span>
+<span class="sd">         Vorob&#39;ev expectation, e.g., as returned by :func:`vorobT`. If not provided, it is calculated as `vorobT(x, reference)`.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Vorob&#39;ev deviation.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. bibliography::</span>
+<span class="sd">         :keyprefix: vorobDev-</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; CPFs = moocore.read_datasets(&quot;./doc/examples/CPFs.txt&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; VD = moocore.vorobDev(CPFs, reference = (2, 200))</span>
+<span class="sd">    &gt;&gt;&gt; VD</span>
+<span class="sd">    3017.1298940232646</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">VE</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">VE</span> <span class="o">=</span> <span class="n">vorobT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">reference</span><span class="p">)[</span><span class="s2">&quot;VE&quot;</span><span class="p">]</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">ncols</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ncols</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;x&#39; must have at least 3 columns (2 objectives + set column)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Hypervolume of the symmetric difference between A and B:</span>
+    <span class="c1"># 2 * H(AUB) - H(A) - H(B)</span>
+    <span class="n">H2</span> <span class="o">=</span> <span class="n">hypervolume</span><span class="p">(</span><span class="n">VE</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">reference</span><span class="p">)</span>
+    <span class="n">uniq_sets</span><span class="p">,</span> <span class="n">uniq_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">x_split</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vsplit</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">uniq_index</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">H1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">((</span><span class="n">hypervolume</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">reference</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">x_split</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">VD</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">hypervolume</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">row_stack</span><span class="p">((</span><span class="n">g</span><span class="p">,</span> <span class="n">VE</span><span class="p">)),</span> <span class="n">ref</span><span class="o">=</span><span class="n">reference</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">x_split</span><span class="p">),</span> <span class="nb">float</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="o">*</span> <span class="mf">2.0</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">VD</span> <span class="o">-</span> <span class="n">H1</span> <span class="o">-</span> <span class="n">H2</span></div>
+
+
+
 <span class="c1"># def eafdiff(x, y, intervals = None, maximise = False):</span>
 <span class="c1">#     x = np.asfarray(x).copy()</span>
 <span class="c1">#     y = np.asfarray(y).copy()</span>

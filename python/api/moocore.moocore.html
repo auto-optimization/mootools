@@ -741,21 +741,26 @@ The last column contains an identifier for which set the data is relevant to.</p
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="moocore.moocore.vorobT">
-<span class="sig-prename descclassname"><span class="pre">moocore.moocore.</span></span><span class="sig-name descname"><span class="pre">vorobT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moocore/moocore.html#vorobT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#moocore.moocore.vorobT" title="Link to this definition">#</a></dt>
-<dd><p>Compute Vorob’ev threshold, expectation and deviation <span id="id28">[<a class="reference internal" href="#id33" title="M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. European Journal of Operational Research, 243(2):386–394, 2015. doi:10.1016/j.ejor.2014.07.032.">Binois <em>et al.</em>, 2015</a>, <a class="reference internal" href="#id46" title="Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, mODa 10–Advances in Model-Oriented Design and Analysis, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. doi:10.1007/978-3-319-00218-7_5.">Chevalier <em>et al.</em>, 2013</a>, <a class="reference internal" href="#id49" title="Ilya Molchanov. Theory of Random Sets. Springer, 2005.">Molchanov, 2005</a>]</span>.</p>
+<dt class="sig sig-object py" id="moocore.moocore.vorobDev">
+<span class="sig-prename descclassname"><span class="pre">moocore.moocore.</span></span><span class="sig-name descname"><span class="pre">vorobDev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moocore/moocore.html#vorobDev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#moocore.moocore.vorobDev" title="Link to this definition">#</a></dt>
+<dd><p>Compute Vorob’ev deviation  <span id="id28">[<a class="reference internal" href="#id33" title="M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. European Journal of Operational Research, 243(2):386–394, 2015. doi:10.1016/j.ejor.2014.07.032.">Binois <em>et al.</em>, 2015</a>, <a class="reference internal" href="#id46" title="Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, mODa 10–Advances in Model-Oriented Design and Analysis, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. doi:10.1007/978-3-319-00218-7_5.">Chevalier <em>et al.</em>, 2013</a>, <a class="reference internal" href="#id49" title="Ilya Molchanov. Theory of Random Sets. Springer, 2005.">Molchanov, 2005</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Numpy array of numerical values and set numbers, containing multiple sets. For example the output          of the <a class="reference internal" href="#moocore.moocore.read_datasets" title="moocore.moocore.read_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_datasets()</span></code></a> function</p></li>
-<li><p><strong>reference</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Reference point set as a numpy array or list. Must be same length as a single point in the         dataset</p></li>
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – <dl class="simple">
+<dt>Numpy array of numerical values and set numbers, containing multiple sets. For example the output </dt><dd><p>of the <a class="reference internal" href="#moocore.moocore.read_datasets" title="moocore.moocore.read_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_datasets()</span></code></a> function.</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>reference</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Reference point set as a numpy array or list. Must be same length as a single point in the dataset.</p></li>
+<li><p><strong>VE</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">optional.</span></code>) – Vorob’ev expectation, e.g., as returned by <a class="reference internal" href="#moocore.moocore.vorobT" title="moocore.moocore.vorobT"><code class="xref py py-func docutils literal notranslate"><span class="pre">vorobT()</span></code></a>. If not provided, it is calculated as <cite>vorobT(x, reference)</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary with elements <cite>threshold</cite>, <cite>VE</cite>, and <cite>avg_hyp</cite> (average hypervolume).</p>
+<dd class="field-even"><p>Vorob’ev deviation.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
 <p class="rubric">References</p>
@@ -771,6 +776,50 @@ The last column contains an identifier for which set the data is relevant to.</p
 </div>
 <div class="citation" id="id49" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id28">Mol05</a><span class="fn-bracket">]</span></span>
+<p>Ilya Molchanov. <em>Theory of Random Sets</em>. Springer, 2005.</p>
+</div>
+</div>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">CPFs</span> <span class="o">=</span> <span class="n">moocore</span><span class="o">.</span><span class="n">read_datasets</span><span class="p">(</span><span class="s2">&quot;./doc/examples/CPFs.txt&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">VD</span> <span class="o">=</span> <span class="n">moocore</span><span class="o">.</span><span class="n">vorobDev</span><span class="p">(</span><span class="n">CPFs</span><span class="p">,</span> <span class="n">reference</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">VD</span>
+<span class="go">3017.1298940232646</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="moocore.moocore.vorobT">
+<span class="sig-prename descclassname"><span class="pre">moocore.moocore.</span></span><span class="sig-name descname"><span class="pre">vorobT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moocore/moocore.html#vorobT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#moocore.moocore.vorobT" title="Link to this definition">#</a></dt>
+<dd><p>Compute Vorob’ev threshold, expectation and deviation <span id="id54">[<a class="reference internal" href="#id59" title="M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. European Journal of Operational Research, 243(2):386–394, 2015. doi:10.1016/j.ejor.2014.07.032.">Binois <em>et al.</em>, 2015</a>, <a class="reference internal" href="#id72" title="Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, mODa 10–Advances in Model-Oriented Design and Analysis, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. doi:10.1007/978-3-319-00218-7_5.">Chevalier <em>et al.</em>, 2013</a>, <a class="reference internal" href="#id75" title="Ilya Molchanov. Theory of Random Sets. Springer, 2005.">Molchanov, 2005</a>]</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Numpy array of numerical values and set numbers, containing multiple sets. For example the output          of the <a class="reference internal" href="#moocore.moocore.read_datasets" title="moocore.moocore.read_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_datasets()</span></code></a> function</p></li>
+<li><p><strong>reference</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Reference point set as a numpy array or list. Must be same length as a single point in the         dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary with elements <cite>threshold</cite>, <cite>VE</cite>, and <cite>avg_hyp</cite> (average hypervolume).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<div class="docutils container" id="id55">
+<div role="list" class="citation-list">
+<div class="citation" id="id59" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id54">BGR15</a><span class="fn-bracket">]</span></span>
+<p>M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. <em>European Journal of Operational Research</em>, 243(2):386–394, 2015. <a class="reference external" href="https://doi.org/10.1016/j.ejor.2014.07.032">doi:10.1016/j.ejor.2014.07.032</a>.</p>
+</div>
+<div class="citation" id="id72" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id54">CGBM13</a><span class="fn-bracket">]</span></span>
+<p>Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, <em>mODa 10–Advances in Model-Oriented Design and Analysis</em>, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. <a class="reference external" href="https://doi.org/10.1007/978-3-319-00218-7_5">doi:10.1007/978-3-319-00218-7_5</a>.</p>
+</div>
+<div class="citation" id="id75" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id54">Mol05</a><span class="fn-bracket">]</span></span>
 <p>Ilya Molchanov. <em>Theory of Random Sets</em>. Springer, 2005.</p>
 </div>
 </div>
@@ -843,6 +892,7 @@ The last column contains an identifier for which set the data is relevant to.</p
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moocore.moocore.is_nondominated"><code class="docutils literal notranslate"><span class="pre">is_nondominated()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moocore.moocore.normalise"><code class="docutils literal notranslate"><span class="pre">normalise()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moocore.moocore.read_datasets"><code class="docutils literal notranslate"><span class="pre">read_datasets()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moocore.moocore.vorobDev"><code class="docutils literal notranslate"><span class="pre">vorobDev()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moocore.moocore.vorobT"><code class="docutils literal notranslate"><span class="pre">vorobT()</span></code></a></li>
 </ul>
   </nav></div>
