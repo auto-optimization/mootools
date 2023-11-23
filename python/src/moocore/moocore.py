@@ -675,14 +675,14 @@ def vorobDev(x, reference, VE=None):
     Parameters
     ----------
     x : numpy array
-        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
-         of the :func:`read_datasets` function.
+       Numpy array of numerical values and set numbers, containing multiple sets.
+       For example the output of the :func:`read_datasets` function.
     reference : numpy array or list
-        Reference point set as a numpy array or list. Must be same length as a single point in the \
-        dataset.
-    VE : numpy array, optional.
-         Vorob'ev expectation, e.g., as returned by :func:`vorobT`. If not provided, it is calculated as `vorobT(x, reference)`.
-    
+       Reference point set as a numpy array or list. Must be same length as a single point in the dataset.
+    VE : numpy array, optional
+       Vorob'ev expectation, e.g., as returned by :func:`vorobT`.
+       If not provided, it is calculated as `vorobT(x, reference)`.
+
     Returns
     -------
     float
