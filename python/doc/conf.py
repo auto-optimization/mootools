@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.extlinks",
     "sphinx.ext.viewcode",
+    "sphinx.ext.mathjax",
     "myst_nb",
     "sphinx.ext.autosectionlabel",
     "sphinxcontrib.bibtex",

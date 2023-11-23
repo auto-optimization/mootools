@@ -258,9 +258,9 @@ def epsilon_mult(data, ref, maximise=False):
 
 # FIXME: TODO maximise option
 def hypervolume(data, ref):
-    """Hypervolume indicator
+    r"""Hypervolume indicator
 
-    Computes the hypervolume metric with respect to a given reference point assuming minimization of all objectives.
+    Computes the hypervolume metric with respect to a given reference point assuming minimization of all objectives. For 2D and 3D, the algorithm used :cite:p:`hypervolume-FonPaqLop06:hypervolume,hypervolume-BeuFonLopPaqVah09:tec` has :math:`O(n \log n)` complexity. For 4D or higher, the algorithm :cite:p:`hypervolume-FonPaqLop06:hypervolume` has :math:`O(n^{d-2} \log n)` time and linear space complexity in the worst-case, but experimental results show that the pruning techniques used may reduce the time complexity even further.
 
     Parameters
     ----------
@@ -276,6 +276,12 @@ def hypervolume(data, ref):
     float
         A single numerical value, the hypervolume indicator
 
+    References
+    ----------
+    .. bibliography::
+         :keyprefix: hypervolume-
+
+
     Examples
     --------
     >>> dat = np.array([[5,5],[4,6],[2,7], [7,4]])
@@ -283,10 +289,12 @@ def hypervolume(data, ref):
     38.0
 
     Select Set 1 of dataset, and remove set number column
+
     >>> dat = moocore.read_datasets("./doc/examples/input1.dat")
     >>> set1 = dat[dat[:,2]==1, :2]
     
     This set contains dominated points so remove them
+
     >>> set1 = moocore.filter_dominated(set1)
     >>> moocore.hypervolume(set1, ref= [10, 10])
     90.46272764755885
@@ -619,6 +627,11 @@ def vorobT(data, reference):
     dict
         A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).
 
+    References
+    ----------
+    .. bibliography::
+         :keyprefix: vorobT-
+
     Examples
     --------
     >>> CPFs = moocore.read_datasets("./doc/examples/CPFs.txt")
@@ -628,10 +641,6 @@ def vorobT(data, reference):
     >>> res['avg_hyp']
     8892.824259740963
 
-    References
-    ----------
-    .. bibliography::
-         :keyprefix: vorobT-
     """
     data = np.asfarray(data)
     ncols = data.shape[1]
