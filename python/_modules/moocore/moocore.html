@@ -642,9 +642,9 @@ document.write(`
 <div class="viewcode-block" id="hypervolume">
 <a class="viewcode-back" href="../../api/moocore.moocore.html#moocore.moocore.hypervolume">[docs]</a>
 <span class="k">def</span> <span class="nf">hypervolume</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ref</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hypervolume indicator</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hypervolume indicator</span>
 
-<span class="sd">    Computes the hypervolume metric with respect to a given reference point assuming minimization of all objectives.</span>
+<span class="sd">    Computes the hypervolume metric with respect to a given reference point assuming minimization of all objectives. For 2D and 3D, the algorithm used :cite:p:`hypervolume-FonPaqLop06:hypervolume,hypervolume-BeuFonLopPaqVah09:tec` has :math:`O(n \log n)` complexity. For 4D or higher, the algorithm :cite:p:`hypervolume-FonPaqLop06:hypervolume` has :math:`O(n^{d-2} \log n)` time and linear space complexity in the worst-case, but experimental results show that the pruning techniques used may reduce the time complexity even further.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -660,6 +660,12 @@ document.write(`
 <span class="sd">    float</span>
 <span class="sd">        A single numerical value, the hypervolume indicator</span>
 
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. bibliography::</span>
+<span class="sd">         :keyprefix: hypervolume-</span>
+
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; dat = np.array([[5,5],[4,6],[2,7], [7,4]])</span>
@@ -667,10 +673,12 @@ document.write(`
 <span class="sd">    38.0</span>
 
 <span class="sd">    Select Set 1 of dataset, and remove set number column</span>
+
 <span class="sd">    &gt;&gt;&gt; dat = moocore.read_datasets(&quot;./doc/examples/input1.dat&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; set1 = dat[dat[:,2]==1, :2]</span>
 <span class="sd">    </span>
 <span class="sd">    This set contains dominated points so remove them</span>
+
 <span class="sd">    &gt;&gt;&gt; set1 = moocore.filter_dominated(set1)</span>
 <span class="sd">    &gt;&gt;&gt; moocore.hypervolume(set1, ref= [10, 10])</span>
 <span class="sd">    90.46272764755885</span>
@@ -1018,6 +1026,11 @@ document.write(`
 <span class="sd">    dict</span>
 <span class="sd">        A dictionary with elements `threshold`, `VE`, and `avg_hyp` (average hypervolume).</span>
 
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. bibliography::</span>
+<span class="sd">         :keyprefix: vorobT-</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; CPFs = moocore.read_datasets(&quot;./doc/examples/CPFs.txt&quot;)</span>
@@ -1027,10 +1040,6 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; res[&#39;avg_hyp&#39;]</span>
 <span class="sd">    8892.824259740963</span>
 
-<span class="sd">    References</span>
-<span class="sd">    ----------</span>
-<span class="sd">    .. bibliography::</span>
-<span class="sd">         :keyprefix: vorobT-</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="n">ncols</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>

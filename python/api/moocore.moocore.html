@@ -40,6 +40,7 @@
     <script src="../_static/documentation_options.js?v=e3e4a12f"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/moocore.moocore';</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -497,13 +498,13 @@ See: <a class="reference internal" href="#moocore.moocore.is_nondominated" title
 <dt class="sig sig-object py" id="moocore.moocore.hypervolume">
 <span class="sig-prename descclassname"><span class="pre">moocore.moocore.</span></span><span class="sig-name descname"><span class="pre">hypervolume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moocore/moocore.html#hypervolume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#moocore.moocore.hypervolume" title="Link to this definition">#</a></dt>
 <dd><p>Hypervolume indicator</p>
-<p>Computes the hypervolume metric with respect to a given reference point assuming minimization of all objectives.</p>
+<p>Computes the hypervolume metric with respect to a given reference point assuming minimization of all objectives. For 2D and 3D, the algorithm used <span id="id1">[<a class="reference internal" href="#id5" title="Nicola Beume, Carlos M. Fonseca, Manuel López-Ibáñez, Luís Paquete, and Jan Vahrenhold. On the complexity of computing the hypervolume indicator. IEEE Transactions on Evolutionary Computation, 13(5):1075–1082, 2009. doi:10.1109/TEVC.2009.2015575.">Beume <em>et al.</em>, 2009</a>, <a class="reference internal" href="#id14" title="Carlos M. Fonseca, Luís Paquete, and Manuel López-Ibáñez. An improved dimension-sweep algorithm for the hypervolume indicator. In Proceedings of the 2006 Congress on Evolutionary Computation (CEC 2006), pages 1157–1163. IEEE Press, Piscataway, NJ, July 2006. doi:10.1109/CEC.2006.1688440.">Fonseca <em>et al.</em>, 2006</a>]</span> has <span class="math notranslate nohighlight">\(O(n \log n)\)</span> complexity. For 4D or higher, the algorithm <span id="id2">[<a class="reference internal" href="#id14" title="Carlos M. Fonseca, Luís Paquete, and Manuel López-Ibáñez. An improved dimension-sweep algorithm for the hypervolume indicator. In Proceedings of the 2006 Congress on Evolutionary Computation (CEC 2006), pages 1157–1163. IEEE Press, Piscataway, NJ, July 2006. doi:10.1109/CEC.2006.1688440.">Fonseca <em>et al.</em>, 2006</a>]</span> has <span class="math notranslate nohighlight">\(O(n^{d-2} \log n)\)</span> time and linear space complexity in the worst-case, but experimental results show that the pruning techniques used may reduce the time complexity even further.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – Numpy array of numerical values, where each row gives the coordinates of a point in objective space.
 If the array is created from the <cite>read_datasets()</cite> function, remove the last column</p></li>
-<li><p><strong>ref</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Reference point set as a numpy array or list. Must be same length as a single point in the         dataset</p></li>
+<li><p><strong>ref</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – Reference point set as a numpy array or list. Must be same length as a single point in the dataset</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -513,19 +514,37 @@ If the array is created from the <cite>read_datasets()</cite> function, remove t
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
+<p class="rubric">References</p>
+<div class="docutils container" id="id3">
+<div role="list" class="citation-list">
+<div class="citation" id="id5" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">BFLopezIbanez+09</a><span class="fn-bracket">]</span></span>
+<p>Nicola Beume, Carlos M. Fonseca, Manuel López-Ibáñez, Luís Paquete, and Jan Vahrenhold. On the complexity of computing the hypervolume indicator. <em>IEEE Transactions on Evolutionary Computation</em>, 13(5):1075–1082, 2009. <a class="reference external" href="https://doi.org/10.1109/TEVC.2009.2015575">doi:10.1109/TEVC.2009.2015575</a>.</p>
+</div>
+<div class="citation" id="id14" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>FPLopezIbanez06<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>Carlos M. Fonseca, Luís Paquete, and Manuel López-Ibáñez. An improved dimension-sweep algorithm for the hypervolume indicator. In <em>Proceedings of the 2006 Congress on Evolutionary Computation (CEC 2006)</em>, pages 1157–1163. IEEE Press, Piscataway, NJ, July 2006. <a class="reference external" href="https://doi.org/10.1109/CEC.2006.1688440">doi:10.1109/CEC.2006.1688440</a>.</p>
+</div>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">moocore</span><span class="o">.</span><span class="n">hypervolume</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">ref</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
 <span class="go">38.0</span>
 </pre></div>
 </div>
-<p>Select Set 1 of dataset, and remove set number column
-&gt;&gt;&gt; dat = moocore.read_datasets(“./doc/examples/input1.dat”)
-&gt;&gt;&gt; set1 = dat[dat[:,2]==1, :2]</p>
-<p>This set contains dominated points so remove them
-&gt;&gt;&gt; set1 = moocore.filter_dominated(set1)
-&gt;&gt;&gt; moocore.hypervolume(set1, ref= [10, 10])
-90.46272764755885</p>
+<p>Select Set 1 of dataset, and remove set number column</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dat</span> <span class="o">=</span> <span class="n">moocore</span><span class="o">.</span><span class="n">read_datasets</span><span class="p">(</span><span class="s2">&quot;./doc/examples/input1.dat&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">set1</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="n">dat</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This set contains dominated points so remove them</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">set1</span> <span class="o">=</span> <span class="n">moocore</span><span class="o">.</span><span class="n">filter_dominated</span><span class="p">(</span><span class="n">set1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">moocore</span><span class="o">.</span><span class="n">hypervolume</span><span class="p">(</span><span class="n">set1</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="go">90.46272764755885</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -724,7 +743,7 @@ The last column contains an identifier for which set the data is relevant to.</p
 <dl class="py function">
 <dt class="sig sig-object py" id="moocore.moocore.vorobT">
 <span class="sig-prename descclassname"><span class="pre">moocore.moocore.</span></span><span class="sig-name descname"><span class="pre">vorobT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moocore/moocore.html#vorobT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#moocore.moocore.vorobT" title="Link to this definition">#</a></dt>
-<dd><p>Compute Vorob’ev threshold, expectation and deviation <span id="id1">[<a class="reference internal" href="#id6" title="M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. European Journal of Operational Research, 243(2):386–394, 2015. doi:10.1016/j.ejor.2014.07.032.">Binois <em>et al.</em>, 2015</a>, <a class="reference internal" href="#id19" title="Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, mODa 10–Advances in Model-Oriented Design and Analysis, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. doi:10.1007/978-3-319-00218-7_5.">Chevalier <em>et al.</em>, 2013</a>, <a class="reference internal" href="#id22" title="Ilya Molchanov. Theory of Random Sets. Springer, 2005.">Molchanov, 2005</a>]</span>.</p>
+<dd><p>Compute Vorob’ev threshold, expectation and deviation <span id="id28">[<a class="reference internal" href="#id33" title="M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. European Journal of Operational Research, 243(2):386–394, 2015. doi:10.1016/j.ejor.2014.07.032.">Binois <em>et al.</em>, 2015</a>, <a class="reference internal" href="#id46" title="Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, mODa 10–Advances in Model-Oriented Design and Analysis, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. doi:10.1007/978-3-319-00218-7_5.">Chevalier <em>et al.</em>, 2013</a>, <a class="reference internal" href="#id49" title="Ilya Molchanov. Theory of Random Sets. Springer, 2005.">Molchanov, 2005</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -739,6 +758,23 @@ The last column contains an identifier for which set the data is relevant to.</p
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 </dd>
 </dl>
+<p class="rubric">References</p>
+<div class="docutils container" id="id29">
+<div role="list" class="citation-list">
+<div class="citation" id="id33" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id28">BGR15</a><span class="fn-bracket">]</span></span>
+<p>M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. <em>European Journal of Operational Research</em>, 243(2):386–394, 2015. <a class="reference external" href="https://doi.org/10.1016/j.ejor.2014.07.032">doi:10.1016/j.ejor.2014.07.032</a>.</p>
+</div>
+<div class="citation" id="id46" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id28">CGBM13</a><span class="fn-bracket">]</span></span>
+<p>Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, <em>mODa 10–Advances in Model-Oriented Design and Analysis</em>, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. <a class="reference external" href="https://doi.org/10.1007/978-3-319-00218-7_5">doi:10.1007/978-3-319-00218-7_5</a>.</p>
+</div>
+<div class="citation" id="id49" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id28">Mol05</a><span class="fn-bracket">]</span></span>
+<p>Ilya Molchanov. <em>Theory of Random Sets</em>. Springer, 2005.</p>
+</div>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">CPFs</span> <span class="o">=</span> <span class="n">moocore</span><span class="o">.</span><span class="n">read_datasets</span><span class="p">(</span><span class="s2">&quot;./doc/examples/CPFs.txt&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">moocore</span><span class="o">.</span><span class="n">vorobT</span><span class="p">(</span><span class="n">CPFs</span><span class="p">,</span> <span class="n">reference</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
@@ -747,23 +783,6 @@ The last column contains an identifier for which set the data is relevant to.</p
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;avg_hyp&#39;</span><span class="p">]</span>
 <span class="go">8892.824259740963</span>
 </pre></div>
-</div>
-<p class="rubric">References</p>
-<div class="docutils container" id="id2">
-<div role="list" class="citation-list">
-<div class="citation" id="id6" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">BGR15</a><span class="fn-bracket">]</span></span>
-<p>M. Binois, D. Ginsbourger, and O. Roustant. Quantifying uncertainty on Pareto fronts with Gaussian process conditional simulations. <em>European Journal of Operational Research</em>, 243(2):386–394, 2015. <a class="reference external" href="https://doi.org/10.1016/j.ejor.2014.07.032">doi:10.1016/j.ejor.2014.07.032</a>.</p>
-</div>
-<div class="citation" id="id19" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">CGBM13</a><span class="fn-bracket">]</span></span>
-<p>Clément Chevalier, David Ginsbourger, Julien Bect, and Ilya Molchanov. Estimating and quantifying uncertainties on level sets using the Vorob'ev expectation and deviation with Gaussian process models. In Dariusz Ucinski, Anthony C. Atkinson, and Maciej Patan, editors, <em>mODa 10–Advances in Model-Oriented Design and Analysis</em>, pages 35–43. Springer International Publishing, Heidelberg, Germany, 2013. <a class="reference external" href="https://doi.org/10.1007/978-3-319-00218-7_5">doi:10.1007/978-3-319-00218-7_5</a>.</p>
-</div>
-<div class="citation" id="id22" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Mol05</a><span class="fn-bracket">]</span></span>
-<p>Ilya Molchanov. <em>Theory of Random Sets</em>. Springer, 2005.</p>
-</div>
-</div>
 </div>
 </dd></dl>
 
