@@ -385,15 +385,13 @@ eafs <- function (points, sets, groups = NULL, percentiles = NULL)
   attsurfs
 }
 
-#' Convert a list of attainment surfaces to a data.frame
+#' Convert a list of attainment surfaces to a single `data.frame`.
 #'
-#' Convert a list of attainment surfaces to a single data.frame.
-#'
-#' @param x (`list()`) List of data.frames or matrices. The names of the list
+#' @param x (`list()`) List of `data.frames` or matrices. The names of the list
 #'   give the percentiles of the attainment surfaces.  This is the format
 #'   returned by [eaf::eafplot()] (and the internal function `compute_eaf_as_list`).
 #'
-#' @return A data.frame with as many columns as objectives and an additional column `percentiles`.
+#' @return A `data.frame` with as many columns as objectives and an additional column `percentiles`.
 #'
 #' @examples
 #'

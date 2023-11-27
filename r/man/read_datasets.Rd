@@ -10,7 +10,7 @@ read_datasets(file, col_names, text)
 \item{file}{(\code{character()})\cr Filename that contains the data.  Each row
 of the table appears as one line of the file.  If it does not contain an
 \emph{absolute} path, the file name is \emph{relative} to the current
-working directory, \code{\link[base]{getwd}()}.  Tilde-expansion is
+working directory, \code{\link[base:getwd]{base::getwd()}}.  Tilde-expansion is
 performed where supported.  Files compressed with \code{xz} are supported.}
 
 \item{col_names}{(\code{character()})\cr Vector of optional names for the variables.  The
@@ -54,7 +54,7 @@ read_datasets(text="1 2\n3 4\n\n5 6\n7 8\n", col_names=c("obj1", "obj2"))
 
 }
 \seealso{
-\code{\link[utils]{read.table}}
+\code{\link[utils:read.table]{utils::read.table()}}
 }
 \author{
 Manuel \enc{López-Ibáñez}{Lopez-Ibanez}

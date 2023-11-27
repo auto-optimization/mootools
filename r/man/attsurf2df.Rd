@@ -2,20 +2,20 @@
 % Please edit documentation in R/eaf.R
 \name{attsurf2df}
 \alias{attsurf2df}
-\title{Convert a list of attainment surfaces to a data.frame}
+\title{Convert a list of attainment surfaces to a single \code{data.frame}.}
 \usage{
 attsurf2df(x)
 }
 \arguments{
-\item{x}{(\code{list()}) List of data.frames or matrices. The names of the list
+\item{x}{(\code{list()}) List of \code{data.frames} or matrices. The names of the list
 give the percentiles of the attainment surfaces.  This is the format
 returned by \code{\link[eaf:eafplot]{eaf::eafplot()}} (and the internal function \code{compute_eaf_as_list}).}
 }
 \value{
-A data.frame with as many columns as objectives and an additional column \code{percentiles}.
+A \code{data.frame} with as many columns as objectives and an additional column \code{percentiles}.
 }
 \description{
-Convert a list of attainment surfaces to a single data.frame.
+Convert a list of attainment surfaces to a single \code{data.frame}.
 }
 \examples{
 

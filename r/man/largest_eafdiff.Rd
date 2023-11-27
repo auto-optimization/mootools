@@ -7,7 +7,7 @@
 largest_eafdiff(x, maximise = FALSE, intervals = 5L, reference, ideal = NULL)
 }
 \arguments{
-\item{x}{(\code{list()}) A list of matrices with at least 3 columns}
+\item{x}{(\code{list()}) A list of matrices with at least 3 columns.}
 
 \item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
 maximised instead of minimised. Either a single logical value that applies
@@ -19,7 +19,7 @@ objective.}
 
 \item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
 
-\item{ideal}{(\code{numeric()}) \cr Ideal point as a vector of numerical values. If \code{NULL}, it is calculated as minimum (resp. maximum if maximising that objective) of each objective in \code{data}.}
+\item{ideal}{(\code{numeric()}) \cr Ideal point as a vector of numerical values. If \code{NULL}, it is calculated as minimum (or maximum if maximising that objective) of each objective in \code{data}.}
 }
 \value{
 (\code{list()}) A list with two components \code{pair} and \code{value}.

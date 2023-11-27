@@ -17,13 +17,13 @@
 "_PACKAGE"
 
 
-#' Results of Hybrid GA on vanzyl and Richmond water networks
+#' Results of Hybrid GA on Vanzyl and Richmond water networks
 #'
 #'@format
 #'  A list with two data frames, each of them with three columns, as
 #'  produced by [read_datasets()].
 #'  \describe{
-#'    \item{`$vanzyl`}{data frame of results on vanzyl network}
+#'    \item{`$vanzyl`}{data frame of results on Vanzyl network}
 #'    \item{`$richmond`}{data frame of results on Richmond
 #'      network. The second column is filled with `NA`}
 #'  }
@@ -89,7 +89,7 @@
 #'  Two metaheuristic algorithms, TabuCol (Hertz et al., 1987) and
 #'  simulated annealing \citep{JohAraMcGSch1991}, to find a good
 #'  approximation of the chromatic number of two random graphs. The data
-#'  here has the only goal of providing an example of use of eafplot for
+#'  here has the only goal of providing an example of use of [eafplot()] for
 #'  comparing algorithm performance with respect to both time and quality
 #'  when modelled as two objectives in trade off.
 #'

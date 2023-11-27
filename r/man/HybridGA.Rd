@@ -3,12 +3,12 @@
 \docType{data}
 \name{HybridGA}
 \alias{HybridGA}
-\title{Results of Hybrid GA on vanzyl and Richmond water networks}
+\title{Results of Hybrid GA on Vanzyl and Richmond water networks}
 \format{
 A list with two data frames, each of them with three columns, as
 produced by \code{\link[=read_datasets]{read_datasets()}}.
 \describe{
-\item{\verb{$vanzyl}}{data frame of results on vanzyl network}
+\item{\verb{$vanzyl}}{data frame of results on Vanzyl network}
 \item{\verb{$richmond}}{data frame of results on Richmond
 network. The second column is filled with \code{NA}}
 }
@@ -20,7 +20,7 @@ network. The second column is filled with \code{NA}}
 HybridGA
 }
 \description{
-Results of Hybrid GA on vanzyl and Richmond water networks
+Results of Hybrid GA on Vanzyl and Richmond water networks
 }
 \examples{
 data(HybridGA)

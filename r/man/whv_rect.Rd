@@ -31,7 +31,7 @@ maximised instead of minimised. Either a single logical value that applies
 to all objectives or a vector of logical values, with one value per
 objective.}
 
-\item{ideal}{(\code{numeric()}) \cr Ideal point as a vector of numerical values. If \code{NULL}, it is calculated as minimum (resp. maximum if maximising that objective) of each objective in \code{data}.}
+\item{ideal}{(\code{numeric()}) \cr Ideal point as a vector of numerical values. If \code{NULL}, it is calculated as minimum (or maximum if maximising that objective) of each objective in \code{data}.}
 
 \item{scalefactor}{(\code{numeric(1)}) real value within \eqn{(0,1]} that scales
 the overall weight of the differences. This is parameter psi (\eqn{\psi}) in \citet{DiaLop2020ejor}.}

@@ -10,8 +10,10 @@ Depends: R (>= 3.5)
 Imports:
         matrixStats,
         Rdpack
-Suggests: testthat (>= 3.0.0),
-          withr    
+Suggests: 
+    spelling,
+    testthat (>= 3.0.0),
+    withr
 License: LGPL (>= 2)
 BugReports: https://github.com/auto-optimization/moocore/issues
 URL: https://github.com/auto-optimization/moocore/, 
@@ -23,3 +25,4 @@ Roxygen: list(markdown = TRUE)
 SystemRequirements: GNU make, Gnu Scientific Library
 RdMacros: Rdpack
 Config/testthat/edition: 3
+Language: en-GB

@@ -9,7 +9,7 @@
 #' @param file (`character()`)\cr Filename that contains the data.  Each row
 #'   of the table appears as one line of the file.  If it does not contain an
 #'   \emph{absolute} path, the file name is \emph{relative} to the current
-#'   working directory, \code{\link[base]{getwd}()}.  Tilde-expansion is
+#'   working directory, [base::getwd()].  Tilde-expansion is
 #'   performed where supported.  Files compressed with `xz` are supported.
 #'
 #' @param col_names (`character()`)\cr Vector of optional names for the variables.  The
@@ -35,7 +35,7 @@
 #'  misinterpreted. In GNU/Linux the program `dos2unix` may be used
 #'  to fix newline characters.
 #'
-#'@seealso \code{\link[utils]{read.table}}
+#'@seealso [utils::read.table()]
 #'
 #'@examples
 #' extdata_path <- system.file(package="moocore","extdata")
@@ -78,9 +78,9 @@ read_datasets <- function(file, col_names, text)
 #' @param x  The data set to write. The last column must be the set number.
 #' 
 #' @param file either a character string naming a file or a connection open for
-#'   writing. ‘""’ indicates output to the console.
+#'   writing. `""` indicates output to the console.
 #'
-#'@seealso \code{\link[utils]{write.table}}, [read_datasets()]
+#'@seealso [utils::write.table()], [read_datasets()]
 #'
 #'@examples
 #' x <- read_datasets(text="1 2\n3 4\n\n5 6\n7 8\n", col_names=c("obj1", "obj2"))

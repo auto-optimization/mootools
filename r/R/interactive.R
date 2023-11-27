@@ -4,7 +4,7 @@
 #' EAF differences according to the method proposed by \citet{DiaLop2020ejor}.
 #' 
 #'
-#' @param x (`list()`) A list of matrices with at least 3 columns
+#' @param x (`list()`) A list of matrices with at least 3 columns.
 #'
 #' @template arg_maximise
 #'
