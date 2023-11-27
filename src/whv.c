@@ -58,8 +58,8 @@ rect_weighted_hv2d(double *data, size_t n, double * rectangles,
         p += nobj;                                                             \
         print_point(pk, p, r, rect);                                           \
     } while(0)
-
-    DEBUG2_PRINT("n = %zu\trectangles = %zu\n", n, rectangles_nrow);
+    // We cannot use %zu for size_t because of MingW compiler.
+    DEBUG2_PRINT("n = %lu\trectangles = %lu\n", (unsigned long)n, (unsigned long)rectangles_nrow);
     if (rectangles_nrow == 0 || n == 0) return 0;
 
     const int nobj = 2;
