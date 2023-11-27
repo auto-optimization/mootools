@@ -89,7 +89,7 @@
 #'  Two metaheuristic algorithms, TabuCol (Hertz et al., 1987) and
 #'  simulated annealing \citep{JohAraMcGSch1991}, to find a good
 #'  approximation of the chromatic number of two random graphs. The data
-#'  here has the only goal of providing an example of use of [eafplot()] for
+#'  here has the only goal of providing an example of use of [eaf::eafplot()] for
 #'  comparing algorithm performance with respect to both time and quality
 #'  when modelled as two objectives in trade off.
 #'
