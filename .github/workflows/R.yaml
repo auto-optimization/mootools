@@ -34,14 +34,16 @@ jobs:
       fail-fast: true
       matrix:
         os: [ windows-latest, macOS-latest, ubuntu-22.04 ]
-        r: [release]
+        r: [ release ]
         include:
-          - os: ubuntu-20.04
-            r: '3.6'
-            # Use latest ubuntu to make it easier to install dependencies
-          - os: ubuntu-latest
-            r: 'devel'
-            http-user-agent: 'release'
+          # Use 3.6 to trigger usage of RTools35
+          - { os: windows-latest, r: '3.6' }
+          # Use 4.1 to check with rtools40's older compiler
+          - { os: windows-latest, r: '4.1' } 
+          # Use latest ubuntu to make it easier to install dependencies
+          - { os: ubuntu-20.04, r: '3.6' }
+          # Use latest ubuntu to make it easier to install dependencies
+          - { os: ubuntu-latest, r: 'devel', http-user-agent: 'release' }
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
@@ -62,7 +64,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::remotes, any::rcmdcheck
+          extra-packages: any::remotes, any::rcmdcheck, any::spelling
           needs: check
           working-directory: r
           
@@ -116,7 +118,7 @@ jobs:
       options: --user=root
       
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         
       #- uses: r-lib/actions/setup-r@v2
 
