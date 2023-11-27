@@ -36,12 +36,11 @@ jobs:
         os: [ windows-latest, macOS-latest, ubuntu-22.04 ]
         r: [ release ]
         include:
+          - { os: ubuntu-20.04, r: '3.6' }
           # Use 3.6 to trigger usage of RTools35
           - { os: windows-latest, r: '3.6' }
           # Use 4.1 to check with rtools40's older compiler
           - { os: windows-latest, r: '4.1' } 
-          # Use latest ubuntu to make it easier to install dependencies
-          - { os: ubuntu-20.04, r: '3.6' }
           # Use latest ubuntu to make it easier to install dependencies
           - { os: ubuntu-latest, r: 'devel', http-user-agent: 'release' }
     env:
@@ -64,7 +63,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::remotes, any::rcmdcheck, any::spelling
+          extra-packages: any::remotes, any::rcmdcheck, any::spelling, any::eaf
           needs: check
           working-directory: r
           
@@ -130,7 +129,7 @@ jobs:
         
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, local::.
+          extra-packages: any::rcmdcheck, local::., any::eaf
           working-directory: r
           
       - uses: r-lib/actions/run-rchk@v2
