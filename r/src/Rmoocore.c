@@ -35,7 +35,7 @@ compute_eaf_helper (SEXP DATA, int nobj, SEXP CUMSIZES, int nruns,
     DEBUG2(
         Rprintf ("eaf computed\n");
         for (int k = 0; k < nlevels; k++) {
-            Rprintf ("eaf[%d] = %d\n", k, eaf[k]->size);
+            Rprintf ("eaf[%d] = %lu\n", k, (unsigned long) eaf[k]->size);
         });
 
     return eaf;
@@ -173,15 +173,10 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     return Rexp(result);
 }
 
-
-SEXP compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
-                            SEXP INTERVALS);
 SEXP 
-compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
-                       SEXP INTERVALS)
+compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP INTERVALS)
 {
     int nprotected = 0;
-
     SEXP_2_INT(NOBJ, nobj);
     SEXP_2_INT(NRUNS, nruns);
     SEXP_2_INT(INTERVALS, intervals);
@@ -192,8 +187,7 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     eaf_free(eaf, nruns);
 
     const int division = nruns / 2;
-
-    int ncol = vector_int_size(&p->col);
+    const int ncol = vector_int_size(&p->col);
 
     DEBUG2(Rprintf ("ncol: %d\n", ncol));
 
