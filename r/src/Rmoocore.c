@@ -150,10 +150,10 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     int nrow = vector_int_size(&rects->col);
     // Two points per row + color
     new_real_matrix (result, nrow, 2 * nobj + 1);
-    double * p_xy = vector_objective_begin(&rects->xy);
+    const double * p_xy = vector_objective_begin(&rects->xy);
     for (k = 0; k < nrow; ++k) {
-        for (int i = 0; i < 2 * nobj; i++)
-            result[k + nrow * i] = (double) *(p_xy++);
+        for (int i = 0; i < 2 * nobj; i++, p_xy++)
+            result[k + nrow * i] = *p_xy;
     }
     vector_objective_dtor (&rects->xy);
 
