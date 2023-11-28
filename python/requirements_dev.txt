@@ -19,6 +19,7 @@ kaleido
 myst-nb 
 sphinxcontrib-napoleon
 sphinxcontrib-bibtex
-
+sphinx-copybutton
+sphinx-autodoc-typehints
 jupyterlab
 ipywidgets

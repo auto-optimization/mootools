@@ -70,8 +70,7 @@ releasebuild: clean
 
 releasecheck: cran
 	$(Reval) 'urlchecker::url_check()'
-	$(MAKE) winbuild
-	$(MAKE) macbuild
+	$(MAKE) winbuild # $(MAKE) macbuild # rhub is broken
 
 cran : build
 	cd $(BINDIR) && _R_CHECK_FORCE_SUGGESTS_=false _R_OPTIONS_STRINGS_AS_FACTORS_=false R CMD check --as-cran $(PACKAGE)_$(PACKAGEVERSION).tar.gz
@@ -91,7 +90,7 @@ pdf:
 	cd $(BINDIR) && R CMD Rd2pdf --no-preview --batch --output=$(PACKAGE).pdf $(PACKAGEDIR)
 
 submit:
-	@echo 'Edit cran-comments.md and run devtools::submit_cran() in R'
+	@echo 'Edit cran-comments.md and run devtools::release() in R'
 
 remotecran: releasebuild
 	$(Reval) "rhub::check_for_cran($(RHUB_COMMON_ARGS), show_status = TRUE)"

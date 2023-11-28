@@ -1,5 +1,5 @@
-import numpy as np
 import pytest
+import numpy as np
 import math
 
 import moocore
@@ -10,10 +10,8 @@ def test_docstrings():
 
     doctest.FLOAT_EPSILON = 1e-9
     # Run doctests for "moocore" module and fail if one of the docstring tests is incorrect.
-    # Pass in the "eaf" module so that the docstrings don't have to import every time
-    doctest.testmod(
-        moocore.moocore, raise_on_error=True, extraglobs={"moocore": moocore}
-    )
+    # Pass in the "moocore" module so that the docstrings don't have to import every time
+    doctest.testmod(moocore, raise_on_error=True, extraglobs={"moocore": moocore})
 
 
 def test_read_datasets_data():

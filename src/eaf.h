@@ -41,14 +41,14 @@
 #define R_NO_REMAP
 #include <R.h>
 #define EAF_MALLOC(WHAT, NMEMB, TYPE)                                          \
-    do { WHAT = malloc (NMEMB * sizeof(TYPE));                                 \
-        if (!WHAT) {                                                           \
-            Rf_error(__FILE__ ": %s = malloc (%u * %u) failed",                \
-                     #WHAT, (unsigned int) NMEMB, (unsigned int) sizeof(TYPE)); } \
+    do { WHAT = malloc ((NMEMB) * sizeof(TYPE));                               \
+        if (!WHAT)                                                             \
+            Rf_error(__FILE__ ": %s = malloc (%lu * %lu) failed", #WHAT,       \
+                     (unsigned long) (NMEMB), (unsigned long) sizeof(TYPE));   \
     } while (0)
 #else
 #define EAF_MALLOC(WHAT, NMEMB, TYPE)                                          \
-    do { WHAT = malloc (NMEMB * sizeof(TYPE));                                 \
+    do { WHAT = malloc ((NMEMB) * sizeof(TYPE));                               \
         if (!WHAT) { perror (__FILE__ ": " #WHAT ); exit (EXIT_FAILURE); }     \
     } while(0)
 #endif // R_PACKAGE
