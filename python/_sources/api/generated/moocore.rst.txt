@@ -1,0 +1,47 @@
+﻿moocore
+=======
+
+.. automodule:: moocore
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      avg_hausdorff_dist
+      eaf
+      epsilon_additive
+      epsilon_mult
+      filter_dominated
+      hypervolume
+      igd
+      igd_plus
+      is_nondominated
+      normalise
+      read_datasets
+      vorobDev
+      vorobT
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      ReadDatasetsError
+   
+   
+
+
+
