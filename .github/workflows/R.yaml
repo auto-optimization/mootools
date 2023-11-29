@@ -110,6 +110,7 @@ jobs:
           path: r/check
 
   rchk:
+    if: false # Skip until https://github.com/r-lib/actions/issues/783
     needs: R-CMD-check
     runs-on: ubuntu-latest
     container:
