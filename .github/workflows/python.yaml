@@ -13,6 +13,8 @@ on:
       - ".github/workflows/python.yaml"
       - "src/**"
       - "python/**"
+  # Manual run
+  workflow_dispatch:
 
 #permissions:
 #  contents: write
@@ -189,3 +191,36 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
+  wheels:
+    name: Build wheels on ${{ matrix.os }}
+    needs: coverage
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        with:
+          package-dir: python
+        env:
+          CIBW_SKIP: "pp*"
+          CIBW_ARCHS_WINDOWS: "auto"
+          CIBW_ARCHS_LINUX: "auto aarch64 ppc64le"
+          CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+
+      - uses: actions/upload-artifact@v3
+        if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/')"
+        with:
+          path: ./wheelhouse/*.whl

@@ -41,3 +41,7 @@ pythonpath = [
 testpaths = [
     "tests"
 ]
+
+[tool.cibuildwheel]
+test-requires = "pytest"
+test-command = "pytest --doctest-modules --ignore-glob='*generate-expected-output.py' "
