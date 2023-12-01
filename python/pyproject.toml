@@ -35,13 +35,9 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-pythonpath = [
-  "src"
-]
-testpaths = [
-    "tests"
-]
+pythonpath = [ "src" ]
+testpaths = [ "tests" ]
 
 [tool.cibuildwheel]
 test-requires = "pytest"
-test-command = "pytest --doctest-modules --ignore-glob='*generate-expected-output.py' "
+test-command = "pytest --doctest-modules --ignore-glob='*generate-expected-output.py' {project}/tests"
