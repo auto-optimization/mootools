@@ -76,3 +76,20 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 }
 
 
+#' @param x (`matrix()`) Matrix of rectangles representing EAF differences
+#'   (returned by [eafdiff()] with `rectangles=TRUE`).
+#' 
+#' @param left (`logical(1)`) With `left=TRUE` return the rectangles with
+#'   positive differences, otherwise return those with negative differences but
+#'   differences are converted to positive.
+#' 
+#'@concept eaf
+#'@export
+choose_eafdiff <- function(x, left = stop("'left' must be either TRUE or FALSE"))
+{
+  if (left) return (x[ x[, ncol(x)] > 0L, , drop = FALSE])
+  x <- x[ x[, ncol(x)] < 0L, , drop = FALSE]
+  # We always return positive colors.
+  x[, ncol(x)] <- abs(x[, ncol(x)])
+  x
+}

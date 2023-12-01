@@ -218,10 +218,6 @@ jobs:
           package-dir: python
           output-dir: wheelhouse
         env:
-          CIBW_ARCHS_WINDOWS: "auto"
-          CIBW_ARCHS_LINUX: "auto aarch64"
-          CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
-          CIBW_SKIP: "*-musllinux*"
           CIBW_BUILD: ${{ matrix.wheel-version }}
           CIBW_BUILD_VERBOSITY: 1
             
