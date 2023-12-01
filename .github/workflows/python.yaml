@@ -192,14 +192,16 @@ jobs:
           verbose: true
 
   wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build wheels (${{ matrix.wheel-version }}) on ${{ matrix.os }}
     needs: coverage
-    if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        arch: [all]
+        wheel-version: ['cp38*', 'cp39*', 'cp310*', 'cp311*', 'cp312*']
 
     steps:
       - uses: actions/checkout@v4
@@ -214,13 +216,17 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.2
         with:
           package-dir: python
+          output-dir: wheelhouse
         env:
-          CIBW_SKIP: "pp*"
           CIBW_ARCHS_WINDOWS: "auto"
-          CIBW_ARCHS_LINUX: "auto aarch64 ppc64le"
+          CIBW_ARCHS_LINUX: "auto aarch64"
           CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
-
+          CIBW_SKIP: "*-musllinux*"
+          CIBW_BUILD: ${{ matrix.wheel-version }}
+          CIBW_BUILD_VERBOSITY: 1
+            
       - uses: actions/upload-artifact@v3
         if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/')"
         with:
-          path: ./wheelhouse/*.whl
+          name: wheels
+          path: wheelhouse/*.whl
