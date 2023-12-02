@@ -31,12 +31,11 @@ Tracker = "https://github.com/auto-optimization/moocore/issues"
 zip-safe = false
 package-dir = {"" = "src"}
 
-[tool.setuptools.packages.find]
-where = ["src"]
+# [tool.setuptools.dynamic]
+# version = {attr = "moocore.__version__"}
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-pythonpath = [ "src" ]
 testpaths = [ "tests" ]
 
 [tool.cibuildwheel]
@@ -44,7 +43,7 @@ skip = ["pp*", "*-musllinux_aarch64", "cp38-musllinux_x86_64"]
 build-verbosity = 2
 # Change import-mode to ensure we test against installed package, not local project
 test-requires = "pytest"
-test-command = "pytest -v {project}/python/tests --import-mode=append --doctest-modules --ignore-glob='*generate-expected-output.py'"
+test-command = "ytest -v {project}/python/tests --import-mode=importlib --doctest-modules"
 # skip tests on cp38-macosx_x86_64 because of https://github.com/catboost/catboost/issues/2371
 # skip tests on emulated architectures, as they are very slow
 # skip tests on *-macosx_arm64 , as cibuildwheel does not support tests on arm64 (yet)

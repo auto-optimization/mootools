@@ -216,8 +216,6 @@ jobs:
         with:
           package-dir: python
           output-dir: wheelhouse
-        env:
-          CIBW_BUILD_VERBOSITY: 1
             
       - uses: actions/upload-artifact@v3
         if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/')"
