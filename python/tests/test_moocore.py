@@ -14,7 +14,7 @@ def test_docstrings():
     doctest.testmod(moocore, raise_on_error=True, extraglobs={"moocore": moocore})
 
 
-def test_read_datasets_data():
+def test_read_datasets_data(test_datapath):
     """
     Check that the moocore.read_datasets() functions returns the same array as that which is calculated from the R library
     """
@@ -39,13 +39,13 @@ def test_read_datasets_data():
     for test, expected_name, expected_shape in zip(
         test_names, expected_names, expected_shapes
     ):
-        testdata = moocore.read_datasets(f"tests/test_data/{test}")
+        testdata = moocore.read_datasets(test_datapath(f"{test}"))
         assert (
             testdata.shape == expected_shape
         ), f"Read data array has incorrect shape, should be {expected_shape} but is {testdata.shape}"
         if expected_name != "":
             check_data = np.loadtxt(
-                f"tests/test_data/expected_output/read_datasets/{expected_name}"
+                test_datapath(f"expected_output/read_datasets/{expected_name}")
             )
             assert np.allclose(
                 testdata, check_data
@@ -64,7 +64,7 @@ def test_read_datasets_badname():
     assert expt.type == FileNotFoundError
 
 
-def test_read_datasets_errorcode():
+def test_read_datasets_errorcode(test_datapath):
     """
     Checks that an exception is raised when read_datasets() returns an
     error code, as well as checking specific error types
@@ -72,38 +72,38 @@ def test_read_datasets_errorcode():
     """
 
     with pytest.raises(Exception) as expt:
-        moocore.read_datasets("tests/test_data/empty")
+        moocore.read_datasets(test_datapath("empty"))
     assert expt.type == moocore.ReadDatasetsError
     assert expt.value.message == "READ_INPUT_FILE_EMPTY"
 
     with pytest.raises(Exception) as expt:
-        moocore.read_datasets("tests/test_data/column_error.dat")
+        moocore.read_datasets(test_datapath("column_error.dat"))
     assert expt.type == moocore.ReadDatasetsError
     assert expt.value.message == "ERROR_COLUMNS"
 
 
-def test_hv_output():
+def test_hv_output(test_datapath):
     """
     Checks the hypervolume calculation produces the correct value
     """
-    X = moocore.read_datasets(f"tests/test_data/input1.dat")
+    X = moocore.read_datasets(test_datapath("input1.dat"))
     hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10]))
     assert math.isclose(hv, 90.46272765), "input1.dat hypervolume produces wrong output"
 
     hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=[10, 10])
     assert math.isclose(hv, 90.46272765), "input1.dat hypervolume produces wrong output"
 
-    X = moocore.read_datasets("tests/test_data/duplicated3.inp")[:, :-1]
+    X = moocore.read_datasets(test_datapath("duplicated3.inp"))[:, :-1]
     hv = moocore.hypervolume(X, ref=[-14324, -14906, -14500, -14654, -14232, -14093])
     assert math.isclose(hv, 1.52890128312393e20)
 
 
-def test_hv_wrong_ref():
+def test_hv_wrong_ref(test_datapath):
     """
     Check that the moocore.hv() functions fails correctly after a ref with the wrong
     dimensions is input
     """
-    X = moocore.read_datasets(f"tests/test_data/input1.dat")
+    X = moocore.read_datasets(test_datapath("input1.dat"))
 
     with pytest.raises(Exception) as expt:
         hv = moocore.hypervolume(X[X[:, 2] == 1, :2], ref=np.array([10, 10, 10]))
@@ -124,8 +124,8 @@ def test_igd():
     assert math.isclose(moocore.avg_hausdorff_dist(B, ref), 2.59148346584763)
 
 
-def test_is_nondominated():
-    X = moocore.read_datasets("tests/test_data/input1.dat")
+def test_is_nondominated(test_datapath):
+    X = moocore.read_datasets(test_datapath("input1.dat"))
     subset = X[X[:, 2] == 3, :2]
     dominated = moocore.is_nondominated(subset)
     assert (
@@ -202,9 +202,7 @@ def test_normalise():
     )
 
 
-def test_eaf(request):
-    test_data_path = request.path.parent.joinpath("test_data")
-
+def test_eaf(test_datapath):
     # FIXME ALG_1_dat is creating slightly different percentile values than expected in its EAF output
     test_names = [
         "input1.dat",
@@ -223,14 +221,14 @@ def test_eaf(request):
         # "ALG_1_dat_get_eaf.txt"
     ]
     for test_name, expected_eaf_name in zip(test_names, expected_eaf_names):
-        dataset = moocore.read_datasets(test_data_path.joinpath(test_name))
+        dataset = moocore.read_datasets(test_datapath(test_name))
         eaf_test = moocore.eaf(dataset)
         eaf_pct_test = moocore.eaf(dataset, percentiles=[0, 50, 100])
         expected_eaf_result = np.loadtxt(
-            test_data_path.joinpath(f"expected_output/eaf/{expected_eaf_name}")
+            test_datapath(f"expected_output/eaf/{expected_eaf_name}")
         )
         expected_eaf_pct_result = np.loadtxt(
-            test_data_path.joinpath(f"expected_output/eaf/pct_{expected_eaf_name}")
+            test_datapath(f"expected_output/eaf/pct_{expected_eaf_name}")
         )
         assert (
             eaf_test.shape == expected_eaf_result.shape
@@ -244,16 +242,16 @@ def test_eaf(request):
 
 
 # def test_get_diff_eaf():
-#     diff1 = np.loadtxt("tests/test_data/100_diff_points_1.txt")
-#     diff2 = np.loadtxt("tests/test_data/100_diff_points_2.txt")
+#     diff1 = np.loadtxt(test_datapath("100_diff_points_1.txt")
+#     diff2 = np.loadtxt(test_datapath("100_diff_points_2.txt")
 #     diff = moocore.get_diff_eaf(diff1, diff2)
 #     diff_intervals = moocore.get_diff_eaf(diff1, diff2, intervals=3)
 
 #     expected_diff12 = np.loadtxt(
-#         "tests/test_data/expected_output/get_diff_eaf/points12_get_diff_eaf.txt"
+#         test_datapath("expected_output/get_diff_eaf/points12_get_diff_eaf.txt"
 #     )
 #     expected_diff12_intervals3 = np.loadtxt(
-#         "tests/test_data/expected_output/get_diff_eaf/int3_points12_get_diff_eaf.txt"
+#         test_datapath("expected_output/get_diff_eaf/int3_points12_get_diff_eaf.txt"
 #     )
 #     assert np.allclose(diff, expected_diff12)
 #     assert np.allclose(diff_intervals, expected_diff12_intervals3)
