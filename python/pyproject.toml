@@ -41,7 +41,7 @@ addopts = '--doctest-modules --ignore-glob="*generate-expected-output.py"'
 
 [tool.cibuildwheel]
 # Only build on CPython 3.10
-build = "cp10-*"
+#build = "cp310-*"
 skip = ["pp*", # Disable building PyPy wheels on all platforms
         "*-musllinux_aarch64", "cp38-musllinux_x86_64",
         "*-win32", "*-manylinux_i686" # Skip 32-bit builds
