@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Core Algorithms for Multi-Objective Optimization"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 dependencies = [
   "cffi >=1.15.1",
   "numpy >= 1.22.3",
