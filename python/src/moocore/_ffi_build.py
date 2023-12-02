@@ -44,7 +44,7 @@ def _get_target_platform(arch_flags, default):
 
 MSVC_CFLAGS = ["/GL", "/O2", "/GS-", "/wd4996"]
 MSVC_LDFLAGS = ["/LTCG"]
-GCC_CFLAGS = ["-flto", "-O3"]
+GCC_CFLAGS = ["-flto", "-O3", "-Wl,-strip-all"]
 
 extra_compile_args = []
 extra_link_args = []
