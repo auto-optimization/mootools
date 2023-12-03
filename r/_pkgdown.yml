@@ -27,11 +27,13 @@ reference:
     contents: has_concept("dominance")
   - title: Multi-objective performance assessment metrics
     contents: has_concept("metrics")
+  - title: Datasets
+    contents: has_keyword("datasets")
   - title: Other useful functions
     contents:
       - read_datasets
       - write_datasets
       - normalise
-  - title: Datasets
-    contents: has_keyword("datasets")
-  
+      - matrix_maximise
+      - rbind_datasets
+      
