@@ -2,6 +2,7 @@
 
 export(attsurf2df)
 export(avg_hausdorff_dist)
+export(choose_eafdiff)
 export(eafdiff)
 export(eafs)
 export(epsilon_additive)

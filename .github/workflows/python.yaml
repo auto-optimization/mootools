@@ -217,7 +217,6 @@ jobs:
           output-dir: wheelhouse
             
       - uses: actions/upload-artifact@v3
-        if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/')"
         with:
           name: wheels
           path: wheelhouse/*.whl

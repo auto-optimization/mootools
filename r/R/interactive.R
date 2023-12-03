@@ -75,7 +75,8 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
   list(pair=best_pair, value = best_value)
 }
 
-
+#' Interactively choose according to empirical attainment function differences
+#' 
 #' @param x (`matrix()`) Matrix of rectangles representing EAF differences
 #'   (returned by [eafdiff()] with `rectangles=TRUE`).
 #' 
@@ -83,6 +84,35 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 #'   positive differences, otherwise return those with negative differences but
 #'   differences are converted to positive.
 #' 
+#' @return `matrix` where the first 4 columns give the coordinates of two
+#'   corners of each rectangle and the last column. In both cases, the last
+#'   column gives the positive differences in favor of the chosen side.
+#'
+#' @examples
+#' \donttest{
+#' extdata_dir <- system.file(package="moocore", "extdata") 
+#' A1 <- read_datasets(file.path(extdata_dir, "wrots_l100w10_dat"))
+#' A2 <- read_datasets(file.path(extdata_dir, "wrots_l10w100_dat"))
+#' # Choose A1
+#' rectangles <- eafdiff(A1, A2, intervals = 5, rectangles = TRUE)
+#' rectangles <- choose_eafdiff(rectangles, left = TRUE)
+#' reference <- c(max(A1[, 1], A2[, 1]), max(A1[, 2], A2[, 2]))
+#' x <- split.data.frame(A1[,1:2], A1[,3])
+#' hv_A1 <- sapply(split.data.frame(A1[, 1:2], A1[, 3]),
+#'                  hypervolume, reference=reference)
+#' hv_A2 <- sapply(split.data.frame(A2[, 1:2], A2[, 3]),
+#'                  hypervolume, reference=reference)
+#' print(fivenum(hv_A1))
+#' print(fivenum(hv_A2))
+
+#' whv_A1 <- sapply(split.data.frame(A1[, 1:2], A1[, 3]),
+#'                  whv_rect, rectangles=rectangles, reference=reference)
+#' whv_A2 <- sapply(split.data.frame(A2[, 1:2], A2[, 3]),
+#'                  whv_rect, rectangles=rectangles, reference=reference)
+#' print(fivenum(whv_A1))
+#' print(fivenum(whv_A2))
+#' }
+#'
 #'@concept eaf
 #'@export
 choose_eafdiff <- function(x, left = stop("'left' must be either TRUE or FALSE"))
