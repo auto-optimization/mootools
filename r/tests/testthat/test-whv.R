@@ -63,5 +63,33 @@ whv <- total_whv_rect(B[,1:2], rectangles=rectangles, ref=ref, ideal = ideal)
 expect_equal(whv, 6.05)
 })
 
+test_that("whv3", {
+
+A <- read_datasets(text='
+1 2
+')
+B <- read_datasets(text='
+2 1
+')
+
+rectangles <- eafdiff(A,B, rectangles=TRUE)
+ref <- c(3,3)
+ideal <- c(1,1)
+
+rects_A <- choose_eafdiff(rectangles, left=TRUE)
+rects_B <- choose_eafdiff(rectangles, left=FALSE)
+
+whv <- whv_rect(matrix(1.5,nrow=1,ncol=2), rectangles=rects_A, ref=ref)
+expect_equal(whv, 0.5)
+whv <- whv_rect(matrix(c(1,2),nrow=1,ncol=2), rectangles=rects_A, ref=ref)
+expect_equal(whv, 1)
+whv <- whv_rect(matrix(c(1,2),nrow=1,ncol=2), rectangles=rects_B, ref=ref)
+expect_equal(whv, 0)
+whv <- whv_rect(matrix(c(2,1),nrow=1,ncol=2), rectangles=rects_A, ref=ref)
+expect_equal(whv, 0)
+whv <- whv_rect(matrix(c(2,1),nrow=1,ncol=2), rectangles=rects_B, ref=ref)
+expect_equal(whv, 1)
+})
+
 }) # withr::with_output_sink()
 

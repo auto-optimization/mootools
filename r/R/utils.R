@@ -30,13 +30,21 @@ check_dataset <- function(x)
   return(x)
 }
 
+#' Combine datasets `x` and `y` by row taking care of making all sets unique.
+#'
+#' @param x,y Datasets.
+#' @return A dataset.
+#' @export
 rbind_datasets <- function(x, y)
 {
+  setcol <- ncol(x)
+  stopifnot(setcol > 2L)
+  stopifnot(ncol(x) == ncol(y))
   # FIXME: We could relax this condition by re-encoding  the column.
-  stopifnot(min(x[,3L]) == 1L)
-  stopifnot(min(y[,3L]) == 1L)
+  stopifnot(min(x[,setcol]) == 1L)
+  stopifnot(min(y[,setcol]) == 1L)
   # We have to make all sets unique.
-  y[,3L] <- y[,3L] + max(x[,3L])
+  y[,setcol] <- y[,setcol] + max(x[,setcol])
   rbind(x, y)
 }
 

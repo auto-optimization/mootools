@@ -283,28 +283,34 @@ compute_eafdiff_polygon <- function(data, intervals = 1L)
     as.integer(intervals))
 }
 
-
-matrix_maximise <- function(z, maximise)
+#' Transform matrix according to maximise parameter
+#'
+#' @param x (`data.frame()`|`matrix()`) A numerical matrix of `data.frame`.
+#'
+#' @template arg_maximise
+#'
+#' @return `x` transformed such that every column where `maximise` is `TRUE` is multiplied by `-1`.
+#' @export
+matrix_maximise <- function(x, maximise)
 {
-  stopifnot(ncol(z) == length(maximise))
-  if (is.data.frame(z)) {
-    # R bug?: If z is data.frame with rownames != NULL, and
-    # maximise == (FALSE, FALSE), then -z[, which(FALSE)]
+  stopifnot(ncol(x) == length(maximise))
+  if (is.data.frame(x)) {
+    # R bug?: If x is data.frame with rownames != NULL, and
+    # maximise == (FALSE, FALSE), then -x[, which(FALSE)]
     # gives error: Error in
     # data.frame(value, row.names = rn, check.names = FALSE, check.rows = FALSE) : 
     # row names supplied are of the wrong length
-    row_names <- rownames(z)
-    rownames(z) <- NULL
-    x <- which(maximise)
-    z[, x] <- -z[, x]
-    rownames(z) <- row_names
+    row_names <- rownames(x)
+    rownames(x) <- NULL
+    i <- which(maximise)
+    x[, i] <- -x[, i]
+    rownames(x) <- row_names
   } else {
-    x <- ifelse(maximise, -1L, 1L)
-    z <- t(t(z) * x)
+    i <- ifelse(maximise, -1L, 1L)
+    x <- t(t(x) * i)
   }
-  return(z)
+  x
 }
-
 
 #' Exact computation of the EAF in 2D or 3D
 #'
