@@ -64,6 +64,9 @@
     <loc>/reference/largest_eafdiff.html</loc>
   </url>
   <url>
+    <loc>/reference/matrix_maximise.html</loc>
+  </url>
+  <url>
     <loc>/reference/moocore-package.html</loc>
   </url>
   <url>
@@ -71,6 +74,9 @@
   </url>
   <url>
     <loc>/reference/normalise.html</loc>
+  </url>
+  <url>
+    <loc>/reference/rbind_datasets.html</loc>
   </url>
   <url>
     <loc>/reference/read_datasets.html</loc>
