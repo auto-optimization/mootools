@@ -68,16 +68,16 @@ read_datasets <- function(file, col_names, text)
   if (missing(col_names))
     col_names <- paste0("V", 1L:(ncol(out)-1))
   colnames(out) <- c(col_names, "set")
-  return(out)
+  out
 }
 
 #' Write data sets
 #'
 #' Write data sets to a file in the same format as [read_datasets()].
 #'
-#' @param x  The data set to write. The last column must be the set number.
+#' @template arg_datasets
 #' 
-#' @param file either a character string naming a file or a connection open for
+#' @param file Either a character string naming a file or a connection open for
 #'   writing. `""` indicates output to the console.
 #'
 #'@seealso [utils::write.table()], [read_datasets()]

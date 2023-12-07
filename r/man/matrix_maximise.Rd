@@ -7,7 +7,7 @@
 matrix_maximise(x, maximise)
 }
 \arguments{
-\item{x}{(\code{data.frame()}|\code{matrix()}) A numerical matrix of \code{data.frame}.}
+\item{x}{(\code{data.frame()}|\code{matrix()}) A numerical matrix or \code{data.frame}.}
 
 \item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
 maximised instead of minimised. Either a single logical value that applies

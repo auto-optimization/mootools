@@ -32,7 +32,7 @@
 #' @export
 normalise <- function(data, to_range = c(1, 2), lower = NA, upper = NA, maximise = FALSE)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data)
   npoints <- nrow(data)
   lower <- rep_len(as.double(lower), nobjs)

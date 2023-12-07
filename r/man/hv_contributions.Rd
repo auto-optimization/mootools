@@ -48,7 +48,7 @@ hv_contributions(filter_dominated(SPEA2minstoptimeRichmond[, 1:2], maximise = c(
 \insertRef{BeuFonLopPaqVah09:tec}{moocore}
 }
 \seealso{
-\code{\link{hypervolume}}
+\code{\link[=hypervolume]{hypervolume()}}
 }
 \author{
 Manuel \enc{López-Ibáñez}{Lopez-Ibanez}

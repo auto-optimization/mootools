@@ -3,15 +3,7 @@
 #' Functions to compute the inverted generational distance (IGD and IGD+) and
 #' the averaged Hausdorff distance between nondominated sets of points.
 #'
-#' @rdname igd
-#' @export
-#' @concept metrics
-#' 
-#' @template arg_data
-#'
-#' @template arg_refset
-#'
-#' @template arg_maximise
+#' @inheritParams epsilon
 #' 
 #' @return  (`numeric(1)`) A single numerical value.
 #'
@@ -82,7 +74,9 @@
 #'
 #' \insertAllCited{}
 #' 
-#' @examples
+#' @doctest
+#  This is already test in test-igd.R
+#' @omit 
 #' # Example 4 from Ishibuchi et al. (2015)
 #' ref <- matrix(c(10,0,6,1,2,2,1,6,0,10), ncol=2, byrow=TRUE)
 #' A <- matrix(c(4,2,3,3,2,4), ncol=2, byrow=TRUE)
@@ -99,7 +93,7 @@
 #'     "> AvgHausdorff(A)=", avg_hausdorff_dist(B, ref),
 #'     ", which both contradict Pareto optimality.\nBy contrast, IGD+(A)=",
 #'     igd_plus(A, ref), "< IGD+(B)=", igd_plus(B, ref), ", which is correct.\n")
-#'
+#' @resume
 #' # A less trivial example.
 #' extdata_path <- system.file(package="moocore","extdata")
 #' path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
@@ -107,81 +101,54 @@
 #' A1 <- read_datasets(path.A1)[,1:2]
 #' A2 <- read_datasets(path.A2)[,1:2]
 #' ref <- filter_dominated(rbind(A1, A2))
+#' @expect equal(91888189)
 #' igd(A1, ref)
+#' @expect equal(11351992)
 #' igd(A2, ref)
-#' 
+#'
+#' # IGD+ (Pareto compliant)
+#' @expect equal(82695357)
+#' igd_plus(A1, ref)
+#' @expect equal(10698269.3)
+#' igd_plus(A2, ref)
+#'
+#' # Average Haussdorff distance
+#' @expect equal(268547627)
+#' avg_hausdorff_dist(A1, ref)
+#' @expect equal(352613092)
+#' avg_hausdorff_dist(A2, ref)
+#' @rdname igd
+#' @concept metrics
 #' @aliases IGDX
+#' @export
 igd <- function(data, reference, maximise = FALSE)
-{
-  data <- check_dataset(data)
-  nobjs <- ncol(data) 
-  npoints <- nrow(data)
-  if (is.null(reference)) {
-    stop("reference cannot be NULL")
-  }
-  reference <- check_dataset(reference)
-  if (ncol(reference) != nobjs)
-    stop("data and reference must have the same number of columns")
-  reference_size <- nrow(reference)
-  
-  .Call(igd_C,
-    as.double(t(data)),
-    as.integer(nobjs),
-    as.integer(npoints),
-    as.double(t(reference)),
-    as.integer(reference_size),
-    as.logical(rep_len(maximise, nobjs)))
-}
+  unary_common(data = data, reference = reference, maximise = maximise,
+    fun = igd_C)
 
 #' @rdname igd
-#' @export
 #' @concept metrics
-#' @examples
-#' # IGD+ (Pareto compliant)
-#' igd_plus(A1, ref)
-#' igd_plus(A2, ref)
-#' 
+#' @export
 igd_plus <- function(data, reference, maximise = FALSE)
-{
-  data <- check_dataset(data)
-  nobjs <- ncol(data) 
-  npoints <- nrow(data)
-  if (is.null(reference)) {
-    stop("reference cannot be NULL")
-  }
-  reference <- check_dataset(reference)
-  if (ncol(reference) != nobjs)
-    stop("data and reference must have the same number of columns")
-  reference_size <- nrow(reference)
-  .Call(igd_plus_C,
-    as.double(t(data)),
-    as.integer(nobjs),
-    as.integer(npoints),
-    as.double(t(reference)),
-    as.integer(reference_size),
-    as.logical(rep_len(maximise, nobjs)))
-}
+  unary_common(data = data, reference = reference, maximise = maximise,
+    fun = igd_plus_C)
 
 #' @rdname igd
 #' @param p (`integer(1)`) Hausdorff distance parameter (default: `1L`).
 #' @concept metrics
-#' @examples
-#' # Average Haussdorff distance
-#' avg_hausdorff_dist(A1, ref)
-#' avg_hausdorff_dist(A2, ref)
 #' @export
 avg_hausdorff_dist <- function(data, reference, maximise = FALSE, p = 1L)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data) 
   npoints <- nrow(data)
-  if (is.null(reference)) {
+  if (is.null(reference))
     stop("reference cannot be NULL")
-  }
-  reference <- check_dataset(reference)
+  
+  reference <- check_points(reference)
   if (ncol(reference) != nobjs)
     stop("data and reference must have the same number of columns")
   reference_size <- nrow(reference)
+  
   .Call(avg_hausdorff_dist_C,
     as.double(t(data)),
     as.integer(nobjs),

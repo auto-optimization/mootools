@@ -5,16 +5,24 @@
 \alias{vorobDev}
 \title{Vorob'ev computations}
 \usage{
-vorobT(x, reference)
+vorobT(x, sets, reference, maximise = FALSE)
 
-vorobDev(x, reference, VE = NULL)
+vorobDev(x, sets, reference, VE = NULL, maximise = FALSE)
 }
 \arguments{
 \item{x}{Either a matrix of data values, or a data frame, or a list of data
 frames of exactly three columns.  The third column gives the set (run,
 sample, ...) identifier.}
 
+\item{sets}{A vector that indicates the set of each point in \code{x}. If
+missing, the last column of \code{x} is used instead.}
+
 \item{reference}{(\code{numeric()}) \cr Reference point as a vector of numerical values.}
+
+\item{maximise}{(\code{logical()} | \code{logical(1)}) \cr Whether the objectives must be
+maximised instead of minimised. Either a single logical value that applies
+to all objectives or a vector of logical values, with one value per
+objective.}
 
 \item{VE}{Vorob'ev expectation, e.g., as returned by \code{\link[=vorobT]{vorobT()}}.}
 }
@@ -31,10 +39,22 @@ function is the probability for a given target in the objective space to
 belong to the symmetric difference between the Vorob'ev expectation and a
 realization of the (random) attained set.
 }
+\references{
+\insertRef{BinGinRou2015gaupar}{moocore}
+
+C. Chevalier (2013), Fast uncertainty reduction strategies relying on
+Gaussian process models, University of Bern, PhD thesis.
+
+\insertRef{Molchanov2005theory}{moocore}
+}
+\author{
+Mickael Binois
+}
+\concept{eaf}
 \examples{
 data(CPFs)
 res <- vorobT(CPFs, reference = c(2, 200))
-print(res$threshold)
+res$threshold
 
 ## Display Vorob'ev expectation and attainment function
 # First style
@@ -49,20 +69,7 @@ print(res$threshold)
 #         extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,
 #         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "\%"),
 #                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
-
 # Now print Vorob'ev deviation
 VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
-print(VD)
+VD
 }
-\references{
-\insertRef{BinGinRou2015gaupar}{moocore}
-
-C. Chevalier (2013), Fast uncertainty reduction strategies relying on
-Gaussian process models, University of Bern, PhD thesis.
-
-\insertRef{Molchanov2005theory}{moocore}
-}
-\author{
-Mickael Binois
-}
-\concept{eaf}

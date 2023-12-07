@@ -35,21 +35,19 @@
 #' @concept metrics
 hypervolume <- function(data, reference, maximise = FALSE)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data) 
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
   if (any(maximise)) {
+    data <- transform_maximise(data, maximise)
     if (length(maximise) == 1L) {
-      data <- -data
       reference <- -reference
-    } else if (length(maximise) != nobjs) {
-      stop("length of maximise must be either 1 or ncol(data)")
+    } else {
+      reference[maximise] <- -reference[maximise]
     }
-    data[,maximise] <- -data[,maximise]
-    reference[maximise] <- -reference[maximise]
   }
   .Call(hypervolume_C,
     t(data),
@@ -66,17 +64,13 @@ hypervolume <- function(data, reference, maximise = FALSE)
 #' zero contribution even if not dominated, because removing one of them does
 #' not change the hypervolume dominated by the remaining set.
 #'
-#' @template arg_data
-#'
-#' @template arg_refpoint
-#'
-#' @template arg_maximise
+#' @inheritParams hypervolume
 #' 
 #' @return ([numeric]) A numerical vector
 #'
 #' @author Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
 #'
-#'@seealso \code{\link{hypervolume}}
+#' @seealso [hypervolume()]
 #'
 #' @references
 #'
@@ -102,26 +96,23 @@ hypervolume <- function(data, reference, maximise = FALSE)
 #' @concept metrics
 hv_contributions <- function(data, reference, maximise = FALSE)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data) 
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
-  
+
   if (any(maximise)) {
+    data <- transform_maximise(data, maximise)
     if (length(maximise) == 1L) {
-      data <- -data
       reference <- -reference
-    } else if (length(maximise) != nobjs) {
-      stop("length of maximise must be either 1 or ncol(data)")
+    } else {
+      reference[maximise] <- -reference[maximise]
     }
-    data[,maximise] <- -data[,maximise]
-    reference[maximise] <- -reference[maximise]
   }
   .Call(hv_contributions_C,
     t(data),
     nobjs,
     npoints,
-    as.double(reference)
-  )
+    as.double(reference))
 }

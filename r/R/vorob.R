@@ -1,22 +1,27 @@
+#' Vorob'ev computations
+#' 
 #' Compute Vorob'ev threshold, expectation and deviation. Also, displaying the
 #' symmetric deviation function is possible.  The symmetric deviation
 #' function is the probability for a given target in the objective space to
 #' belong to the symmetric difference between the Vorob'ev expectation and a
 #' realization of the (random) attained set.
 #' 
-#' @title Vorob'ev computations
 #' @param x Either a matrix of data values, or a data frame, or a list of data
 #'   frames of exactly three columns.  The third column gives the set (run,
 #'   sample, ...) identifier.
+#' @template arg_sets
 #' @template arg_refpoint
+#' @template arg_maximise
+#' 
 #' @return `vorobT` returns a list with elements `threshold`,
 #'   `VE`, and `avg_hyp` (average hypervolume)
 #' @rdname Vorob
 #' @author Mickael Binois
-#' @examples
+#' @doctest
 #' data(CPFs)
 #' res <- vorobT(CPFs, reference = c(2, 200))
-#' print(res$threshold)
+#' @expect equal(44.140625)
+#' res$threshold
 #' 
 #' ## Display Vorob'ev expectation and attainment function
 #' # First style
@@ -31,6 +36,10 @@
 #' #         extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,
 #' #         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "%"),
 #' #                           list(a = formatC(res$threshold, digits = 2, format = "f"))))
+#' # Now print Vorob'ev deviation
+#' VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
+#' @expect equal(3017.1299)
+#' VD
 #' @references
 #' \insertRef{BinGinRou2015gaupar}{moocore}
 #'
@@ -41,57 +50,78 @@
 #'
 #' @concept eaf
 #' @export
-vorobT <- function(x, reference)
+vorobT <- function(x, sets, reference, maximise = FALSE)
 {
-  x <- check_eaf_data(x)
-  setcol <- ncol(x)
-  nobjs <- setcol - 1L
+  if (missing(sets)) {
+    sets <- x[, ncol(x)]
+    x <- x[, -ncol(x), drop=FALSE]
+  }
+  x <- check_points(x)
 
+  if (any(maximise)) {
+    x <- transform_maximise(x, maximise)
+    if (length(maximise) == 1L) {
+      reference <- -reference
+    } else {
+      reference[maximise] <- -reference[maximise]
+    }
+  }
+ 
   # First step: compute average hypervolume over conditional Pareto fronts
-  avg_hyp <- mean(sapply(split.data.frame(x[,1:nobjs], x[, setcol]),
-                         hypervolume, reference = reference))
+  avg_hyp <- mean(sapply(split.data.frame(x, sets), hypervolume, reference = reference))
 
   prev_hyp <- diff <- Inf # hypervolume of quantile at previous step
   a <- 0
   b <- 100
+  setcol <- ncol(x) + 1L
   while (diff != 0) {
     c <- (a + b) / 2
-    eaf_res <- eafs(x[,1:nobjs], x[,setcol], percentiles = c)[,1:nobjs]
-    tmp <- hypervolume(eaf_res, reference = reference)
+    VE <- eaf(x, sets = sets, percentiles = c)[,-setcol]
+    tmp <- hypervolume(VE, reference = reference)
     if (tmp > avg_hyp) a <- c else b <- c
     diff <- prev_hyp - tmp
     prev_hyp <- tmp
   }
-  
-  list(threshold = c, VE = eaf_res, avg_hyp = avg_hyp)
+  if (any(maximise))
+    VE <- transform_maximise(VE, maximise)
+  list(threshold = c, VE = VE, avg_hyp = avg_hyp)
 } 
 
 #' @concept eaf
 #' @rdname Vorob
 #' @param VE Vorob'ev expectation, e.g., as returned by [vorobT()].
 #' @return `vorobDev` returns the Vorob'ev deviation.
-#' @examples
-#' 
-#' # Now print Vorob'ev deviation
-#' VD <- vorobDev(CPFs, VE = res$VE, reference = c(2, 200))
-#' print(VD)
 #' @export
-vorobDev <- function(x, reference, VE = NULL)
+vorobDev <- function(x, sets, reference, VE = NULL, maximise = FALSE)
 {
-  if (is.data.frame(x)) x <- as.matrix(x)
-  if (is.null(VE)) VE <- vorobT(x, reference)$VE
+  if (missing(sets)) {
+    sets <- x[, ncol(x)]
+    x <- x[, -ncol(x), drop=FALSE]
+  }
+  if (is.null(VE)) {
+    VE <- vorobT(x, sets, reference = reference, maximise = maximise)$VE
+  } else {
+    x <- check_points(x)
+  }
   
+  if (any(maximise)) {
+    x <- transform_maximise(x, maximise)
+    VE <- transform_maximise(VE, maximise)
+    if (length(maximise) == 1L) {
+      reference <- -reference
+    } else {
+      reference[maximise] <- -reference[maximise]
+    }
+  }
   setcol <- ncol(x)
-  nobjs <- setcol - 1L
-
   # Hypervolume of the symmetric difference between A and B:
   # 2 * H(AUB) - H(A) - H(B)
   H2 <- hypervolume(VE, reference = reference)
-  x_split <- split.data.frame(x[,1:nobjs, drop=FALSE], x[,setcol])
+  x_split <- split.data.frame(x, sets)
   H1 <- mean(sapply(x_split, hypervolume, reference = reference))
 
   hv_union_VE <- function(y)
-    hypervolume(rbind(y[, 1:nobjs, drop=FALSE], VE), reference = reference)
+    hypervolume(rbind(y, VE), reference = reference)
   
   VD <- 2 * sum(sapply(x_split, hv_union_VE))
   nruns <- length(x_split)

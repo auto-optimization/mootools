@@ -7,9 +7,10 @@
 write_datasets(x, file = "")
 }
 \arguments{
-\item{x}{The data set to write. The last column must be the set number.}
+\item{x}{(\code{matrix} | \code{data.frame}) \cr Matrix or data frame that represents multiple data sets of multi-dimensional points. Each row represent one point.
+The last column is the set index.}
 
-\item{file}{either a character string naming a file or a connection open for
+\item{file}{Either a character string naming a file or a connection open for
 writing. \code{""} indicates output to the console.}
 }
 \description{

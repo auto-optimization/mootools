@@ -13,7 +13,8 @@ Imports:
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
-    withr
+    withr,
+    doctest
 License: LGPL (>= 2)
 BugReports: https://github.com/auto-optimization/moocore/issues
 URL: https://github.com/auto-optimization/moocore/, 
@@ -21,7 +22,9 @@ LazyLoad: true
 LazyData: true
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE,
+              roclets = c("collate", "rd", "namespace", 
+                          "doctest::dt_roclet")) 
 SystemRequirements: GNU make, Gnu Scientific Library
 RdMacros: Rdpack
 Config/testthat/edition: 3

@@ -49,22 +49,24 @@ NULL
 #> NULL
 
 #' @rdname epsilon
-#' @export
 #' @concept metrics
-#' @examples
+#' @doctest
 #' # Fig 6 from Zitzler et al. (2003).
 #' A1 <- matrix(c(9,2,8,4,7,5,5,6,4,7), ncol=2, byrow=TRUE)
 #' A2 <- matrix(c(8,4,7,5,5,6,4,7), ncol=2, byrow=TRUE)
 #' A3 <- matrix(c(10,4,9,5,8,6,7,7,6,8), ncol=2, byrow=TRUE)
-#' 
+#' @omit
 #' plot(A1, xlab=expression(f[1]), ylab=expression(f[2]),
 #'      panel.first=grid(nx=NULL), pch=4, cex=1.5, xlim = c(0,10), ylim=c(0,8))
 #' points(A2, pch=0, cex=1.5)
 #' points(A3, pch=1, cex=1.5)
 #' legend("bottomleft", legend=c("A1", "A2", "A3"), pch=c(4,0,1),
 #'        pt.bg="gray", bg="white", bty = "n", pt.cex=1.5, cex=1.2)
+#' @expect equal(0.9)
 #' epsilon_mult(A1, A3) # A1 epsilon-dominates A3 => e = 9/10 < 1 
+#' @expect equal(1)
 #' epsilon_mult(A1, A2) # A1 weakly dominates A2 => e = 1
+#' @expect equal(2)
 #' epsilon_mult(A2, A1) # A2 is epsilon-dominated by A1 => e = 2 > 1
 #' 
 #' # A more realistic example
@@ -74,53 +76,45 @@ NULL
 #' A1 <- read_datasets(path.A1)[,1:2]
 #' A2 <- read_datasets(path.A2)[,1:2]
 #' ref <- filter_dominated(rbind(A1, A2))
+#' @expect equal(199090640)
 #' epsilon_additive(A1, ref)
+#' @expect equal(132492066)
 #' epsilon_additive(A2, ref)
-epsilon_additive <- function(data, reference, maximise = FALSE)
-  epsilon_common(data = data, reference = reference, maximise = maximise,
-                 mul = FALSE)
-
-#' @rdname epsilon
-#' @export
-#' @concept metrics
-#' @examples
 #' # Multiplicative version of epsilon metric
 #' ref <- filter_dominated(rbind(A1, A2))
+#' @expect equal(1.05401476)
 #' epsilon_mult(A1, ref)
+#' @expect equal(1.023755)
 #' epsilon_mult(A2, ref)
-#' 
-epsilon_mult <- function(data, reference, maximise = FALSE)
-  epsilon_common(data = data, reference = reference, maximise = maximise,
-                 mul = TRUE)
+#' @export
+epsilon_additive <- function(data, reference, maximise = FALSE)
+  unary_common(data = data, reference = reference, maximise = maximise,
+    fun = epsilon_add_C)
 
-epsilon_common <- function(data, reference, maximise, mul)
+#' @rdname epsilon
+#' @concept metrics
+#' @export
+epsilon_mult <- function(data, reference, maximise = FALSE)
+  unary_common(data = data, reference = reference, maximise = maximise,
+    fun = epsilon_mul_C)
+
+unary_common <- function(data, reference, maximise, fun)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data) 
   npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
   
-  reference <- check_dataset(reference)
+  reference <- check_points(reference)
   if (ncol(reference) != nobjs)
     stop("data and reference must have the same number of columns")
   reference_size <- nrow(reference)
   
-  maximise <- as.logical(rep_len(maximise, nobjs))
-
-  if (mul)
-    return(.Call(epsilon_mul_C,
-                 as.double(t(data)),
-                 as.integer(nobjs),
-                 as.integer(npoints),
-                 as.double(t(reference)),
-                 as.integer(reference_size),
-                 maximise))
-  else
-    return(.Call(epsilon_add_C,
-                 as.double(t(data)),
-                 as.integer(nobjs),
-                 as.integer(npoints),
-                 as.double(t(reference)),
-                 as.integer(reference_size),
-                 maximise))
+  .Call(fun,
+    as.double(t(data)),
+    as.integer(nobjs),
+    as.integer(npoints),
+    as.double(t(reference)),
+    as.integer(reference_size),
+    as.logical(rep_len(maximise, nobjs)))
 }

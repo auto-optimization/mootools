@@ -1,3 +1,4 @@
+# Example 4 from Ishibuchi et al. (2015)
 ref = matrix(c(10, 0, 6, 1, 2, 2, 1, 6, 0, 10), ncol = 2L, byrow = TRUE)
 A = matrix(c(4, 2, 3, 3, 2, 4), ncol = 2L, byrow = TRUE)
 B = matrix(c(8, 2, 4, 4, 2, 8), ncol = 2L, byrow = TRUE)

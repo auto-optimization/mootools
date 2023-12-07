@@ -93,6 +93,13 @@ still popular due to historical reasons.
 The average Hausdorff distance (\eqn{\Delta_p(A,R)}) is also not weakly
 Pareto-compliant, as shown in the examples below.
 }
+\references{
+\insertAllCited{}
+}
+\author{
+Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+}
+\concept{metrics}
 \examples{
 # Example 4 from Ishibuchi et al. (2015)
 ref <- matrix(c(10,0,6,1,2,2,1,6,0,10), ncol=2, byrow=TRUE)
@@ -110,7 +117,6 @@ cat("A is better than B in terms of Pareto optimality,\n however, IGD(A)=",
     "> AvgHausdorff(A)=", avg_hausdorff_dist(B, ref),
     ", which both contradict Pareto optimality.\nBy contrast, IGD+(A)=",
     igd_plus(A, ref), "< IGD+(B)=", igd_plus(B, ref), ", which is correct.\n")
-
 # A less trivial example.
 extdata_path <- system.file(package="moocore","extdata")
 path.A1 <- file.path(extdata_path, "ALG_1_dat.xz")
@@ -129,10 +135,3 @@ igd_plus(A2, ref)
 avg_hausdorff_dist(A1, ref)
 avg_hausdorff_dist(A2, ref)
 }
-\references{
-\insertAllCited{}
-}
-\author{
-Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
-}
-\concept{metrics}

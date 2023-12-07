@@ -2,29 +2,36 @@
 % Please edit documentation in R/eaf.R
 \name{attsurf2df}
 \alias{attsurf2df}
-\title{Convert a list of attainment surfaces to a single \code{data.frame}.}
+\title{Convert a list of attainment surfaces to a single EAF \code{data.frame}.}
 \usage{
 attsurf2df(x)
 }
 \arguments{
 \item{x}{(\code{list()}) List of \code{data.frames} or matrices. The names of the list
 give the percentiles of the attainment surfaces.  This is the format
-returned by \code{\link[eaf:eafplot]{eaf::eafplot()}} (and the internal function \code{compute_eaf_as_list}).}
+returned by \code{\link[=eaf_as_list]{eaf_as_list()}} and \code{\link[mooplot:eafplot]{mooplot::eafplot()}}.}
 }
 \value{
 A \code{data.frame} with as many columns as objectives and an additional column \code{percentiles}.
 }
 \description{
-Convert a list of attainment surfaces to a single \code{data.frame}.
+Convert a list of attainment surfaces to a single EAF \code{data.frame}.
 }
 \examples{
 
 data(SPEA2relativeRichmond)
+attsurfs <- eaf_as_list(eaf(SPEA2relativeRichmond, percentiles = c(0,50,100)))
+str(attsurfs)
+eaf_df <- attsurf2df(attsurfs)
+str(eaf_df)
 # attsurfs <- eafplot (SPEA2relativeRichmond, percentiles = c(0,50,100),
 #                      xlab = expression(C[E]), ylab = "Total switches",
 #                      lty=0, pch=21, xlim = c(90, 140), ylim = c(0, 25))
 # attsurfs <- attsurf2df(attsurfs)
 # text(attsurfs[,1:2], labels = attsurfs[,3], adj = c(1.5,1.5))
 
+}
+\seealso{
+\code{\link[=eaf_as_list]{eaf_as_list()}}
 }
 \concept{eaf}

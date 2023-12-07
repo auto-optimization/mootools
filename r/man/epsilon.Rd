@@ -55,12 +55,18 @@ sense.
 Computation of the epsilon indicator requires \eqn{O(n \cdot |A| \cdot
 |R|)}, where \eqn{n} is the number of objectives (dimension of vectors).
 }
+\references{
+\insertRef{ZitThiLauFon2003:tec}{moocore}
+}
+\author{
+Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
+}
+\concept{metrics}
 \examples{
 # Fig 6 from Zitzler et al. (2003).
 A1 <- matrix(c(9,2,8,4,7,5,5,6,4,7), ncol=2, byrow=TRUE)
 A2 <- matrix(c(8,4,7,5,5,6,4,7), ncol=2, byrow=TRUE)
 A3 <- matrix(c(10,4,9,5,8,6,7,7,6,8), ncol=2, byrow=TRUE)
-
 plot(A1, xlab=expression(f[1]), ylab=expression(f[2]),
      panel.first=grid(nx=NULL), pch=4, cex=1.5, xlim = c(0,10), ylim=c(0,8))
 points(A2, pch=0, cex=1.5)
@@ -84,12 +90,4 @@ epsilon_additive(A2, ref)
 ref <- filter_dominated(rbind(A1, A2))
 epsilon_mult(A1, ref)
 epsilon_mult(A2, ref)
-
 }
-\references{
-\insertRef{ZitThiLauFon2003:tec}{moocore}
-}
-\author{
-Manuel \enc{López-Ibáñez}{Lopez-Ibanez}
-}
-\concept{metrics}

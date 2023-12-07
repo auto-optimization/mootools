@@ -33,16 +33,14 @@
 #' @concept dominance
 is_nondominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data)
   npoints <- nrow(data)
-  maximise <- rep_len(as.logical(maximise), nobjs)
-
   .Call(is_nondominated_C,
     t(data),
     nobjs,
     npoints,
-    maximise,
+    rep_len(as.logical(maximise), nobjs),
     as.logical(keep_weakly))
 }
 
@@ -51,10 +49,7 @@ is_nondominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
 #' @return `filter_dominated` returns a matrix or data.frame with only mutually nondominated points.
 #' @export
 filter_dominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
-{
-  return(data[is_nondominated(data, maximise = maximise, keep_weakly = keep_weakly),
-            , drop = FALSE])
-}
+  data[is_nondominated(data, maximise = maximise, keep_weakly = keep_weakly), , drop = FALSE]
 
 #' @description `pareto_rank()` ranks points according to Pareto-optimality,
 #'   which is also called nondominated sorting \citep{Deb02nsga2}.
@@ -81,12 +76,11 @@ filter_dominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
 #' @export
 pareto_rank <- function(data, maximise = FALSE)
 {
-  data <- check_dataset(data)
+  data <- check_points(data)
   nobjs <- ncol(data)
   npoints <- nrow(data)
-  maximise <- rep_len(as.logical(maximise), nobjs)
-  data <- matrix_maximise(data, maximise)
+  if (any(maximise))
+    data <- transform_maximise(data, maximise)
   .Call(pareto_ranking_C,
-    as.double(t(data)),
-    nobjs, npoints)
+    t(data), nobjs, npoints)
 }

@@ -78,7 +78,7 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 #' Interactively choose according to empirical attainment function differences
 #' 
 #' @param x (`matrix()`) Matrix of rectangles representing EAF differences
-#'   (returned by [eafdiff()] with `rectangles=TRUE`).
+#'   returned by [eafdiff()] with `rectangles=TRUE`.
 #' 
 #' @param left (`logical(1)`) With `left=TRUE` return the rectangles with
 #'   positive differences, otherwise return those with negative differences but
@@ -104,7 +104,6 @@ largest_eafdiff <- function(x, maximise = FALSE, intervals = 5L, reference,
 #'                  hypervolume, reference=reference)
 #' print(fivenum(hv_A1))
 #' print(fivenum(hv_A2))
-
 #' whv_A1 <- sapply(split.data.frame(A1[, 1:2], A1[, 3]),
 #'                  whv_rect, rectangles=rectangles, reference=reference)
 #' whv_A2 <- sapply(split.data.frame(A2[, 1:2], A2[, 3]),
