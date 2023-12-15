@@ -33,13 +33,10 @@
 #' @concept dominance
 is_nondominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data)
-  npoints <- nrow(data)
   .Call(is_nondominated_C,
     t(data),
-    nobjs,
-    npoints,
     rep_len(as.logical(maximise), nobjs),
     as.logical(keep_weakly))
 }
@@ -76,11 +73,8 @@ filter_dominated <- function(data, maximise = FALSE, keep_weakly = FALSE)
 #' @export
 pareto_rank <- function(data, maximise = FALSE)
 {
-  data <- check_points(data)
-  nobjs <- ncol(data)
-  npoints <- nrow(data)
+  data <- as_double_matrix(data)
   if (any(maximise))
     data <- transform_maximise(data, maximise)
-  .Call(pareto_ranking_C,
-    t(data), nobjs, npoints)
+  .Call(pareto_ranking_C, t(data))
 }

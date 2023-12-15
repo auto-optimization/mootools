@@ -1,15 +1,15 @@
 #include "Rcommon.h"
 #include "eaf.h"
 
+#define DECLARE_CALL(RET_TYPE, NAME, ...)                                      \
+    extern RET_TYPE NAME(__VA_ARGS__);
+#include "init.h"
+#undef DECLARE_CALL
+
 static eaf_t **
-compute_eaf_helper (SEXP DATA, int nobj, SEXP CUMSIZES, int nruns, 
+compute_eaf_helper (SEXP DATA, int nobj, const int * cumsizes, int nruns,
                     const double *percentile, int nlevels)
 {
-    SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, cumsizes_len);
-    if (cumsizes_len < nruns)
-        Rf_error("length of cumsizes (%d) is less than nruns (%d)",
-                 cumsizes_len, nruns);
-
     int *level = levels_from_percentiles(percentile, nlevels, nruns);
     double *data = REAL(DATA);
 
@@ -42,13 +42,14 @@ compute_eaf_helper (SEXP DATA, int nobj, SEXP CUMSIZES, int nruns,
 }
 
 SEXP
-compute_eaf_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP PERCENTILE)
+compute_eaf_C(SEXP DATA, SEXP CUMSIZES, SEXP PERCENTILE)
 {
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NRUNS, nruns);
-    SEXP_2_DOUBLE_VECTOR(PERCENTILE, percentile, nlevels);
+    const int nobj = Rf_nrows(DATA); /* We transpose the matrix before calling this function. */
+    SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, nruns);
+    SEXP_2_DOUBLE_VECTOR_OR_NULL(PERCENTILE, percentile, nlevels);
+    if (!percentile) nlevels = nruns;
 
-    eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, percentile, nlevels);
+    eaf_t **eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, percentile, nlevels);
     int totalpoints = eaf_totalpoints (eaf, nlevels);
 
     SEXP mat;
@@ -60,41 +61,36 @@ compute_eaf_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP PERCENTILE)
 }
 
 SEXP 
-compute_eafdiff_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP INTERVALS)
+compute_eafdiff_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
 {
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NRUNS, nruns);
+    const int nobj = Rf_nrows(DATA); /* We transpose the matrix before calling this function. */
+    SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, nruns);
     SEXP_2_INT(INTERVALS, intervals);
-    eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
-
-    const int nsets1 = nruns / 2;
+    
+    eaf_t **eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, NULL, nruns);
     const int totalpoints = eaf_totalpoints (eaf, nruns);
 
-    SEXP mat;
-    PROTECT(mat = Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
+    SEXP mat = PROTECT(Rf_allocMatrix(REALSXP, totalpoints, nobj + 1));
     double *rmat = REAL(mat);
 
-    int k;
     int pos = 0;
-    for (k = 0; k < nruns; k++) {
+    for (int k = 0; k < nruns; k++) {
         int npoints = eaf[k]->size;
-        int i, j;
-
         DEBUG2(
             int totalsize = npoints * nobj;
             Rprintf ("totalpoints eaf[%d] = %d\n", k, totalsize)
             );
-
         // FIXME: Find the most efficient order of the loop.
-        for (i = 0; i < npoints; i++) {
-            for (j = 0; j < nobj; j++) {
+        for (int i = 0; i < npoints; i++) {
+            for (int j = 0; j < nobj; j++) {
                 rmat[pos + j * totalpoints] = eaf[k]->data[j + i * nobj];
             }
             pos++;
         }
     }
+    const int nsets1 = nruns / 2;
     pos += (nobj - 1) * totalpoints;
-    for (k = 0; k < nruns; k++) {
+    for (int k = 0; k < nruns; k++) {
         int npoints = eaf[k]->size;
         for (int i = 0; i < npoints; i++) {
             rmat[pos] = eafdiff_percentile(eaf[k], i, nsets1, nruns, intervals);
@@ -130,19 +126,15 @@ static int polygon_copy(double *dest, int start, int nrows, const double *src)
     return len - start;
 }
 
-SEXP compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
-                                  SEXP INTERVALS);
 SEXP
-compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
-                             SEXP INTERVALS)
+compute_eafdiff_rectangles_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
 {
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NRUNS, nruns);
-    SEXP_2_INT(INTERVALS, intervals);
     int nprotected = 0;
-    int k;
+    const int nobj = Rf_nrows(DATA); /* We transpose the matrix before calling this function. */
+    SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, nruns);
+    SEXP_2_INT(INTERVALS, intervals);
     
-    eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
+    eaf_t **eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, NULL, nruns);
     eaf_polygon_t * rects = eaf_compute_rectangles(eaf, nobj, nruns);
     eaf_free(eaf, nruns);
 
@@ -151,6 +143,7 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
     // Two points per row + color
     new_real_matrix (result, nrow, 2 * nobj + 1);
     const double * p_xy = vector_objective_begin(&rects->xy);
+    int k;
     for (k = 0; k < nrow; ++k) {
         for (int i = 0; i < 2 * nobj; i++, p_xy++)
             result[k + nrow * i] = *p_xy;
@@ -174,15 +167,14 @@ compute_eafdiff_rectangles_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS,
 }
 
 SEXP 
-compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP INTERVALS)
+compute_eafdiff_polygon_C(SEXP DATA, SEXP CUMSIZES, SEXP INTERVALS)
 {
     int nprotected = 0;
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NRUNS, nruns);
+    const int nobj = Rf_nrows(DATA); /* We transpose the matrix before calling this function. */
+    SEXP_2_INT_VECTOR(CUMSIZES, cumsizes, nruns);
     SEXP_2_INT(INTERVALS, intervals);
 
-    eaf_t **eaf = compute_eaf_helper(DATA, nobj, CUMSIZES, nruns, NULL, nruns);
-
+    eaf_t **eaf = compute_eaf_helper(DATA, nobj, cumsizes, nruns, NULL, nruns);
     eaf_polygon_t *p = eaf_compute_area(eaf, nobj, nruns);
     eaf_free(eaf, nruns);
 
@@ -194,9 +186,9 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP INT
     int left_ncol = 0, right_ncol = 0;
     int left_len = 0, right_len = 0;
 
-    /* First compute the adjusted colors, and how much space we need
-       on each side. */
-    double * p_xy = vector_objective_begin(&p->xy);
+    /* First compute the adjusted colors, and how much space we need on each
+       side. */
+    const double *p_xy = vector_objective_begin(&p->xy);
     for (int k = 0; k < ncol; k++) {
         // Truncate colors to interval
         int color = vector_int_at(&p->col, k) * intervals / (double) division;
@@ -254,7 +246,6 @@ compute_eafdiff_area_C(SEXP DATA, SEXP NOBJ, SEXP CUMSIZES, SEXP NRUNS, SEXP INT
     set_attribute(right, "col", right_col);
 
     new_list(poly, 2);
-
     list_push_back (poly, left);
     list_push_back (poly, right);
 
@@ -300,12 +291,11 @@ R_read_datasets(SEXP FILENAME)
 #include "nondominated.h"
 
 void
-normalise_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-            SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
+normalise_C(SEXP DATA, SEXP RANGE, SEXP LBOUND, SEXP UBOUND, SEXP MAXIMISE)
 {
     int nprotected = 0;
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NPOINT, npoint);
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(RANGE, range, range_len);
     SEXP_2_DOUBLE_VECTOR(LBOUND, lbound, lbound_len);
     SEXP_2_DOUBLE_VECTOR(UBOUND, ubound, ubound_len);
@@ -316,24 +306,23 @@ normalise_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
     assert (nobj == maximise_len);
     assert (range_len == 2);
 
-    agree_normalise(REAL(DATA), nobj, npoint, maximise, range[0], range[1],
+    agree_normalise(data, nobj, npoint, maximise, range[0], range[1],
                     lbound, ubound);
     free (maximise);
     UNPROTECT(nprotected);
 }
 
 SEXP
-is_nondominated_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP MAXIMISE,
-                  SEXP KEEP_WEAKLY)
+is_nondominated_C(SEXP DATA, SEXP MAXIMISE, SEXP KEEP_WEAKLY)
 {
     int nprotected = 0;
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NPOINT, npoint);
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     SEXP_2_LOGICAL(KEEP_WEAKLY, keep_weakly);
     assert (nobj == maximise_len);
     
-    bool * bool_is_nondom = is_nondominated(REAL(DATA), nobj, npoint, maximise, keep_weakly);
+    bool * bool_is_nondom = is_nondominated(data, nobj, npoint, maximise, keep_weakly);
     free (maximise);
 
     new_logical_vector (is_nondom, npoint);
@@ -344,12 +333,11 @@ is_nondominated_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP MAXIMISE,
 }
 
 SEXP
-pareto_ranking_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT)
+pareto_ranking_C(SEXP DATA)
 {
     int nprotected = 0;
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NPOINT, npoint);
-    double * data = REAL(DATA);
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
 
     /* FIXME: How to assign directly? */
     new_int_vector (rank, npoint);
@@ -366,12 +354,11 @@ pareto_ranking_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT)
 #include "hv.h"
 
 SEXP
-hypervolume_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE)
+hypervolume_C(SEXP DATA, SEXP REFERENCE)
 {
     int nprotected = 0;
-    double *data = REAL(DATA);
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NPOINT, npoint);
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
     assert (nobj == reference_len);
     new_real_vector(hv, 1);
@@ -381,12 +368,10 @@ hypervolume_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE)
 }
 
 SEXP
-hv_contributions_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE)
+hv_contributions_C(SEXP DATA, SEXP REFERENCE)
 {
     int nprotected = 0;
-    double *data = REAL(DATA);
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NPOINT, npoint);
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
     assert (nobj == reference_len);
     new_real_vector(hv, npoint);
@@ -398,18 +383,14 @@ hv_contributions_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT, SEXP REFERENCE)
 #include "whv.h"
 
 SEXP
-rect_weighted_hv2d_C(SEXP DATA, SEXP NPOINTS, SEXP RECTANGLES, SEXP RECTANGLES_NROW)
+rect_weighted_hv2d_C(SEXP DATA, SEXP RECTANGLES)
 {
     int nprotected = 0;
-    // It cannot be const because we need to sort it.
-    double *data = REAL(DATA);
-    SEXP_2_INT(NPOINTS, npoints);
-    // It cannot be const because we need to sort it.
-    double *rectangles = REAL(RECTANGLES);
-    SEXP_2_INT(RECTANGLES_NROW, rectangles_nrow);
-    
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
+    SEXP_2_DOUBLE_MATRIX(RECTANGLES, rectangles, unused, rectangles_nrow);
     new_real_vector(hv, 1);
-    hv[0] = rect_weighted_hv2d(data, npoints, rectangles, rectangles_nrow); 
+    hv[0] = rect_weighted_hv2d(data, npoint, rectangles, rectangles_nrow); 
     UNPROTECT (nprotected);
     return Rexp(hv);
 }
@@ -440,13 +421,10 @@ Sexp_to_dist(SEXP DIST, SEXP SEED)
 }
 
 SEXP
-whv_hype_C(SEXP DATA, SEXP NPOINTS, SEXP IDEAL, SEXP REFERENCE,
-           SEXP DIST, SEXP SEED, SEXP NSAMPLES)
+whv_hype_C(SEXP DATA, SEXP IDEAL, SEXP REFERENCE, SEXP DIST, SEXP SEED, SEXP NSAMPLES)
 {
     int nprotected = 0;
-    // It cannot be const because we need to sort it.
-    double *data = REAL(DATA);
-    SEXP_2_INT(NPOINTS, npoints);
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoints);
     SEXP_2_INT(NSAMPLES, nsamples);
     SEXP_2_DOUBLE_VECTOR(REFERENCE, reference, reference_len);
     SEXP_2_DOUBLE_VECTOR(IDEAL, ideal, ideal_len);
@@ -477,22 +455,19 @@ enum unary_metric_t {
 }; 
 
 static inline SEXP
-unary_metric_ref(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-                 SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE,
+unary_metric_ref(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE,
                  enum unary_metric_t metric, SEXP EXTRA)
 {
     int nprotected = 0;
-    SEXP_2_INT(NOBJ, nobj);
-    SEXP_2_INT(NPOINT, npoint);
+    /* We transpose the matrix before calling this function. */
+    SEXP_2_DOUBLE_MATRIX(DATA, data, nobj, npoint);
     double *ref = REAL(REFERENCE);
-    /* FIXME: int ref_size = Rf_nrows(REFERENCE); */
-    SEXP_2_INT(REFERENCE_SIZE, ref_size);
+    /* We transpose the matrix before calling this function. */
+    int ref_size = Rf_ncols(REFERENCE);
     SEXP_2_LOGICAL_BOOL_VECTOR(MAXIMISE, maximise, maximise_len);
     assert (nobj == maximise_len);
 
     new_real_vector(value, 1);
-    const double *data = REAL(DATA);
-    
     switch (metric) {
       case EPSILON_ADD:
           value[0] = epsilon_additive (data, nobj, npoint, ref, ref_size, maximise);
@@ -521,47 +496,31 @@ unary_metric_ref(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
 }
 
 SEXP
-epsilon_mul_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-              SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE)
+epsilon_mul_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE)
 {
-    return(unary_metric_ref(DATA, NOBJ, NPOINT,
-                            REFERENCE, REFERENCE_SIZE, MAXIMISE,
-                            EPSILON_MUL, R_NilValue));
+    return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, EPSILON_MUL, R_NilValue));
 }
 
 SEXP
-epsilon_add_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-              SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE)
+epsilon_add_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE)
 {
-    return(unary_metric_ref(DATA, NOBJ, NPOINT,
-                            REFERENCE, REFERENCE_SIZE, MAXIMISE,
-                            EPSILON_ADD, R_NilValue));
+    return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, EPSILON_ADD, R_NilValue));
 }
 
 SEXP
-igd_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-      SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE)
+igd_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE)
 {
-    return(unary_metric_ref(DATA, NOBJ, NPOINT,
-                            REFERENCE, REFERENCE_SIZE, MAXIMISE,
-                            INV_GD, R_NilValue));
+    return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, INV_GD, R_NilValue));
 }
 
 SEXP
-igd_plus_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-          SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE)
+igd_plus_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE)
 {
-    return(unary_metric_ref(DATA, NOBJ, NPOINT,
-                            REFERENCE, REFERENCE_SIZE, MAXIMISE,
-                            INV_GDPLUS, R_NilValue));
+    return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, INV_GDPLUS, R_NilValue));
 }
 
 SEXP
-avg_hausdorff_dist_C(SEXP DATA, SEXP NOBJ, SEXP NPOINT,
-                     SEXP REFERENCE, SEXP REFERENCE_SIZE, SEXP MAXIMISE,
-                     SEXP P)
+avg_hausdorff_dist_C(SEXP DATA, SEXP REFERENCE, SEXP MAXIMISE, SEXP P)
 {
-    return(unary_metric_ref(DATA, NOBJ, NPOINT,
-                            REFERENCE, REFERENCE_SIZE, MAXIMISE,
-                            AVG_HAUSDORFF, P));
+    return(unary_metric_ref(DATA, REFERENCE, MAXIMISE, AVG_HAUSDORFF, P));
 }

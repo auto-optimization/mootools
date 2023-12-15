@@ -163,6 +163,13 @@ attained_left_right (const bit_array *attained, int division, int total,
     *count_right = count_r;
 }
 
+static inline double
+level2percentile (int level, int n)
+{
+    if (level == n) return 100.;
+    return ((double)level * 100.0) / (double) n;
+}
+
 static inline int
 percentile2level (double p, int n)
 {
@@ -241,4 +248,3 @@ eaf_polygon_t *eaf_compute_polygon (eaf_t **eaf, int nobj, int nlevels);
 eaf_polygon_t *eaf_compute_polygon_old (eaf_t **eaf, int nobj, int nlevels);
 void eaf_print_polygon (FILE* stream, eaf_t **eaf, int nobj, int nlevels);
 eaf_polygon_t * eaf_compute_rectangles (eaf_t **eaf, int nobj, int nlevels);
-

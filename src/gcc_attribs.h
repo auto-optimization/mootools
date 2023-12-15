@@ -3,7 +3,7 @@
 
 /* FIXME: does this handle C++? */
 #ifndef __pure_func
-# define __pure_func	__attribute__((pure))
+# define __pure_func	__attribute__((__pure__))
 #endif
 /* Many functions have no effects except the return value and their
    return value depends only on the parameters and/or global
@@ -17,7 +17,7 @@
    resource, that may change between two consecutive calls (such as
    feof in a multithreading environment).  */
 #ifndef __const_func
-# define __const_func	__attribute__((const))
+# define __const_func	__attribute__((__const__))
 #endif
 /* Many functions do not examine any values except their arguments,
    and have no effects except the return value. Basically this is just
@@ -29,7 +29,7 @@
    that calls a non-const function usually must not be const. It does
    not make sense for a const function to return void.  */
 #ifndef __noreturn
-# define __noreturn	__attribute__((noreturn))
+# define __noreturn	__attribute__((__noreturn__))
 #endif
 /* The noreturn keyword tells the compiler to assume that function
    cannot return. It can then optimize without regard to what would
@@ -37,7 +37,7 @@
    code. More importantly, it helps avoid spurious warnings of
    uninitialized variables. */
 #ifndef __malloc
-# define __malloc	__attribute__((malloc))
+# define __malloc	__attribute__((__malloc__))
 #endif
 /* The malloc attribute is used to tell the compiler that a function
    may be treated as if any non-NULL pointer it returns cannot alias
@@ -48,26 +48,26 @@
    it to the new pointer) after the function returns a non-NULL
    value.  */
 #ifndef __must_check
-# define __must_check	__attribute__((warn_unused_result))
+# define __must_check	__attribute__((__warn_unused_result__))
 #endif
 /* The warn_unused_result attribute causes a warning to be emitted if
    a caller of the function with this attribute does not use its
    return value.  */
 #ifndef __deprecated
-# define __deprecated	__attribute__((deprecated))
+# define __deprecated	__attribute__((__deprecated__))
 #endif
 /* The deprecated attribute results in a warning if the function is
    used anywhere in the source file.  */
 #ifndef __used
-# define __used		__attribute__((used))
+# define __used		__attribute__((__used__))
 #endif
 /* FIXME: add the explanation from the GCC documentation to each attribute. */
 #ifndef _no_warn_unused
-# define _no_warn_unused __attribute__((unused))
+# define _no_warn_unused __attribute__((__unused__))
 #endif
 /* This attribute, attached to a function, means that the function is meant to be possibly unused. GCC does not produce a warning for this function. */
 #ifndef __packed
-# define __packed	__attribute__((packed))
+# define __packed	__attribute__((__packed__))
 #endif
 /* FIXME: add the explanation from the GCC documentation to each attribute. */
 

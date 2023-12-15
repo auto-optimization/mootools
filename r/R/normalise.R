@@ -32,9 +32,8 @@
 #' @export
 normalise <- function(data, to_range = c(1, 2), lower = NA, upper = NA, maximise = FALSE)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data)
-  npoints <- nrow(data)
   lower <- rep_len(as.double(lower), nobjs)
   upper <- rep_len(as.double(upper), nobjs)
   # Handle NA
@@ -48,13 +47,11 @@ normalise <- function(data, to_range = c(1, 2), lower = NA, upper = NA, maximise
   if (length(to_range) != 2L)
     stop("to_range must be a vector of length 2")
 
-  out <- t.default(data)
+  data <- t.default(data)
   .Call(normalise_C,
-    out, # This is modified by normalise_C
-    as.integer(nobjs),
-    as.integer(npoints),
+    data, # This is modified by normalise_C
     as.double(to_range),
     lower, upper, maximise)
   # FIXME: Transposing in C may avoid a copy.
-  t.default(out)
+  t.default(data)
 }

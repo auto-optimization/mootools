@@ -62,7 +62,7 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
     x <- x[, -ncol(x), drop=FALSE]
   }
     
-  x <- check_points(x)
+  x <- as_double_matrix(x)
   maximise <- as.logical(maximise)
   if (any(maximise))  
     x <- transform_maximise(x, maximise)
@@ -72,31 +72,14 @@ eaf <- function (x, sets, percentiles = NULL, maximise = FALSE, groups = NULL)
     percentiles <- unique.default(sort.int(as.numeric(percentiles)))
   }
 
-  compute_1_eaf <- function(z, s, p, maximise) {
-    order_sets <- order(s)
-    s <- check_sets(s, order_sets)
-    z <- z[order_sets, , drop=FALSE]
-    nsets <- nunique(s)
-    if (is.null(p)) {
-      # FIXME: We should compute this in the C code.
-      p <- 1L:nsets * (100 / nsets)
-    }
-    z <- compute_eaf_call(z, sets = s, percentiles = p)
-    # Undo previous transformation
-    if (any(maximise))
-      z[,-ncol(z)] <- transform_maximise(z[, -ncol(z), drop=FALSE], maximise)
-    z
-  }
-  
   if (is.null(groups))
-    return(compute_1_eaf(x, s=sets, p=percentiles, maximise = maximise))
+    return(compute_1_eaf(x, sets = sets, percentiles = percentiles, maximise = maximise))
   
-  attsurfs <- data.frame()
   groups <- factor(groups)
   # FIXME: Is there a multi-variate tapply? Maybe data.table?
   do.call("rbind", lapply(levels(groups), function(g){
     where <- groups == g
-    data.frame(compute_1_eaf(x[where, , drop=FALSE], s = sets[where], p = percentiles, maximise = maximise),
+    data.frame(compute_1_eaf(x[where, , drop=FALSE], sets = sets[where], percentiles = percentiles, maximise = maximise),
       groups = g)
   }))
 }
@@ -138,20 +121,39 @@ attsurf2df <- function(x)
   cbind(x[uniq, , drop = FALSE], percentiles = percentiles[uniq])
 }
 
-compute_eaf_call <- function(x, sets, percentiles)
+compute_1_eaf <- function(x, sets, percentiles, maximise)
 {
-  nobjs <- ncol(x)
-  npoints <- tabulate(sets)
-  nsets <- length(npoints)
-  # FIXME: Delete this check.
-  stopifnot(is.numeric(percentiles))
+  # This function assumes that x has been already transformed according to maximise.
+  if (anyNA(sets)) stop("'sets' must have only non-NA numerical values")
+  order_sets <- order(sets)
+  sets <- sets[order_sets]
+  # The C code expects points within a set to be contiguous.
+  x <- x[order_sets, , drop=FALSE]
+  nsets <- nunique(sets)
+  ## if (is.null(percentiles)) {
+  ##   # FIXME: We should compute this in the C code.
+  ##   percentiles <- 1L:nsets * (100 / nsets)
+  ## }
+  x <- compute_eaf_call(x, cumsizes = cumsum(unique_counts(sets)), percentiles = percentiles)
+  # Undo previous transformation
+  if (any(maximise))
+      x[,-ncol(x)] <- transform_maximise(x[, -ncol(x), drop=FALSE], maximise)
+  x
+}
+
+#' Same as [eaf()] but performs no checks and does not transform the input or
+#' the output. This function should be used by other packages that want to
+#' avoid redundant checks and transformations.
+#'
+#' @seealso [as_double_matrix()] [transform_maximise()]
+#' @inheritParams eaf
+#' @param cumsizes Cumulative size of the different sets of points in `x`.
+#' @export
+compute_eaf_call <- function(x, cumsizes, percentiles)
   .Call(compute_eaf_C,
     t(x),
-    nobjs,
-    cumsum(npoints),
-    nsets,
+    cumsizes,
     percentiles)
-}
 
 #' Convert an EAF data frame to a list of data frames, where each element
 #' of the list is one attainment surface. The function [attsurf2df()] can be
@@ -172,52 +174,14 @@ compute_eaf_call <- function(x, sets, percentiles)
 #' @export
 eaf_as_list <- function(eaf)
 {
+  # FIXME: Add groups argument.
   setcol <- ncol(eaf)
-  split.data.frame(eaf[,-setcol, drop=FALSE], factor(eaf[,setcol, drop=FALSE]))
-}
-
-transform_maximise <- function(x, maximise)
-{
-  if (length(maximise) == 1L) {
-    return(-x)
-  } else if (length(maximise) != ncol(x)) {
-    stop("length of maximise must be either 1 or ncol(x)")
+  if (!is.null(colnames(eaf)) && colnames(eaf)[setcol] == "groups") {
+    return(split.data.frame(eaf[, -c(setcol-1L, setcol), drop=FALSE],
+      list(eaf[, setcol-1L], eaf[, setcol]), sep="-"))
   }
-  x[,maximise] <- -x[,maximise, drop=FALSE]
-  x
+  split.data.frame(eaf[,-setcol, drop=FALSE], factor(eaf[,setcol]))
 }
-  
-
-#' Transform matrix according to maximise parameter
-#'
-#' @param x (`data.frame()`|`matrix()`) A numerical matrix or `data.frame`.
-#'
-#' @template arg_maximise
-#'
-#' @return `x` transformed such that every column where `maximise` is `TRUE` is multiplied by `-1`.
-#' @export
-matrix_maximise <- function(x, maximise)
-{
-  stopifnot(ncol(x) == length(maximise))
-  if (is.data.frame(x)) {
-    # R bug?: If x is data.frame with rownames != NULL, and
-    # maximise == (FALSE, FALSE), then -x[, which(FALSE)]
-    # gives error: Error in
-    # data.frame(value, row.names = rn, check.names = FALSE, check.rows = FALSE) : 
-    # row names supplied are of the wrong length
-    row_names <- rownames(x)
-    rownames(x) <- NULL
-    i <- which(maximise)
-    x[, i] <- -x[, i]
-    rownames(x) <- row_names
-  } else {
-    i <- ifelse(maximise, -1L, 1L)
-    x <- t(t(x) * i)
-  }
-  x
-}
-
-
 
 ### Local Variables:
 ### ess-indent-level: 2

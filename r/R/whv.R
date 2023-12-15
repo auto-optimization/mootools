@@ -36,15 +36,15 @@
 #'@export
 whv_rect <- function(data, rectangles, reference, maximise = FALSE)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data)
-  npoints <- nrow(data)
   if (nobjs != 2L) stop("sorry: only 2 objectives supported")
   if (ncol(rectangles) != 5L) stop("rectangles: invalid number of columns")
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
   # FIXME: This is wrong for maximisation
   stopifnot(maximise == FALSE)
+  rectangles <- as_double_matrix(rectangles)
   # FIXME: Do this in C code!
   rectangles_a <- rectangles[,c(1L,3L), drop=FALSE]
   rectangles_a[rectangles_a > reference[1L]] <- reference[1L]
@@ -55,8 +55,6 @@ whv_rect <- function(data, rectangles, reference, maximise = FALSE)
   # Remove empty rectangles maybe created above.
   rectangles <- rectangles[ (rectangles[,1L] != rectangles[,3L]) & (rectangles[,2L] != rectangles[,4L]),
                          , drop = FALSE]
-  rectangles_nrows <- nrow(rectangles)
-
   if (any(maximise)) {
     data <- transform_maximise(data, maximise)
     if (length(maximise) == 1L) {
@@ -69,10 +67,8 @@ whv_rect <- function(data, rectangles, reference, maximise = FALSE)
     }
   }
   .Call(rect_weighted_hv2d_C,
-    as.double(t(data)),
-    as.integer(npoints),
-    as.double(t(rectangles)),
-    as.integer(rectangles_nrows))
+    t(data),
+    t(rectangles))
 }
 
 
@@ -165,17 +161,14 @@ total_whv_rect <- function(data, rectangles, reference, maximise = FALSE, ideal 
 whv_hype <- function(data, reference, ideal, maximise = FALSE,
                      dist = list(type = "uniform"), nsamples = 1e5L)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data)
-  npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
   if (is.null(ideal)) stop("ideal cannot be NULL")
   if (length(ideal) == 1L) ideal <- rep_len(ideal, nobjs)
-  if (nobjs != 2L) {
-    stop("sorry: only 2 objectives supported")
-  }
-
+  if (nobjs != 2L) stop("sorry: only 2 objectives supported")
+  
   if (any(maximise)) {
     if (length(maximise) == 1L) {
       data <- -data
@@ -192,7 +185,6 @@ whv_hype <- function(data, reference, ideal, maximise = FALSE,
   
   .Call(whv_hype_C,
     t(data),
-    npoints,
     as.double(ideal),
     as.double(reference),
     dist,

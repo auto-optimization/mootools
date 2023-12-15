@@ -10,6 +10,10 @@
     if (!Rf_isReal(A) || !Rf_isVector(A))                               \
 	Rf_error("Argument '" #A "' is not a numeric vector");
 
+#define CHECK_ARG_IS_NUMERIC_MATRIX(A)					\
+    if (!Rf_isReal(A) || !Rf_isMatrix(A))                               \
+	Rf_error("Argument '" #A "' is not a numeric matrix");
+
 #define CHECK_ARG_IS_INT_VECTOR(A)					\
     if (!Rf_isInteger(A) || !Rf_isVector(A))                            \
 	Rf_error("Argument '" #A "' is not an integer vector");
@@ -72,10 +76,19 @@
 /*
  * Unpack an integer vector stored in SEXP S.
  */
-#define SEXP_2_DOUBLE_VECTOR(S, I, N)                \
-    CHECK_ARG_IS_NUMERIC_VECTOR(S);                  \
-    double *I = REAL(S);                             \
-    const R_len_t N = Rf_length(S);
+#define SEXP_2_DOUBLE_VECTOR_MAYBE_NULL(S, I, N, IS_NULL)                      \
+    if (!IS_NULL) CHECK_ARG_IS_NUMERIC_VECTOR(S);                              \
+    double *I = (IS_NULL) ? NULL : REAL(S);                                    \
+    R_len_t N = (IS_NULL) ? 0 : Rf_length(S);
+
+#define SEXP_2_DOUBLE_VECTOR(S, I, N) SEXP_2_DOUBLE_VECTOR_MAYBE_NULL(S, I, N, false)
+#define SEXP_2_DOUBLE_VECTOR_OR_NULL(S, I, N) SEXP_2_DOUBLE_VECTOR_MAYBE_NULL(S, I, N, Rf_isNull(S))
+
+#define SEXP_2_DOUBLE_MATRIX(S, I, N_ROWS, N_COLS)                    \
+    CHECK_ARG_IS_NUMERIC_MATRIX(S);                                   \
+    double *I = REAL(S);                                              \
+    const int N_ROWS _no_warn_unused = Rf_nrows(S);                   \
+    const int N_COLS _no_warn_unused = Rf_ncols(S)
 
 #define SEXP_2_INT_VECTOR(S, I, N)               \
     CHECK_ARG_IS_INT_VECTOR(S);                  \

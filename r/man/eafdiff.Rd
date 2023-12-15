@@ -4,7 +4,7 @@
 \alias{eafdiff}
 \title{Compute empirical attainment function differences}
 \usage{
-eafdiff(x, y, intervals = NULL, maximise = c(FALSE, FALSE), rectangles = FALSE)
+eafdiff(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE)
 }
 \arguments{
 \item{x, y}{Data frames corresponding to the input data of
@@ -39,8 +39,11 @@ data sets.
 This function calculates the differences between the EAFs of two
 data sets.
 }
+\seealso{
+\code{\link[=read_datasets]{read_datasets()}}, \code{\link[mooplot:eafdiffplot]{mooplot::eafdiffplot()}}
+}
+\concept{eaf}
 \examples{
-
 A1 <- read_datasets(text='
  3 2
  2 3
@@ -50,6 +53,7 @@ A1 <- read_datasets(text='
  
  1 2
 ')
+
 A2 <- read_datasets(text='
  4 2.5
  3 3
@@ -62,14 +66,18 @@ A2 <- read_datasets(text='
 ')
 d <- eafdiff(A1, A2)
 str(d)
-print(d)
+
+
+
+
+
+
+
+
+
+d
 
 d <- eafdiff(A1, A2, rectangles = TRUE)
 str(d)
-print(d)
-
+d
 }
-\seealso{
-\code{\link[=read_datasets]{read_datasets()}}, \code{\link[mooplot:eafdiffplot]{mooplot::eafdiffplot()}}
-}
-\concept{eaf}

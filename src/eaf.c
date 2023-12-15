@@ -225,11 +225,12 @@ eaf2matrix_R (double *rmat, eaf_t * const * eaf, int nobj, int totalpoints,
     int pos = 0;
     for (int k = 0; k < nlevels; k++) {
         int npoints = eaf[k]->size;
+        double p = percentile ? percentile[k] : level2percentile(k+1, nlevels);
         for (int i = 0; i < npoints; i++) {
             for (int j = 0; j < nobj; j++) {
                 rmat[pos + j * totalpoints] = eaf[k]->data[j + i * nobj];
             }
-            rmat[pos + nobj * totalpoints] = percentile[k];
+            rmat[pos + nobj * totalpoints] = p;
             pos++;
         }
     }
@@ -243,11 +244,12 @@ eaf2matrix (double *rmat, eaf_t * const * eaf, int nobj, _no_warn_unused int tot
     int ncol = nobj + 1;
     for (int k = 0; k < nlevels; k++) {
         int npoints = eaf[k]->size;
+        double p = percentile ? percentile[k] : level2percentile(k+1, nlevels);
         for (int i = 0; i < npoints; i++) {
             for (int j = 0; j < nobj; j++) {
                 rmat[j + pos * ncol] = eaf[k]->data[j + i * nobj];
             }
-            rmat[nobj + pos * ncol] = percentile[k];
+            rmat[nobj + pos * ncol] = p;
             pos++;
         }
     }

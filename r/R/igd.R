@@ -138,23 +138,16 @@ igd_plus <- function(data, reference, maximise = FALSE)
 #' @export
 avg_hausdorff_dist <- function(data, reference, maximise = FALSE, p = 1L)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data) 
-  npoints <- nrow(data)
   if (is.null(reference))
     stop("reference cannot be NULL")
-  
-  reference <- check_points(reference)
+  reference <- as_double_matrix(reference)
   if (ncol(reference) != nobjs)
     stop("data and reference must have the same number of columns")
-  reference_size <- nrow(reference)
-  
   .Call(avg_hausdorff_dist_C,
-    as.double(t(data)),
-    as.integer(nobjs),
-    as.integer(npoints),
-    as.double(t(reference)),
-    as.integer(reference_size),
+    t(data),
+    t(reference),
     as.logical(rep_len(maximise, nobjs)),
     as.integer(p))
 }

@@ -1,27 +1,3 @@
-compute_eafdiff_helper <- function(data, intervals)
-{
-  # Last column is the set number.
-  setcol <- ncol(data)
-  nobjs <- setcol - 1L
-  sets <- data[, setcol]
-  order_sets <- order(sets)
-  # The C code expects points within a set to be contiguous.
-  data <- as.matrix(data[order_sets, 1L:nobjs])
-  sets <- sets[order_sets]
-  nsets <- nunique(sets)
-  npoints <- tabulate(sets)
-  # FIXME: Ideally this would be computed by the C code, but it is hard-coded.
-  ## division <- nsets %/% 2
-  ## nsets1 <- division
-  ## nsets2 <- nsets - division
-  .Call(compute_eafdiff_C,
-    t(data),
-    nobjs,
-    as.integer(cumsum(npoints)),
-    nsets,
-    as.integer(intervals))
-}
-
 #' Compute empirical attainment function differences 
 #' 
 #' Calculate the differences between the empirical attainment functions of two
@@ -53,8 +29,7 @@ compute_eafdiff_helper <- function(data, intervals)
 #' 
 #' @seealso    [read_datasets()], [mooplot::eafdiffplot()]
 #' 
-#' @examples
-#'
+#' @doctest
 #' A1 <- read_datasets(text='
 #'  3 2
 #'  2 3
@@ -64,6 +39,7 @@ compute_eafdiff_helper <- function(data, intervals)
 #'  
 #'  1 2
 #' ')
+#' 
 #' A2 <- read_datasets(text='
 #'  4 2.5
 #'  3 3
@@ -76,19 +52,51 @@ compute_eafdiff_helper <- function(data, intervals)
 #' ')
 #' d <- eafdiff(A1, A2)
 #' str(d)
-#' print(d)
-#'
+#' @testRaw  expect_equal(d,matrix(byrow=TRUE, ncol=3, scan(text='1.0  2.0    2
+#' @testRaw   2.0  1.0   -1
+#' @testRaw   2.5  1.0    0
+#' @testRaw   2.0  2.0    1
+#' @testRaw   2.0  3.0    2
+#' @testRaw   3.0  2.0    2
+#' @testRaw   2.5  3.5    0
+#' @testRaw   3.0  3.0    0
+#' @testRaw   4.0  2.5    1')))
+#' @expect true(is.matrix(.))
+#' d
+#' 
 #' d <- eafdiff(A1, A2, rectangles = TRUE)
 #' str(d)
-#' print(d)
-#'
+# @expect value(as.matrix(read.table(header=TRUE, text='
+#       xmin ymin xmax ymax diff
+#       2.0  1.0  2.5  2.0   -1
+#       1.0  2.0  2.0  Inf    2
+#       2.5  1.0  Inf  2.0    0
+#       2.0  2.0  3.0  3.0    1
+#       2.0  3.5  2.5  Inf    2
+#       2.0  3.0  3.0  3.5    2
+#       3.0  2.5  4.0  3.0    2
+#       3.0  2.0  Inf  2.5    2
+#       4.0  2.5  Inf  3.0    1')))
+#' d
 #'@concept eaf
 #'@export
-eafdiff <- function(x, y, intervals = NULL, maximise = c(FALSE, FALSE),
-                    rectangles = FALSE)
+eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE)
 {
-  maximise <- as.logical(maximise)
-  nsets <- (length(unique(x[,ncol(x)])) + length(unique(y[,ncol(y)])))
+  stopifnot(ncol(x) == ncol(y))
+  
+  sets_x <- x[, ncol(x)]
+  if (anyNA(sets_x)) stop("'sets' must have only non-NA numerical values")
+  cumsizes_x <- cumsum(unique_counts(sets_x))
+  # The C code expects points within a set to be contiguous.
+  x <- as_double_matrix(x[order(sets_x) , -ncol(x), drop=FALSE])
+
+  sets_y <- y[, ncol(y)]
+  if (anyNA(sets_y)) stop("'sets' must have only non-NA numerical values")
+  cumsizes_y <- cumsum(unique_counts(sets_y))
+  # The C code expects points within a set to be contiguous.
+  y <- as_double_matrix(y[order(sets_y), -ncol(y), drop=FALSE])
+
+  nsets <- length(cumsizes_x) + length(cumsizes_y)
   if (is.null(intervals)) {
     # Default is nsets / 2
     intervals <- nsets / 2.0
@@ -97,80 +105,74 @@ eafdiff <- function(x, y, intervals = NULL, maximise = c(FALSE, FALSE),
     intervals <- min(intervals, nsets / 2.0)
   }
 
-  data <- rbind_datasets(x, y)
-  data <- check_eaf_data(data)
-  # FIXME: Is it faster to subset or to multiply the third column by 1?
-  data[,1L:2L] <- matrix_maximise(data[,1L:2L, drop=FALSE], maximise = maximise)
-  
-  DIFF <- if (rectangles) compute_eafdiff_rectangles(data, intervals = intervals)
-          else compute_eafdiff_helper(data, intervals = intervals)
-  # FIXME: We should remove duplicated rows in C code.
+  maximise <- as.logical(maximise)
+  if (any(maximise)) {
+    x <- transform_maximise(x, maximise)
+    y <- transform_maximise(y, maximise)
+  }
 
+  DIFF <- compute_eafdiff_call(x, y, cumsizes_x, cumsizes_y,
+    intervals = intervals, ret = if (rectangles) "rectangles" else "points")
+  # FIXME: We should remove duplicated rows in C code.
   # FIXME: Check that we do not generate duplicated nor overlapping rectangles
   # with different colors. That would be a bug.
   DIFF <- DIFF[!duplicated(DIFF),]
+  if (any(maximise)) {
+    if (rectangles && length(maximise) != 1L) 
+      maximise <- c(maximise, maximise)
+    DIFF[, -ncol(DIFF)] <- transform_maximise(DIFF[, -ncol(DIFF), drop=FALSE], maximise)
+  }
+  # Undo previous transformation
+  ## if (any(maximise)) {
+  ##   DIFF[,-ncol(x)] <- transform_maximise(x[, -ncol(x), drop=FALSE], maximise)
+  ## }
   DIFF
 }
 
-compute_eafdiff <- function(data, intervals)
+#' Same as [eafdiff()] but performs no checks and does not transform the input or
+#' the output. This function should be used by other packages that want to
+#' avoid redundant checks and transformations.
+#'
+#' @seealso [as_double_matrix()] [transform_maximise()]
+#' @inheritParams eafdiff
+#' @param cumsizes_x,cumsizes_y Cumulative size of the different sets of points in `x`.
+#' @param ret (`"points"|"rectangles"|"polygons"`)\cr The format of the returned EAF differences.
+#' @export
+compute_eafdiff_call <- function(x, y, cumsizes_x, cumsizes_y, intervals, ret)
 {
-  DIFF <- compute_eafdiff_helper(data, intervals)
-  #print(DIFF)
-  # FIXME: Do this computation in C code. See compute_eafdiff_area_C
-  setcol <- ncol(data)
-  eafval <- DIFF[, setcol]
-  eafdiff <- list(left  = unique(DIFF[ eafval >= 1L, , drop=FALSE]),
-                  right = unique(DIFF[ eafval <= -1L, , drop=FALSE]))
-  eafdiff$right[, setcol] <- -eafdiff$right[, setcol]
-  eafdiff
+  x <- cbind(t(x), t(y))
+  cumsizes <- c(cumsizes_x, cumsizes_x[length(cumsizes_x)] + cumsizes_y)
+  intervals <- as.integer(intervals)
+  switch(ret,
+    rectangles = .Call(compute_eafdiff_rectangles_C, x, cumsizes, intervals),
+    polygons = .Call(compute_eafdiff_polygon_C, x, cumsizes, intervals),
+    points = .Call(compute_eafdiff_C, x, cumsizes, intervals))
 }
 
-
-# FIXME: The default intervals should be nsets / 2
-compute_eafdiff_rectangles <- function(data, intervals = 1L)
-{
-  # Last column is the set number.
-  setcol <- ncol(data)
-  nobjs <- setcol - 1L
-  sets <- data[, setcol]
-  order_sets <- order(sets)
-  # The C code expects points within a set to be contiguous.
-  data <- as.matrix(data[order_sets, 1L:nobjs, drop=FALSE])
-  sets <- sets[order_sets]
-  nsets <- nunique(sets)
-  npoints <- tabulate (sets)
-  .Call(compute_eafdiff_rectangles_C,
-    t(data),
-    nobjs,
-    as.integer(cumsum(npoints)),
-    nsets,
-    as.integer(intervals))
-}
+compute_eafdiff <- function(x, y, sets_x, sets_y, intervals)
+  compute_eafdiff_call(x, y, cumsum(unique_counts(sets_x)), cumsum(unique_counts(sets_y)), intervals, ret = "points")
 
 # FIXME: The default intervals should be nsets / 2
-compute_eafdiff_polygon <- function(data, intervals = 1L)
-{
-  # Last column is the set number.
-  setcol <- ncol(data)
-  nobjs <- setcol - 1L
-  sets <- data[, setcol]
-  order_sets <- order(sets)
-  # The C code expects points within a set to be contiguous.
-  data <- data[order_sets, 1L:nobjs, drop=FALSE]
-  sets <- sets[order_sets]
-  nsets <- nunique(sets)
-  npoints <- tabulate(sets)
-  # FIXME: Ideally this would be computed by the C code, but it is hard-coded.
-  ## division <- nsets %/% 2
-  ## nsets1 <- division
-  ## nsets2 <- nsets - division
-  # FIMXE: This function may require a lot of memory for 900 sets. Is there a
-  # way to save memory?
-  .Call(compute_eafdiff_area_C,
-    t(data),
-    nobjs,
-    as.integer(cumsum(npoints)),
-    nsets,
-    as.integer(intervals))
-}
+compute_eafdiff_rectangles <- function(x, y, sets_x, sets_y, intervals)
+  compute_eafdiff_call(x, y, cumsum(unique_counts(sets_x)), cumsum(unique_counts(sets_y)), intervals, ret = "rectangles")
+
+# FIXME: The default intervals should be nsets / 2
+compute_eafdiff_polygon <- function(x, y, sets_x, sets_y, intervals)
+  compute_eafdiff_call(x, y, cumsum(unique_counts(sets_x)), cumsum(unique_counts(sets_y)), intervals, ret = "polygons")
+
+
+
+## compute_eafdiff <- function(data, intervals)
+## {
+##   DIFF <- compute_eafdiff_call(data[,c(1L,2L), drop=FALSE], sets = data[,3L], intervals = intervals)
+##   #print(DIFF)
+##   # FIXME: Do this computation in C code. See compute_eafdiff_area_C
+##   setcol <- ncol(data)
+##   eafval <- DIFF[, setcol]
+##   eafdiff <- list(left  = unique(DIFF[ eafval >= 1L, , drop=FALSE]),
+##                   right = unique(DIFF[ eafval <= -1L, , drop=FALSE]))
+##   eafdiff$right[, setcol] <- -eafdiff$right[, setcol]
+##   eafdiff
+## }
+
 

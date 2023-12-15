@@ -35,9 +35,8 @@
 #' @concept metrics
 hypervolume <- function(data, reference, maximise = FALSE)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data) 
-  npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
@@ -51,8 +50,6 @@ hypervolume <- function(data, reference, maximise = FALSE)
   }
   .Call(hypervolume_C,
     t(data),
-    nobjs,
-    npoints,
     as.double(reference))
 }
 
@@ -96,9 +93,8 @@ hypervolume <- function(data, reference, maximise = FALSE)
 #' @concept metrics
 hv_contributions <- function(data, reference, maximise = FALSE)
 {
-  data <- check_points(data)
+  data <- as_double_matrix(data)
   nobjs <- ncol(data) 
-  npoints <- nrow(data)
   if (is.null(reference)) stop("reference cannot be NULL")
   if (length(reference) == 1L) reference <- rep_len(reference, nobjs)
 
@@ -112,7 +108,5 @@ hv_contributions <- function(data, reference, maximise = FALSE)
   }
   .Call(hv_contributions_C,
     t(data),
-    nobjs,
-    npoints,
     as.double(reference))
 }

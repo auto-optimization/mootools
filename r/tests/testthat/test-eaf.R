@@ -30,18 +30,3 @@ test_that("eafs_sets_non_numeric", {
   expect_equal(eaf(x, sets=1:5), eaf(x, sets=letters[1:5]))
 })
 
-test_that("eaf3d", {
-  lin <- read_datasets("lin.S.txt")
-  sph <- read_datasets("sph.S.txt")
-  nobjs <- ncol(lin) - 1
-  nruns_left <- max(lin[, nobjs + 1])
-  data_combined <- sph
-  data_combined[, nobjs + 1] <- data_combined[, nobjs + 1] + nruns_left
-  data_combined <- rbind(lin, data_combined)
-  # This may stop working once we filter uninteresting values in the C code directly.
-  DIFF <- moocore:::compute_eafdiff_helper(data_combined, intervals = nruns_left)
-  x <- as.matrix(read.table("lin.S-sph.S-diff.txt.xz", header = FALSE))
-  dimnames(x) <- NULL
-  x[, nobjs + 1] <- x[, nobjs + 1] - x[, nobjs + 2]
-  expect_equal(DIFF[, 1 : (nobjs + 1)], x[, 1 : (nobjs + 1)])
-})

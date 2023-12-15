@@ -56,7 +56,7 @@ vorobT <- function(x, sets, reference, maximise = FALSE)
     sets <- x[, ncol(x)]
     x <- x[, -ncol(x), drop=FALSE]
   }
-  x <- check_points(x)
+  x <- as_double_matrix(x)
 
   if (any(maximise)) {
     x <- transform_maximise(x, maximise)
@@ -94,6 +94,9 @@ vorobT <- function(x, sets, reference, maximise = FALSE)
 #' @export
 vorobDev <- function(x, sets, reference, VE = NULL, maximise = FALSE)
 {
+  # FIXME: Does it make sense to call this function with 'x' different than the
+  # one used to calculate VE? If not, then we should merge them and avoid a lot
+  # of redundant work.
   if (missing(sets)) {
     sets <- x[, ncol(x)]
     x <- x[, -ncol(x), drop=FALSE]
@@ -101,7 +104,7 @@ vorobDev <- function(x, sets, reference, VE = NULL, maximise = FALSE)
   if (is.null(VE)) {
     VE <- vorobT(x, sets, reference = reference, maximise = maximise)$VE
   } else {
-    x <- check_points(x)
+    x <- as_double_matrix(x)
   }
   
   if (any(maximise)) {
