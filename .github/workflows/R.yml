@@ -4,13 +4,13 @@ on:
   push:
     branches-ignore: [gh-pages]
     paths:
-      - ".github/workflows/R.yaml"
+      - ".github/workflows/R.yml"
       - "src/**"
       - "r/**"
   pull_request:
     branches-ignore:  [gh-pages]
     paths:
-      - ".github/workflows/R.yaml"
+      - ".github/workflows/R.yml"
       - "src/**"
       - "r/**"
 
@@ -163,7 +163,7 @@ jobs:
         with:
           extra-packages: any::covr
           needs: coverage
-          working-directory: 'r'
+          working-directory: r
 
       - name: Test coverage
         env:
