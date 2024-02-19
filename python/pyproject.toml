@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "moocore"
 version = "0.0.9999"
 authors = [
-  { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" }
+  { name = "Manuel López-Ibáñez", email = "manuel.lopez-ibanez@manchester.ac.uk" },
   { name = "Fergus Rooney", email = "fergus.rooney@outlook.com" },
 ]
 description = "Core Algorithms for Multi-Objective Optimization"
