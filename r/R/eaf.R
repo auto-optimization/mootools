@@ -148,6 +148,7 @@ compute_1_eaf <- function(x, sets, percentiles, maximise)
 #' @seealso [as_double_matrix()] [transform_maximise()]
 #' @inheritParams eaf
 #' @param cumsizes Cumulative size of the different sets of points in `x`.
+#' @concept eaf
 #' @export
 compute_eaf_call <- function(x, cumsizes, percentiles)
   .Call(compute_eaf_C,
@@ -170,7 +171,7 @@ compute_eaf_call <- function(x, cumsizes, percentiles)
 #' x <- read_datasets(file.path(extdata_path, "example1_dat"))
 #' attsurfs <- eaf_as_list(eaf(x, percentiles = c(0, 50, 100)))
 #' str(attsurfs)
-#' 
+#' @concept eaf
 #' @export
 eaf_as_list <- function(eaf)
 {

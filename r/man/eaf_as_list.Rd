@@ -24,8 +24,8 @@ extdata_path <- system.file(package="moocore", "extdata")
 x <- read_datasets(file.path(extdata_path, "example1_dat"))
 attsurfs <- eaf_as_list(eaf(x, percentiles = c(0, 50, 100)))
 str(attsurfs)
-
 }
 \seealso{
 \code{\link[=eaf]{eaf()}} \code{\link[=attsurf2df]{attsurf2df()}}
 }
+\concept{eaf}

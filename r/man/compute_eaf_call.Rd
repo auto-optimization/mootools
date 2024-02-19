@@ -26,3 +26,4 @@ avoid redundant checks and transformations.
 \seealso{
 \code{\link[=as_double_matrix]{as_double_matrix()}} \code{\link[=transform_maximise]{transform_maximise()}}
 }
+\concept{eaf}

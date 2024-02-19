@@ -137,6 +137,7 @@ eafdiff <- function(x, y, intervals = NULL, maximise = FALSE, rectangles = FALSE
 #' @inheritParams eafdiff
 #' @param cumsizes_x,cumsizes_y Cumulative size of the different sets of points in `x`.
 #' @param ret (`"points"|"rectangles"|"polygons"`)\cr The format of the returned EAF differences.
+#' @concept eaf
 #' @export
 compute_eafdiff_call <- function(x, y, cumsizes_x, cumsizes_y, intervals, ret)
 {

@@ -35,4 +35,5 @@ reference:
       - write_datasets
       - normalise
       - rbind_datasets
-      
+      - transform_maximise      
+      - as_double_matrix
