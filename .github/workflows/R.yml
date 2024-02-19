@@ -61,16 +61,16 @@ jobs:
           http-user-agent: ${{ matrix.http-user-agent }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::remotes, any::rcmdcheck, any::spelling, any::eaf
-          needs: check
-          working-directory: r
-          
       - name: Install macos dependencies
         if: runner.os == 'macOS'
         run: brew install gsl gawk automake
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::remotes, any::rcmdcheck, any::spelling
+          needs: check
+          working-directory: r
+          
       - name: Check (CRAN)
         env:
           NOT_CRAN: false

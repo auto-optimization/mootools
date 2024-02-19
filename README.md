@@ -1,4 +1,4 @@
-MOOTOOLS: Multi-Objective Optimization Toolkit 
+MOOCORE: Core Mathematical Functions for Multi-Objective Optimization
 ==============================================
 <!-- badges: start -->
 [![C build
@@ -9,49 +9,23 @@ status](https://github.com/auto-optimization/mootools/workflows/Python/badge.svg
 status](https://github.com/auto-optimization/mootools/workflows/R/badge.svg)](https://github.com/auto-optimization/mootools/actions/workflows/R.yaml)
 <!-- badges: end -->
 
-nondominated
-------------
+[ [**GitHub**](https://auto-optimization.github.io/mootools) ] [ [**R package**](https://auto-optimization.github.io/mootools/r/) ] [ [**Python package**](https://auto-optimization.github.io/mootools/python/) ]
 
-Obtain information and perform some operations on the nondominated
-sets given as input.
-
-
-  Building `nondominated'
-  -----------------------
-
-The program has been tested on GNU/Linux using bash as shell and a
-recent version of GCC (>= 4.2). If you have success or problems using
-other systems, please let me know.
-
-I recommend that you compile specifically for your architecture
-using GCC option -march=. The default compilation is done with:
-
-  make nondominated
-
-This uses the option "-march=native". If your GCC version does not
-support "native", you can give an explicit architecture:
-
-  make nondominated march=i686
-
-See the GCC manual for the names of the architectures supported by
-your version of GCC.
+**Contributors:**
+    [Manuel López-Ibáñez](https://lopez-ibanez.eu),
 
 
-  Using `nondominated'
-  --------------------
+The goal of this repository is to collect core mathematical functions and algorithms for multi-objective optimization and make them available to different programming languages via similar interfaces. These functions include:
 
-See the output of
+ * Identifying and filtering dominated vectors.
+ * Quality metrics such as (weighted) hypervolume, epsilon, IGD, etc.
+ * Computation of the Empirical Attainment Function.
+ 
+The repository is composed of:
 
-  nondominated --help
+ * `src/`: C library and command-line tools.
+ * `r/`: An R package that uses the C library.
+ * `python/`: A Python package that uses the C library.
+ 
+Each component is documented in the `README.md` file found under each folder.
 
-
-  License
-  -------
-
-See LICENSE file or contact the author.
-
-
-  Contact
-  -------
-
-Manuel Lopez-Ibanez <manuel.lopez-ibanez@ulb.ac.be>

@@ -341,7 +341,6 @@ def is_nondominated(data, maximise=False, keep_weakly=False):
 
         `filter_dominated` returns a numpy array with only mutually nondominated points.
 
-        
     Examples
     --------
     >>> S = np.array([[1,1], [0,1], [1,0], [1,0]])
@@ -375,7 +374,72 @@ def filter_dominated(data, maximise=False, keep_weakly=False):
     """Remove dominated points according to Pareto optimality.
     See: :func:`is_nondominated` for details
     """
-    return data[is_nondominated(data, maximise, keep_weakly)]
+    return data[is_nondominated(data, maximise, keep_weakly), :]
+
+
+def filter_dominated_sets(data, maximise=False, keep_weakly=False):
+    """Given a dataset with multiple sets (last column gives the set index), filter dominated points per set.
+
+    Executes the :func:`filter_dominated` function for every set in a dataset \
+    and returns back a dataset.
+
+    Parameters
+    ----------
+    data : numpy array
+        Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
+         of the :func:`read_datasets` function
+    maximise : single bool, or list of booleans
+        Whether the objectives must be maximised instead of minimised. \
+        Either a single boolean value that applies to all objectives or a list of booleans, with one value per objective. \
+        Also accepts a 1D numpy array with values 0 or 1 for each objective
+
+    Returns
+    -------
+    numpy array
+        A numpy array with only mutually nondominated points (last column is the set index).
+
+    Examples
+    --------
+    >>> x = moocore.read_datasets("./doc/examples/input1.dat")
+    >>> pf_per_set = moocore.filter_dominated_sets(x)
+    >>> len(pf_per_set)
+    >>> pf = moocore.filter_dominated(x[:, :-1])
+    >>> len(pf)
+    >>> pf                                          # doctest: +ELLIPSIS
+    array([[2.60764118, 6.31309852, 3.        ],
+           [3.22509709, 6.1522834 , 3.        ],
+           [0.37731545, 9.02211752, 3.        ],
+           [4.61023932, 2.29231998, 3.        ],
+           [0.2901393 , 8.32259412, 4.        ],
+           [1.54506255, 0.38303122, 4.        ],
+           [4.43498452, 4.13150648, 5.        ],
+           [9.78758589, 1.41238277, 5.        ],
+           [7.85344142, 3.02219054, 5.        ],
+           [0.9017068 , 7.49376946, 5.        ],
+           [0.17470556, 8.89066343, 5.        ]])
+
+    See Also
+    --------
+    With a single dataset, use :func:`filter_dominated`
+    """
+    data = np.asfarray(data)
+    ncols = data.shape[1]
+    if ncols < 3:
+        raise ValueError(
+            "'data' must have at least 3 columns (2 objectives + set column)"
+        )
+    nobjs = ncols - 1
+    uniq_sets, uniq_index = np.unique(data[:, -1], return_index=True)
+    x_split = np.vsplit(data[:, :-1], uniq_index[1:])
+    is_nondom = np.fromiter(
+        (
+            is_nondominated(g, maximise=maximise, keep_weakly=keep_weakly)
+            for g in x_split
+        ),
+        dtype=float,
+        count=data.shape[0],
+    )
+    return data[is_nondom, :]
 
 
 # def filter_dominated_sets(dataset, maximise=False, keep_weakly=False):
@@ -543,7 +607,7 @@ def eaf(data, percentiles=[]):
 
     Parameters
     ----------
-    dataset : numpy array
+    data : numpy array
         Numpy array of numerical values and set numbers, containing multiple sets. For example the output \
          of the :func:`read_datasets` function
     percentiles : list
@@ -713,10 +777,16 @@ def vorobDev(x, reference, VE=None):
     H2 = hypervolume(VE, ref=reference)
     uniq_sets, uniq_index = np.unique(x[:, -1], return_index=True)
     x_split = np.vsplit(x[:, :-1], uniq_index[1:])
-    H1 = np.fromiter((hypervolume(g, ref=reference) for g in x_split), float).mean()
+    H1 = np.fromiter(
+        (hypervolume(g, ref=reference) for g in x_split),
+        dtype=float,
+        count=len(x_split),
+    ).mean()
     VD = (
         np.fromiter(
-            (hypervolume(np.row_stack((g, VE)), ref=reference) for g in x_split), float
+            (hypervolume(np.row_stack((g, VE)), ref=reference) for g in x_split),
+            dtype=float,
+            count=len(x_split),
         ).mean()
         * 2.0
     )
