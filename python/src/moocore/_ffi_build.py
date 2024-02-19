@@ -7,6 +7,7 @@ Every time a new C function is created, its prototype must be added to the `ffib
 The header files required must be placed in the first argument of `ffibuilder.set_source`, and any additional `.C` files must be added to the `sources` argument of `ffibuilder.set_source`
 
 """
+
 import os
 import sys
 import platform
