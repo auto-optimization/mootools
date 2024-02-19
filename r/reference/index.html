@@ -85,7 +85,7 @@
           
           <code><a href="attsurf2df.html">attsurf2df()</a></code> 
         </dt>
-        <dd>Convert a list of attainment surfaces to a single <code>data.frame</code>.</dd>
+        <dd>Convert a list of attainment surfaces to a single EAF <code>data.frame</code>.</dd>
       </dl><dl><dt>
           
           <code><a href="choose_eafdiff.html">choose_eafdiff()</a></code> 
@@ -93,14 +93,35 @@
         <dd>Interactively choose according to empirical attainment function differences</dd>
       </dl><dl><dt>
           
+          <code><a href="compute_eaf_call.html">compute_eaf_call()</a></code> 
+        </dt>
+        <dd>Same as <code><a href="../reference/eaf.html">eaf()</a></code> but performs no checks and does not transform the input or
+the output. This function should be used by other packages that want to
+avoid redundant checks and transformations.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="compute_eafdiff_call.html">compute_eafdiff_call()</a></code> 
+        </dt>
+        <dd>Same as <code><a href="../reference/eafdiff.html">eafdiff()</a></code> but performs no checks and does not transform the input or
+the output. This function should be used by other packages that want to
+avoid redundant checks and transformations.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="eaf.html">eaf()</a></code> 
+        </dt>
+        <dd>Exact computation of the EAF in 2D or 3D</dd>
+      </dl><dl><dt>
+          
+          <code><a href="eaf_as_list.html">eaf_as_list()</a></code> 
+        </dt>
+        <dd>Convert an EAF data frame to a list of data frames, where each element
+of the list is one attainment surface. The function <code><a href="../reference/attsurf2df.html">attsurf2df()</a></code> can be
+used to convert the list into a single data frame.</dd>
+      </dl><dl><dt>
+          
           <code><a href="eafdiff.html">eafdiff()</a></code> 
         </dt>
         <dd>Compute empirical attainment function differences</dd>
-      </dl><dl><dt>
-          
-          <code><a href="eafs.html">eafs()</a></code> 
-        </dt>
-        <dd>Exact computation of the EAF in 2D or 3D</dd>
       </dl><dl><dt>
           
           <code><a href="largest_eafdiff.html">largest_eafdiff()</a></code> 
@@ -240,14 +261,19 @@ water network.</dd>
         <dd>Normalise points</dd>
       </dl><dl><dt>
           
-          <code><a href="matrix_maximise.html">matrix_maximise()</a></code> 
+          <code><a href="rbind_datasets.html">rbind_datasets()</a></code> 
+        </dt>
+        <dd>Combine datasets <code>x</code> and <code>y</code> by row taking care of making all sets unique.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="transform_maximise.html">transform_maximise()</a></code> 
         </dt>
         <dd>Transform matrix according to maximise parameter</dd>
       </dl><dl><dt>
           
-          <code><a href="rbind_datasets.html">rbind_datasets()</a></code> 
+          <code><a href="as_double_matrix.html">as_double_matrix()</a></code> 
         </dt>
-        <dd>Combine datasets <code>x</code> and <code>y</code> by row taking care of making all sets unique.</dd>
+        <dd>Convert input to a matrix with <code>"double"</code> storage mode (<code><a href="https://rdrr.io/r/base/mode.html" class="external-link">base::storage.mode()</a></code>).</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

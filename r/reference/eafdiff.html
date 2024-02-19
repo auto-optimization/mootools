@@ -49,7 +49,7 @@ data sets."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Compute empirical attainment function differences</h1>
-      <small class="dont-index">Source: <a href="https://github.com/auto-optimization/moocore/blob/HEAD/R/eaf.R" class="external-link"><code>R/eaf.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/auto-optimization/moocore/blob/HEAD/R/eafdiff.R" class="external-link"><code>R/eafdiff.R</code></a></small>
       <div class="d-none name"><code>eafdiff.Rd</code></div>
     </div>
 
@@ -60,7 +60,7 @@ data sets.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">eafdiff</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, intervals <span class="op">=</span> <span class="cn">NULL</span>, maximise <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span>, rectangles <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">eafdiff</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, intervals <span class="op">=</span> <span class="cn">NULL</span>, maximise <span class="op">=</span> <span class="cn">FALSE</span>, rectangles <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -107,13 +107,12 @@ data sets.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="read_datasets.html">read_datasets()</a></code>, <code><a href="https://mlopez-ibanez.github.io/eaf/reference/eafdiffplot.html" class="external-link">eaf::eafdiffplot()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="read_datasets.html">read_datasets()</a></code>, <code>mooplot::eafdiffplot()</code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">A1</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_datasets.html">read_datasets</a></span><span class="op">(</span>text<span class="op">=</span><span class="st">'</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">A1</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_datasets.html">read_datasets</a></span><span class="op">(</span>text<span class="op">=</span><span class="st">'</span></span></span>
 <span class="r-in"><span><span class="st"> 3 2</span></span></span>
 <span class="r-in"><span><span class="st"> 2 3</span></span></span>
 <span class="r-in"><span><span class="st"> </span></span></span>
@@ -122,6 +121,7 @@ data sets.</p>
 <span class="r-in"><span><span class="st"> </span></span></span>
 <span class="r-in"><span><span class="st"> 1 2</span></span></span>
 <span class="r-in"><span><span class="st">'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">A2</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_datasets.html">read_datasets</a></span><span class="op">(</span>text<span class="op">=</span><span class="st">'</span></span></span>
 <span class="r-in"><span><span class="st"> 4 2.5</span></span></span>
 <span class="r-in"><span><span class="st"> 3 3</span></span></span>
@@ -135,7 +135,16 @@ data sets.</p>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">eafdiff</span><span class="op">(</span><span class="va">A1</span>, <span class="va">A2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  num [1:9, 1:3] 1 2 2.5 2 2 3 2.5 3 4 2 ...</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">d</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  1.0  2.0    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  2.0  1.0   -1</span>
@@ -153,7 +162,7 @@ data sets.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "dimnames")=List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ : chr [1:5] "xmin" "ymin" "xmax" "ymax" ...</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       xmin ymin xmax ymax diff</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  2.0  1.0  2.5  2.0   -1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  1.0  2.0  2.0  Inf    2</span>
@@ -164,7 +173,6 @@ data sets.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  3.0  2.5  4.0  3.0    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  3.0  2.0  Inf  2.5    2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  4.0  2.5  Inf  3.0    1</span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

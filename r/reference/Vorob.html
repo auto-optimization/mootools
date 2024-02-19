@@ -69,9 +69,9 @@ realization of the (random) attained set.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vorobT</span><span class="op">(</span><span class="va">x</span>, <span class="va">reference</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vorobT</span><span class="op">(</span><span class="va">x</span>, <span class="va">sets</span>, <span class="va">reference</span>, maximise <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">vorobDev</span><span class="op">(</span><span class="va">x</span>, <span class="va">reference</span>, VE <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">vorobDev</span><span class="op">(</span><span class="va">x</span>, <span class="va">sets</span>, <span class="va">reference</span>, VE <span class="op">=</span> <span class="cn">NULL</span>, maximise <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -82,8 +82,20 @@ frames of exactly three columns.  The third column gives the set (run,
 sample, ...) identifier.</p></dd>
 
 
+<dt>sets</dt>
+<dd><p>A vector that indicates the set of each point in <code>x</code>. If
+missing, the last column of <code>x</code> is used instead.</p></dd>
+
+
 <dt>reference</dt>
 <dd><p>(<code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric()</a></code>) <br> Reference point as a vector of numerical values.</p></dd>
+
+
+<dt>maximise</dt>
+<dd><p>(<code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical()</a></code> | <code>logical(1)</code>) <br> Whether the objectives must be
+maximised instead of minimised. Either a single logical value that applies
+to all objectives or a vector of logical values, with one value per
+objective.</p></dd>
 
 
 <dt>VE</dt>
@@ -122,7 +134,7 @@ Springer.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">CPFs</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">vorobT</span><span class="op">(</span><span class="va">CPFs</span>, reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">200</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">threshold</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span><span class="op">$</span><span class="va">threshold</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 44.14062</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Display Vorob'ev expectation and attainment function</span></span></span>
@@ -138,10 +150,9 @@ Springer.</p>
 <span class="r-in"><span><span class="co">#         extra.legend = "VE", extra.lty = "solid", extra.pch = NA, extra.lwd = 2,</span></span></span>
 <span class="r-in"><span><span class="co">#         main = substitute(paste("Empirical attainment function, ",beta,"* = ", a, "%"),</span></span></span>
 <span class="r-in"><span><span class="co">#                           list(a = formatC(res$threshold, digits = 2, format = "f"))))</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Now print Vorob'ev deviation</span></span></span>
 <span class="r-in"><span><span class="va">VD</span> <span class="op">&lt;-</span> <span class="fu">vorobDev</span><span class="op">(</span><span class="va">CPFs</span>, VE <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">VE</span>, reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">200</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">VD</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">VD</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3017.13</span>
 </code></pre></div>
     </div>

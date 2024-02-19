@@ -31,16 +31,28 @@
     <loc>/reference/Vorob.html</loc>
   </url>
   <url>
+    <loc>/reference/as_double_matrix.html</loc>
+  </url>
+  <url>
     <loc>/reference/attsurf2df.html</loc>
   </url>
   <url>
     <loc>/reference/choose_eafdiff.html</loc>
   </url>
   <url>
-    <loc>/reference/eafdiff.html</loc>
+    <loc>/reference/compute_eaf_call.html</loc>
   </url>
   <url>
-    <loc>/reference/eafs.html</loc>
+    <loc>/reference/compute_eafdiff_call.html</loc>
+  </url>
+  <url>
+    <loc>/reference/eaf.html</loc>
+  </url>
+  <url>
+    <loc>/reference/eaf_as_list.html</loc>
+  </url>
+  <url>
+    <loc>/reference/eafdiff.html</loc>
   </url>
   <url>
     <loc>/reference/epsilon.html</loc>
@@ -64,9 +76,6 @@
     <loc>/reference/largest_eafdiff.html</loc>
   </url>
   <url>
-    <loc>/reference/matrix_maximise.html</loc>
-  </url>
-  <url>
     <loc>/reference/moocore-package.html</loc>
   </url>
   <url>
@@ -83,6 +92,9 @@
   </url>
   <url>
     <loc>/reference/tpls50x20_1_MWT.html</loc>
+  </url>
+  <url>
+    <loc>/reference/transform_maximise.html</loc>
   </url>
   <url>
     <loc>/reference/whv_hype.html</loc>
