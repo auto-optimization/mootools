@@ -235,14 +235,17 @@ jobs:
           path: wheelhouse
           pattern: wheels-*
           merge-multiple: true
-          
+
+      - name: List wheels
+        run: ls -l wheelhouse/*.whl
+        
       - name: Upload wheels
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git checkout --orphan new-wheels
           git rm -rf .
-          mv python/wheelhouse/*.whl .
+          mv wheelhouse/*.whl .
           git add *.whl
           git commit --allow-empty -m "Store wheels"
           git branch -D wheels
