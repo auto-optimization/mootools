@@ -222,8 +222,7 @@ jobs:
           name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
 
-
-  wheels:
+  upload:
     name: Store wheels
     needs: wheels
     runs-on: ubuntu-latest
