@@ -206,7 +206,7 @@ jobs:
           needs: website
           working-directory: r
 
-      - name: Deploy package Deploy 🚀
+      - name: Deploy package 🚀
         if: success() && runner.os == 'Linux' && matrix.r == 'release' && github.event_name == 'push'
         run: |
           git config --local user.email "actions@github.com"
