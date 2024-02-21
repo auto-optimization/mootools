@@ -222,6 +222,20 @@ jobs:
           name: wheels-${{ matrix.os }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
 
+
+  wheels:
+    name: Store wheels
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - uses: actions/download-artifact@v4
+        with:
+          path: wheelhouse
+          pattern: wheels-*
+          merge-multiple: true
+          
       - name: Upload wheels
         run: |
           git config --local user.email "actions@github.com"
@@ -235,4 +249,3 @@ jobs:
           git branch -m wheels          
           git push --force origin wheels
         shell: bash {0}
-
