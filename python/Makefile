@@ -9,6 +9,9 @@ build:
 test:
 	tox
 
+black:
+	pre-commit autoupdate
+	pre-commit run -a
 doc:
 	$(MAKE) -C doc clean
 	tox -e docs
